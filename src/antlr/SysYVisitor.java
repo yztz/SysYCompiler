@@ -1,4 +1,4 @@
-// Generated from D:/javaFolder/SysYcompiler/src\SysY.g4 by ANTLR 4.9.1
+// Generated from D:/java/SysYCompiler/src\SysY.g4 by ANTLR 4.9.1
 
 package antlr;
 
@@ -13,11 +13,11 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface SysYVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link SysYParser#compilationUnit}.
+	 * Visit a parse tree produced by {@link SysYParser#compUnit}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCompilationUnit(SysYParser.CompilationUnitContext ctx);
+	T visitCompUnit(SysYParser.CompUnitContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SysYParser#decl}.
 	 * @param ctx the parse tree
@@ -103,11 +103,61 @@ public interface SysYVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBlockItem(SysYParser.BlockItemContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SysYParser#stmt}.
+	 * Visit a parse tree produced by the {@code assignStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStmt(SysYParser.StmtContext ctx);
+	T visitAssignStat(SysYParser.AssignStatContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code semiStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSemiStat(SysYParser.SemiStatContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code blockStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBlockStat(SysYParser.BlockStatContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ifStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfStat(SysYParser.IfStatContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code whileStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhileStat(SysYParser.WhileStatContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code breakStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBreakStat(SysYParser.BreakStatContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code continueStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitContinueStat(SysYParser.ContinueStatContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code returnStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReturnStat(SysYParser.ReturnStatContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SysYParser#exp}.
 	 * @param ctx the parse tree
@@ -133,17 +183,26 @@ public interface SysYVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrimaryExp(SysYParser.PrimaryExpContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SysYParser#unaryExp}.
+	 * Visit a parse tree produced by the {@code primaryExpr}
+	 * labeled alternative in {@link SysYParser#unaryExp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitUnaryExp(SysYParser.UnaryExpContext ctx);
+	T visitPrimaryExpr(SysYParser.PrimaryExprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SysYParser#unaryOp}.
+	 * Visit a parse tree produced by the {@code functionExpr}
+	 * labeled alternative in {@link SysYParser#unaryExp}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitUnaryOp(SysYParser.UnaryOpContext ctx);
+	T visitFunctionExpr(SysYParser.FunctionExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code signExpr}
+	 * labeled alternative in {@link SysYParser#unaryExp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSignExpr(SysYParser.SignExprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SysYParser#funcRParams}.
 	 * @param ctx the parse tree

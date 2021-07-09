@@ -5,7 +5,7 @@ package antlr;
 }
 
 
-compilationUnit
+compUnit
     :   (decl|funcDef)+
     ;
 
@@ -62,14 +62,14 @@ blockItem
     |   stmt
     ;
 stmt
-    :   lVal '=' exp ';'
-    |   (exp)? ';'
-    |   block
-    |   'if' '('cond')' stmt ('else'stmt)?
-    |   'while' '('cond')' stmt
-    |   'break'';'
-    |   'continue'';'
-    |   'return' (exp)? ';'
+    :   lVal '=' exp ';'                    #assignStat
+    |   (exp)? ';'                          #semiStat
+    |   block                               #blockStat
+    |   'if' '('cond')' stmt ('else'stmt)?  #ifStat
+    |   'while' '('cond')' stmt             #whileStat
+    |   'break'';'                          #breakStat
+    |   'continue'';'                       #continueStat
+    |   'return' (exp)? ';'                 #returnStat
     ;
 exp
     :   addExp
@@ -89,32 +89,29 @@ primaryExp
 //    :   Integer_const
 //    ;
 unaryExp
-    :   primaryExp
-    |   Identifier '(' (funcRParams)? ')'
-    |   unaryOp unaryExp
-    ;
-unaryOp
-    :   '+'|'-'|'!'
+    :   primaryExp                          #primaryExpr
+    |   Identifier '(' (funcRParams)? ')'   #functionExpr
+    |   op=('+'|'-'|'!') unaryExp           #signExpr
     ;
 
 funcRParams
-    :   exp (','exp)*
+    :   params+=exp (','params+=exp)*
     ;
 mulExp
     :   unaryExp
-    |   mulExp ('*'|'/'|'%') unaryExp
+    |   mulExp op=('*'|'/'|'%') unaryExp
     ;
 addExp
     :   mulExp
-    |   addExp ('+'|'-') mulExp
+    |   addExp op=('+'|'-') mulExp
     ;
 relExp
     :   addExp
-    |   relExp ('<='|'>='|'<'|'>') addExp
+    |   relExp op=('<='|'>='|'<'|'>') addExp
     ;
 eqExp
     :   relExp
-    |   eqExp ('=='|'!=') relExp
+    |   eqExp op=('=='|'!=') relExp
     ;
 lAndExp
     :   eqExp
@@ -150,6 +147,7 @@ Integer_const
     |   Octal_const
     |   Hexadecimal_const
     ;
+
 
 
 LeftParen : '(';

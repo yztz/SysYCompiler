@@ -1,4 +1,4 @@
-// Generated from D:/javaFolder/SysYcompiler/src\SysY.g4 by ANTLR 4.9.1
+// Generated from D:/java/SysYCompiler/src\SysY.g4 by ANTLR 4.9.1
 
 package antlr;
 
@@ -10,15 +10,15 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface SysYListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link SysYParser#compilationUnit}.
+	 * Enter a parse tree produced by {@link SysYParser#compUnit}.
 	 * @param ctx the parse tree
 	 */
-	void enterCompilationUnit(SysYParser.CompilationUnitContext ctx);
+	void enterCompUnit(SysYParser.CompUnitContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link SysYParser#compilationUnit}.
+	 * Exit a parse tree produced by {@link SysYParser#compUnit}.
 	 * @param ctx the parse tree
 	 */
-	void exitCompilationUnit(SysYParser.CompilationUnitContext ctx);
+	void exitCompUnit(SysYParser.CompUnitContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SysYParser#decl}.
 	 * @param ctx the parse tree
@@ -160,15 +160,101 @@ public interface SysYListener extends ParseTreeListener {
 	 */
 	void exitBlockItem(SysYParser.BlockItemContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SysYParser#stmt}.
+	 * Enter a parse tree produced by the {@code assignStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
 	 * @param ctx the parse tree
 	 */
-	void enterStmt(SysYParser.StmtContext ctx);
+	void enterAssignStat(SysYParser.AssignStatContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link SysYParser#stmt}.
+	 * Exit a parse tree produced by the {@code assignStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
 	 * @param ctx the parse tree
 	 */
-	void exitStmt(SysYParser.StmtContext ctx);
+	void exitAssignStat(SysYParser.AssignStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code semiStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterSemiStat(SysYParser.SemiStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code semiStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitSemiStat(SysYParser.SemiStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code blockStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterBlockStat(SysYParser.BlockStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code blockStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitBlockStat(SysYParser.BlockStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ifStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfStat(SysYParser.IfStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ifStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfStat(SysYParser.IfStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code whileStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhileStat(SysYParser.WhileStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code whileStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhileStat(SysYParser.WhileStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code breakStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterBreakStat(SysYParser.BreakStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code breakStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitBreakStat(SysYParser.BreakStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code continueStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterContinueStat(SysYParser.ContinueStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code continueStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitContinueStat(SysYParser.ContinueStatContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code returnStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterReturnStat(SysYParser.ReturnStatContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code returnStat}
+	 * labeled alternative in {@link SysYParser#stmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitReturnStat(SysYParser.ReturnStatContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SysYParser#exp}.
 	 * @param ctx the parse tree
@@ -210,25 +296,41 @@ public interface SysYListener extends ParseTreeListener {
 	 */
 	void exitPrimaryExp(SysYParser.PrimaryExpContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SysYParser#unaryExp}.
+	 * Enter a parse tree produced by the {@code primaryExpr}
+	 * labeled alternative in {@link SysYParser#unaryExp}.
 	 * @param ctx the parse tree
 	 */
-	void enterUnaryExp(SysYParser.UnaryExpContext ctx);
+	void enterPrimaryExpr(SysYParser.PrimaryExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link SysYParser#unaryExp}.
+	 * Exit a parse tree produced by the {@code primaryExpr}
+	 * labeled alternative in {@link SysYParser#unaryExp}.
 	 * @param ctx the parse tree
 	 */
-	void exitUnaryExp(SysYParser.UnaryExpContext ctx);
+	void exitPrimaryExpr(SysYParser.PrimaryExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SysYParser#unaryOp}.
+	 * Enter a parse tree produced by the {@code functionExpr}
+	 * labeled alternative in {@link SysYParser#unaryExp}.
 	 * @param ctx the parse tree
 	 */
-	void enterUnaryOp(SysYParser.UnaryOpContext ctx);
+	void enterFunctionExpr(SysYParser.FunctionExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link SysYParser#unaryOp}.
+	 * Exit a parse tree produced by the {@code functionExpr}
+	 * labeled alternative in {@link SysYParser#unaryExp}.
 	 * @param ctx the parse tree
 	 */
-	void exitUnaryOp(SysYParser.UnaryOpContext ctx);
+	void exitFunctionExpr(SysYParser.FunctionExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code signExpr}
+	 * labeled alternative in {@link SysYParser#unaryExp}.
+	 * @param ctx the parse tree
+	 */
+	void enterSignExpr(SysYParser.SignExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code signExpr}
+	 * labeled alternative in {@link SysYParser#unaryExp}.
+	 * @param ctx the parse tree
+	 */
+	void exitSignExpr(SysYParser.SignExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SysYParser#funcRParams}.
 	 * @param ctx the parse tree
