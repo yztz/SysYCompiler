@@ -18,13 +18,13 @@ public class SysYBaseListener implements SysYListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCompUnit(SysYParser.CompUnitContext ctx) { }
+	@Override public void enterCompilationUnit(SysYParser.CompilationUnitContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCompUnit(SysYParser.CompUnitContext ctx) { }
+	@Override public void exitCompilationUnit(SysYParser.CompilationUnitContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -253,18 +253,6 @@ public class SysYBaseListener implements SysYListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPrimaryExp(SysYParser.PrimaryExpContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNumber(SysYParser.NumberContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNumber(SysYParser.NumberContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

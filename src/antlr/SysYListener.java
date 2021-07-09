@@ -10,15 +10,15 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface SysYListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link SysYParser#compUnit}.
+	 * Enter a parse tree produced by {@link SysYParser#compilationUnit}.
 	 * @param ctx the parse tree
 	 */
-	void enterCompUnit(SysYParser.CompUnitContext ctx);
+	void enterCompilationUnit(SysYParser.CompilationUnitContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link SysYParser#compUnit}.
+	 * Exit a parse tree produced by {@link SysYParser#compilationUnit}.
 	 * @param ctx the parse tree
 	 */
-	void exitCompUnit(SysYParser.CompUnitContext ctx);
+	void exitCompilationUnit(SysYParser.CompilationUnitContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SysYParser#decl}.
 	 * @param ctx the parse tree
@@ -209,16 +209,6 @@ public interface SysYListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPrimaryExp(SysYParser.PrimaryExpContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SysYParser#number}.
-	 * @param ctx the parse tree
-	 */
-	void enterNumber(SysYParser.NumberContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SysYParser#number}.
-	 * @param ctx the parse tree
-	 */
-	void exitNumber(SysYParser.NumberContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SysYParser#unaryExp}.
 	 * @param ctx the parse tree

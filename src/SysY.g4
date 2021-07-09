@@ -4,8 +4,9 @@ grammar SysY;
 package antlr;
 }
 
-compUnit
-    :    (decl|funcDef) +
+
+compilationUnit
+    :   (decl|funcDef)+
     ;
 
 decl
@@ -33,8 +34,8 @@ varDecl
     :   bType varDef (','varDef)* ';'
     ;
 varDef
-    :   bType varDecl ('['constExp']')*
-    |   bType varDecl ('['constExp']')* '=' initVal
+    :   Identifier ('['constExp']')*
+    |   Identifier ('['constExp']')* '=' initVal
     ;
 initVal
     :   exp
@@ -82,13 +83,14 @@ lVal
 primaryExp
     :   '(' exp ')'
     |   lVal
-    |   number
+    |   Integer_const
     ;
-number
-    :   Integer_const
-    ;
+//number
+//    :   Integer_const
+//    ;
 unaryExp
-    :   primaryExp | Identifier '(' (funcRParams)? ')'
+    :   primaryExp
+    |   Identifier '(' (funcRParams)? ')'
     |   unaryOp unaryExp
     ;
 unaryOp
@@ -131,22 +133,22 @@ Identifier
     :   Nondigit (Nondigit|Digit)*
     ;
 //  十进制
-Decimal_const
+fragment Decimal_const
     :   NonZeroDigit Digit*
     ;
 //  八进制
-Octal_const
+fragment Octal_const
     :   '0' OctalDigit*
     ;
 //  十六进制
-Hexadecimal_cosnt
+fragment Hexadecimal_const
     :   HexPrefix  HexDigit+
     ;
 //  整型
 Integer_const
     :   Decimal_const
     |   Octal_const
-    |   Hexadecimal_cosnt
+    |   Hexadecimal_const
     ;
 
 
@@ -192,7 +194,8 @@ fragment NonZeroDigit
     :   [1-9]
     ;
 fragment OctalDigit
-    :   [0-7];
+    :   [0-7]
+    ;
 fragment HexDigit
     :   [0-9A-Fa-f]
     ;

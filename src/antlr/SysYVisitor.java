@@ -13,11 +13,11 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface SysYVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link SysYParser#compUnit}.
+	 * Visit a parse tree produced by {@link SysYParser#compilationUnit}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCompUnit(SysYParser.CompUnitContext ctx);
+	T visitCompilationUnit(SysYParser.CompilationUnitContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SysYParser#decl}.
 	 * @param ctx the parse tree
@@ -132,12 +132,6 @@ public interface SysYVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPrimaryExp(SysYParser.PrimaryExpContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link SysYParser#number}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNumber(SysYParser.NumberContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SysYParser#unaryExp}.
 	 * @param ctx the parse tree
