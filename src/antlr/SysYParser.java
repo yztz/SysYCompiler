@@ -4,6 +4,7 @@ package antlr;
 
 import genir.code.AddressOrNum;
 import genir.code.GotoRepresent;
+import genir.code.InterRepresentHolder;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.atn.ATNDeserializer;
@@ -1143,7 +1144,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class BlockContext extends ParserRuleContext {
+	public static class BlockContext extends ParserRuleContext implements IHasBreakOrContinue {
 		public TerminalNode LeftBrace() { return getToken(SysYParser.LeftBrace, 0); }
 		public TerminalNode RightBrace() { return getToken(SysYParser.RightBrace, 0); }
 		public List<BlockItemContext> blockItem() {
@@ -1168,6 +1169,28 @@ public class SysYParser extends Parser {
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SysYVisitor ) return ((SysYVisitor<? extends T>)visitor).visitBlock(this);
 			else return visitor.visitChildren(this);
+		}
+
+		private List<InterRepresentHolder> breakQuads = null;
+		private List<InterRepresentHolder> continueQuads= null;
+		@Override
+		public List<InterRepresentHolder> getBreakQuads() {
+			return breakQuads;
+		}
+
+		@Override
+		public List<InterRepresentHolder> getContinueQuads() {
+			return continueQuads;
+		}
+
+		@Override
+		public void setBreakQuads(List<InterRepresentHolder> quads) {
+			this.breakQuads=quads;
+		}
+
+		@Override
+		public void setContinueQuads(List<InterRepresentHolder> quads) {
+			this.continueQuads=quads;
 		}
 	}
 
@@ -1209,7 +1232,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class BlockItemContext extends ParserRuleContext {
+	public static class BlockItemContext extends ParserRuleContext implements IHasBreakOrContinue{
 		public DeclContext decl() {
 			return getRuleContext(DeclContext.class,0);
 		}
@@ -1232,6 +1255,27 @@ public class SysYParser extends Parser {
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SysYVisitor ) return ((SysYVisitor<? extends T>)visitor).visitBlockItem(this);
 			else return visitor.visitChildren(this);
+		}
+		private List<InterRepresentHolder> breakQuads=null;
+		private List<InterRepresentHolder> continueQuads=null;
+		@Override
+		public List<InterRepresentHolder> getBreakQuads() {
+			return breakQuads;
+		}
+
+		@Override
+		public List<InterRepresentHolder> getContinueQuads() {
+			return continueQuads;
+		}
+
+		@Override
+		public void setBreakQuads(List<InterRepresentHolder> quads) {
+			breakQuads=quads;
+		}
+
+		@Override
+		public void setContinueQuads(List<InterRepresentHolder> quads) {
+			continueQuads=quads;
 		}
 	}
 
@@ -1283,16 +1327,45 @@ public class SysYParser extends Parser {
 		}
 		return _localctx;
 	}
-
-	public static class StmtContext extends ParserRuleContext {
+	public static interface IHasBreakOrContinue
+	{
+		List<InterRepresentHolder> getBreakQuads();
+		List<InterRepresentHolder> getContinueQuads();
+		void setBreakQuads(List<InterRepresentHolder> quads);
+		void setContinueQuads(List<InterRepresentHolder> quads);
+	}
+	public static class StmtContext extends ParserRuleContext implements IHasBreakOrContinue {
 		public StmtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_stmt; }
-	 
+	 	public int startIrIndex;
+
 		public StmtContext() { }
 		public void copyFrom(StmtContext ctx) {
 			super.copyFrom(ctx);
+		}
+
+		private List<InterRepresentHolder> breakQuads = null;
+		private List<InterRepresentHolder> continueQuads= null;
+		@Override
+		public List<InterRepresentHolder> getBreakQuads() {
+			return breakQuads;
+		}
+
+		@Override
+		public List<InterRepresentHolder> getContinueQuads() {
+			return continueQuads;
+		}
+
+		@Override
+		public void setBreakQuads(List<InterRepresentHolder> quads) {
+			this.breakQuads=quads;
+		}
+
+		@Override
+		public void setContinueQuads(List<InterRepresentHolder> quads) {
+			this.continueQuads=quads;
 		}
 	}
 	public static class IfStatContext extends StmtContext {

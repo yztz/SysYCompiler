@@ -1,14 +1,22 @@
 package genir.code;
 
 public class GotoRepresent extends InterRepresent{
-    public int targetLineNum;
+    public InterRepresentHolder targetHolder;
 
-    public GotoRepresent(int targetLineNum) {
-        this.targetLineNum = targetLineNum;
+    public GotoRepresent(InterRepresent target) {
+        this.targetHolder =new InterRepresentHolder(target);
     }
-
+    public void setTargetIR(InterRepresent targetHolder)
+    {
+        this.targetHolder.setInterRepresent(targetHolder);
+    }
+    public InterRepresent getTargetIR()
+    {
+        return targetHolder.getInterRepresent();
+    }
     @Override
     public String toString() {
-        return String.format("%-6d: goto %-7d",lineNum,targetLineNum);
+        InterRepresent target = getTargetIR();
+        return String.format("%-6d: goto %-7d", lineNum,target==null?-1: target.lineNum);
     }
 }

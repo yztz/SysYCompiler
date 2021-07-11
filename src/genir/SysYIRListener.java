@@ -155,7 +155,17 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitBlock(SysYParser.BlockContext ctx) {
+        List<InterRepresentHolder> breakQuads=new ArrayList<>();
+        List<InterRepresentHolder> continueQuads=new ArrayList<>();
+        for (SysYParser.BlockItemContext blockItemContext : ctx.blockItem()) {
+            if(blockItemContext.getBreakQuads()!=null)
+                breakQuads.addAll(blockItemContext.getBreakQuads());
+            if(blockItemContext.getContinueQuads()!=null)
+                continueQuads.addAll(blockItemContext.getContinueQuads());
+        }
 
+        ctx.setBreakQuads(breakQuads);
+        ctx.setContinueQuads(continueQuads);
     }
 
     @Override
@@ -165,7 +175,11 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitBlockItem(SysYParser.BlockItemContext ctx) {
-
+        if(ctx.stmt()!=null)
+        {
+            ctx.setBreakQuads(ctx.stmt().getBreakQuads());
+            ctx.setContinueQuads(ctx.stmt().getContinueQuads());
+        }
     }
 
     @Override
@@ -195,7 +209,8 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitBlockStat(SysYParser.BlockStatContext ctx) {
-
+        ctx.setBreakQuads(ctx.block().getBreakQuads());
+        ctx.setContinueQuads(ctx.block().getContinueQuads());
     }
 
     @Override
@@ -205,9 +220,31 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitIfStat(SysYParser.IfStatContext ctx) {
-        for (GotoRepresent ir : ctx.cond().falseList) {
-            ir.targetLineNum=irCodes.getNextQuad();
-            //System.out.println("false "+ir.lineNum);
+        if(ctx.stmt().size()==2) //有else
+        {
+            int elseStartQuad = ctx.stmt(1).startIrIndex;
+            InterRepresent elseStartIr=irCodes.codes.get(elseStartQuad);
+            for (GotoRepresent ir : ctx.cond().falseList) {
+                ir.setTargetIR(elseStartIr);
+            }
+            // 需要插入一句goto，在if的代码块执行完成后跳过else代码块
+            GotoRepresent skipElseStmtIR = new GotoRepresent(null);
+            irCodes.insertCode(elseStartQuad,skipElseStmtIR);
+            irCodes.bookQuad(skipElseStmtIR.targetHolder);
+        }else{
+            for (GotoRepresent ir : ctx.cond().falseList) {
+                irCodes.bookQuad(ir.targetHolder);
+            }
+        }
+
+        // 传递breakQuad和continueQuad给父级可能存在的while节点
+        if(ctx.stmt().size()==2) //有else
+        {
+            ctx.setBreakQuads(mergeList(ctx.stmt(0).getBreakQuads(),ctx.stmt(1).getBreakQuads()));
+            ctx.setContinueQuads(mergeList(ctx.stmt(0).getContinueQuads(),ctx.stmt(1).getContinueQuads()));
+        }else{
+            ctx.setBreakQuads(ctx.stmt(0).getBreakQuads());
+            ctx.setContinueQuads(ctx.stmt(0).getContinueQuads());
         }
     }
 
@@ -218,7 +255,30 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitWhileStat(SysYParser.WhileStatContext ctx) {
+        InterRepresent whileStartIR = irCodes.getInterRepresent(ctx.startIrIndex);
+        GotoRepresent returnIR = new GotoRepresent(whileStartIR);
+        irCodes.addCode(returnIR);
 
+        InterRepresent stmtStartIR = irCodes.getInterRepresent(ctx.stmt().startIrIndex);
+        for (GotoRepresent ir : ctx.cond().trueList) {
+            ir.targetHolder.setInterRepresent(stmtStartIR);
+        }
+        for (GotoRepresent ir : ctx.cond().falseList) {
+            irCodes.bookQuad(ir.targetHolder);
+        }
+
+        if (ctx.stmt().getBreakQuads() != null) {
+            for (InterRepresentHolder breakQuad : ctx.stmt().getBreakQuads()) {
+                irCodes.bookQuad(breakQuad);
+            }
+        }
+
+        if(ctx.stmt().getContinueQuads()!=null)
+        {
+            for (InterRepresentHolder continueQuad : ctx.stmt().getContinueQuads()) {
+                continueQuad.setInterRepresent(whileStartIR);
+            }
+        }
     }
 
     @Override
@@ -228,7 +288,10 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitBreakStat(SysYParser.BreakStatContext ctx) {
-
+        GotoRepresent breakGoto=new GotoRepresent(null);
+        ctx.setBreakQuads(new ArrayList<>());
+        ctx.getBreakQuads().add(breakGoto.targetHolder);
+        irCodes.addCode(breakGoto);
     }
 
     @Override
@@ -238,7 +301,10 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitContinueStat(SysYParser.ContinueStatContext ctx) {
-
+        GotoRepresent continueGoto=new GotoRepresent(null);
+        ctx.setContinueQuads(new ArrayList<>());
+        ctx.getContinueQuads().add(continueGoto.targetHolder);
+        irCodes.addCode(continueGoto);
     }
 
     @Override
@@ -271,7 +337,7 @@ public class SysYIRListener implements SysYListener {
         ctx.trueList=ctx.lOrExp().trueList;
         ctx.falseList=ctx.lOrExp().falseList;
         for (GotoRepresent ir : ctx.trueList) {
-            ir.targetLineNum = irCodes.getNextQuad();
+            irCodes.bookQuad(ir.targetHolder);
             //System.out.println("true "+ir.lineNum);
         }
     }
@@ -418,9 +484,14 @@ public class SysYIRListener implements SysYListener {
     private <T> List<T> mergeList(List<T> from1,
                            List<T> from2)
     {
-        List<T> result = new ArrayList<>();
-        result.addAll(from1);
-        result.addAll(from2);
+        List<T> result = null;
+        if(from1!=null || from2!=null)
+            result=new ArrayList<>();
+
+        if(from1!=null)
+            result.addAll(from1);
+        if(from2!=null)
+            result.addAll(from2);
         return result;
     }
 
@@ -431,8 +502,8 @@ public class SysYIRListener implements SysYListener {
 
     private void createIfGotoPair(SysYParser.BranchContextBase ctx, IfGotoRepresent.RelOp relOp,
                                   AddressOrNum address1,AddressOrNum address2) {
-        IfGotoRepresent ifGoto = new IfGotoRepresent(-1, relOp, address1, address2);
-        GotoRepresent goTo = new GotoRepresent(-1);
+        IfGotoRepresent ifGoto = new IfGotoRepresent(null, relOp, address1, address2);
+        GotoRepresent goTo = new GotoRepresent(null);
         ctx.trueList=new ArrayList<>();
         ctx.falseList=new ArrayList<>();
         ctx.trueList.add(ifGoto);
@@ -459,8 +530,6 @@ public class SysYIRListener implements SysYListener {
                 System.err.println("Unknown rel opcode");
             }
 
-            IfGotoRepresent ifGoto = new IfGotoRepresent(-1, relOp,
-                                                         ctx.relExp().address, ctx.addExp().result);
             createIfGotoPair(ctx, relOp,ctx.relExp().address,ctx.addExp().result);
         }
     }
@@ -514,9 +583,10 @@ public class SysYIRListener implements SysYListener {
             ctx.trueList=ctx.eqExp().trueList;
             ctx.falseList = mergeList(ctx.lAndExp().falseList,ctx.eqExp().falseList);
 
+            InterRepresent targetIR = irCodes.getInterRepresent(ctx.eqExp().quad);
             // 回填
             for (GotoRepresent ir : ctx.lAndExp().trueList) {
-                ir.targetLineNum = ctx.eqExp().quad;
+                ir.targetHolder.setInterRepresent(targetIR);
             }
         }
     }
@@ -539,9 +609,10 @@ public class SysYIRListener implements SysYListener {
             ctx.trueList = mergeList(ctx.lOrExp().trueList,ctx.lAndExp().trueList);
             ctx.falseList = ctx.lAndExp().falseList;
 
+            InterRepresent targetIR = irCodes.getInterRepresent(ctx.lAndExp().quad);
             // 回填
             for (GotoRepresent ir : ctx.lOrExp().falseList) {
-                ir.targetLineNum = ctx.lAndExp().quad;
+                ir.targetHolder.setInterRepresent(targetIR);
             }
         }
     }
@@ -568,7 +639,11 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterEveryRule(ParserRuleContext parserRuleContext) {
-
+        if(parserRuleContext instanceof SysYParser.StmtContext)
+        {
+            SysYParser.StmtContext stmtContext=(SysYParser.StmtContext) parserRuleContext;
+            stmtContext.startIrIndex = irCodes.getNextQuad();
+        }
     }
 
     @Override

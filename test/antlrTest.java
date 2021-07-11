@@ -45,7 +45,7 @@ public class antlrTest {
     @Test
     public void testIf()
     {
-        SysYParser parser = getParser("test/testIf.sys");
+        SysYParser parser = getParser("test/testWhileIf.sys");
         ParseTree tree = parser.stmt();
         ParseTreeWalker walker = new ParseTreeWalker();
         SysYIRListener irListener = new SysYIRListener();
