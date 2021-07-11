@@ -2,14 +2,19 @@
 
 package antlr;
 
-import org.antlr.v4.runtime.atn.*;
-import org.antlr.v4.runtime.dfa.DFA;
+import genir.code.AddressOrNum;
+import genir.code.GotoRepresent;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.atn.ATN;
+import org.antlr.v4.runtime.atn.ATNDeserializer;
+import org.antlr.v4.runtime.atn.ParserATNSimulator;
+import org.antlr.v4.runtime.atn.PredictionContextCache;
+import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class SysYParser extends Parser {
@@ -1604,7 +1609,18 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ExpContext extends ParserRuleContext {
+	public static class ExpContextBase extends ParserRuleContext{
+		public AddressOrNum result;
+
+		public ExpContextBase() {
+		}
+
+		public ExpContextBase(ParserRuleContext parent, int invokingStateNumber) {
+			super(parent, invokingStateNumber);
+		}
+	}
+
+	public static class ExpContext extends ExpContextBase {
 		public AddExpContext addExp() {
 			return getRuleContext(AddExpContext.class,0);
 		}
@@ -1648,7 +1664,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class CondContext extends ParserRuleContext {
+	public static class CondContext extends BranchContextBase {
 		public LOrExpContext lOrExp() {
 			return getRuleContext(LOrExpContext.class,0);
 		}
@@ -1769,7 +1785,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class PrimaryExpContext extends ParserRuleContext {
+	public static class PrimaryExpContext extends ExpContextBase {
 		public TerminalNode LeftParen() { return getToken(SysYParser.LeftParen, 0); }
 		public ExpContext exp() {
 			return getRuleContext(ExpContext.class,0);
@@ -1845,7 +1861,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class UnaryExpContext extends ParserRuleContext {
+	public static class UnaryExpContext extends ExpContextBase {
 		public UnaryExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2059,7 +2075,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class MulExpContext extends ParserRuleContext {
+	public static class MulExpContext extends ExpContextBase {
 		public Token op;
 		public UnaryExpContext unaryExp() {
 			return getRuleContext(UnaryExpContext.class,0);
@@ -2156,7 +2172,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class AddExpContext extends ParserRuleContext {
+	public static class AddExpContext extends ExpContextBase {
 		public Token op;
 		public MulExpContext mulExp() {
 			return getRuleContext(MulExpContext.class,0);
@@ -2251,8 +2267,22 @@ public class SysYParser extends Parser {
 		}
 		return _localctx;
 	}
+	public static class BranchContextBase extends ParserRuleContext{
+		public BranchContextBase(ParserRuleContext parent, int invokingStateNumber) {
+			super(parent, invokingStateNumber);
+		}
+		public List<GotoRepresent> trueList = null;
+		public List<GotoRepresent> falseList = null;
+	}
+	public static class RelExpContextBase extends BranchContextBase{
+		public RelExpContextBase(ParserRuleContext parent, int invokingStateNumber) {
+			super(parent, invokingStateNumber);
+		}
+		public AddressOrNum address;
+		public int quad;
+	}
 
-	public static class RelExpContext extends ParserRuleContext {
+	public static class RelExpContext extends RelExpContextBase {
 		public Token op;
 		public AddExpContext addExp() {
 			return getRuleContext(AddExpContext.class,0);
@@ -2350,7 +2380,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class EqExpContext extends ParserRuleContext {
+	public static class EqExpContext extends RelExpContextBase {
 		public Token op;
 		public RelExpContext relExp() {
 			return getRuleContext(RelExpContext.class,0);
@@ -2446,7 +2476,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class LAndExpContext extends ParserRuleContext {
+	public static class LAndExpContext extends RelExpContextBase {
 		public EqExpContext eqExp() {
 			return getRuleContext(EqExpContext.class,0);
 		}
@@ -2530,7 +2560,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class LOrExpContext extends ParserRuleContext {
+	public static class LOrExpContext extends RelExpContextBase {
 		public LAndExpContext lAndExp() {
 			return getRuleContext(LAndExpContext.class,0);
 		}
@@ -2614,7 +2644,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ConstExpContext extends ParserRuleContext {
+	public static class ConstExpContext extends ExpContextBase {
 		public AddExpContext addExp() {
 			return getRuleContext(AddExpContext.class,0);
 		}
