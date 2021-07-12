@@ -2,7 +2,7 @@ package genir.code;
 
 public class IfGotoRepresent extends GotoRepresent {
 
-    public IfGotoRepresent(InterRepresent target, RelOp relOp, AddressOrNum left, AddressOrNum right) {
+    public IfGotoRepresent(InterRepresent target, RelOp relOp, AddressOrData left, AddressOrData right) {
         super(target);
         this.relOp = relOp;
         this.left = left;
@@ -10,13 +10,13 @@ public class IfGotoRepresent extends GotoRepresent {
     }
 
     public RelOp relOp;
-    public AddressOrNum left;
-    public AddressOrNum right;
+    public AddressOrData left;
+    public AddressOrData right;
 
     @Override
     public String toString() {
         InterRepresent targetIR = targetHolder.getInterRepresent();
-        return String.format("%-6d: if %s %s %s goto %-7d", lineNum, left, relOp, right,targetIR==null?-1:targetIR.lineNum );
+        return lineNumToString()+String.format("if %s %s %s goto %-7d", left, relOp, right,targetIR==null?-1:targetIR.lineNum );
     }
 
     public enum RelOp{

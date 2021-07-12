@@ -17,6 +17,6 @@ public class GotoRepresent extends InterRepresent{
     @Override
     public String toString() {
         InterRepresent target = getTargetIR();
-        return String.format("%-6d: goto %-7d", lineNum,target==null?-1: target.lineNum);
+        return lineNumToString()+String.format("goto %-7d",target==null?-1: target.lineNum);
     }
 }

@@ -1,39 +1,41 @@
-package genir.code;
+package genir;
+
+import genir.code.InterRepresent;
+import genir.code.InterRepresentHolder;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 public class IRCode {
-    private int nextQuad = 0;
+    private int nextLineNum = 0;
     public LinkedList<InterRepresent> codes = new LinkedList<>();
     public void addCode(InterRepresent code)
     {
-        code.setLineNum(nextQuad);
-        nextQuad++;
+        code.setLineNum(nextLineNum);
+        nextLineNum++;
         codes.addLast(code);
-        fullFillQuad(code);
+        fullFillVacancy(code);
     }
 
-    private final List<InterRepresentHolder> bookQuadHolders=new ArrayList<>();
+    private final List<InterRepresentHolder> vacancyHolders =new ArrayList<>();
 
     /**
      * 预定一个空位，当添加一条新的代码时，将这些空位回填
      * @param holder 用来保存该代码的holder
      */
-    public void bookQuad(InterRepresentHolder holder)
+    public void bookVacancy(InterRepresentHolder holder)
     {
-        bookQuadHolders.add(holder);
+        vacancyHolders.add(holder);
     }
-    public void fullFillQuad(InterRepresent ir)
+    public void fullFillVacancy(InterRepresent ir)
     {
-        for (InterRepresentHolder bookQuadHolder : bookQuadHolders) {
-            bookQuadHolder.setInterRepresent(ir);
+        for (InterRepresentHolder holders : vacancyHolders) {
+            holders.setInterRepresent(ir);
         }
-        bookQuadHolders.clear();
+        vacancyHolders.clear();
     }
-    public void fillQuad(InterRepresentHolder holder,int irIndex)
+    public void fillVacancy(InterRepresentHolder holder, int irIndex)
     {
         holder.setInterRepresent(codes.get(irIndex));
     }
@@ -49,10 +51,10 @@ public class IRCode {
         });
         code.setLineNum(index);
         codes.add(index,code);
-        nextQuad++;
+        nextLineNum++;
         //fullFillQuad(code);
     }
-    public int getNextQuad() {
-        return nextQuad;
+    public int getNextLineNum() {
+        return nextLineNum;
     }
 }
