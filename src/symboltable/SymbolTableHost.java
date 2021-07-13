@@ -37,8 +37,8 @@ public class SymbolTableHost {
         VarSymbol result = null;
         while (domain!=null)
         {
-            if (startDomain.symbolTable.containSymbol(ident)) {
-                VarSymbol varSymbol = startDomain.symbolTable.getSymbol(ident);
+            if (domain.symbolTable.containSymbol(ident)) {
+                VarSymbol varSymbol = domain.symbolTable.getSymbol(ident);
                 if(varSymbol.varToken.getStartIndex()<symbolToken.getStartIndex()) //检查是否在使用前定义
                 {
                     result=varSymbol;

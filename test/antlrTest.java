@@ -101,6 +101,22 @@ public class antlrTest {
         }
     }
 
+    @Test
+    public void testFull()
+    {
+        SysYParser parser = getParser("test/testFull.sys");
+        ParseTree tree = parser.compUnit();
+        ParseTreeWalker walker = new ParseTreeWalker();
+        SymbolTableHost symbolTableHost=new SymbolTableHost();
+        FuncSymbolTable funcSymbolTable=new FuncSymbolTable();
+        prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
+        SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
+        walker.walk(irListener, tree);
+        for (InterRepresent code : irListener.irCodes.codes) {
+            System.out.println(code.toString());
+        }
+    }
+
     private void prepareSymbol(ParseTree tree, ParseTreeWalker walker, SymbolTableHost symbolTableHost, FuncSymbolTable funcSymbolTable) {
         SysSymbolListener symbolListener=new SysSymbolListener(symbolTableHost, funcSymbolTable);
         walker.walk(symbolListener, tree);
