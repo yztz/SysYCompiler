@@ -28,6 +28,11 @@ public class InterRepresentFactory {
     {
         return new LoadRepresent(varSymbol,offset,currentAddress++);
     }
+
+    public static SaveRepresent createSaveRepresent(VarSymbol varSymbol,AddressOrData offset,AddressOrData source)
+    {
+        return new SaveRepresent(varSymbol,offset,source);
+    }
     /*public static UnaryRepre createCondJumpRepresent(SysYParser.RelExpContextBase ctx)
     {
 

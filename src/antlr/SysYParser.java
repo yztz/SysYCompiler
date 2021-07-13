@@ -15,6 +15,7 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import symboltable.SymbolDomain;
+import symboltable.VarSymbol;
 
 import java.util.List;
 
@@ -132,7 +133,7 @@ public class SysYParser extends Parser {
 	}
 	public static class PositionableBase extends DomainedContext{
 		public InterRepresentHolder startStmtHolder;
-
+		public InterRepresentHolder endStmtHolder;
 		public PositionableBase(ParserRuleContext parent, int invokingStateNumber) {
 			super(parent, invokingStateNumber);
 		}
@@ -779,6 +780,9 @@ public class SysYParser extends Parser {
 	}
 
 	public static class InitValContext extends DomainedContext {
+		public VarSymbol symbol;
+		public int symbolOffset;
+		public int whichDim; //第几个维度
 		public ExpContext exp() {
 			return getRuleContext(ExpContext.class,0);
 		}
@@ -2737,14 +2741,14 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ConstExpContext extends ExpContextBase {
-		public AddExpContext addExp() {
+	public static class ConstExpContext extends ExpContext {
+		/*public AddExpContext addExp() {
 			return getRuleContext(AddExpContext.class,0);
-		}
+		}*/
 		public ConstExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_constExp; }
+		/*@Override public int getRuleIndex() { return RULE_constExp; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if ( listener instanceof SysYListener ) ((SysYListener)listener).enterConstExp(this);
@@ -2757,7 +2761,7 @@ public class SysYParser extends Parser {
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SysYVisitor ) return ((SysYVisitor<? extends T>)visitor).visitConstExp(this);
 			else return visitor.visitChildren(this);
-		}
+		}*/
 	}
 
 	public final ConstExpContext constExp() throws RecognitionException {

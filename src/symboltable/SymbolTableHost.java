@@ -39,7 +39,7 @@ public class SymbolTableHost {
         {
             if (domain.symbolTable.containSymbol(ident)) {
                 VarSymbol varSymbol = domain.symbolTable.getSymbol(ident);
-                if(varSymbol.varToken.getStartIndex()<symbolToken.getStartIndex()) //检查是否在使用前定义
+                if(varSymbol.varToken.getStartIndex()<=symbolToken.getStartIndex()) //检查是否在使用前定义
                 {
                     result=varSymbol;
                     break;
