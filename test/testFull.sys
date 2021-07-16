@@ -1,9 +1,12 @@
 int main()
 {
-    int a = (1+3)*-2;
-    if(1<2)
+    int result;
+    result = 0;
+    int i;
+    i=1;
+    while(i<=100)
     {
-        return 1;
+        result=result+i;
+        i=i+1;
     }
-    return 0;
 }

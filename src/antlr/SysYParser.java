@@ -2,8 +2,9 @@
 
 package antlr;
 
-import genir.code.AddressOrNum;
+import genir.code.AddressOrData;
 import genir.code.GotoRepresent;
+import genir.code.InterRepresentHolder;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.atn.ATNDeserializer;
@@ -13,6 +14,8 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import symboltable.SymbolDomain;
+import symboltable.VarSymbol;
 
 import java.util.List;
 
@@ -119,7 +122,27 @@ public class SysYParser extends Parser {
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 
-	public static class CompUnitContext extends ParserRuleContext {
+	public static class DomainedContext extends ParserRuleContext{
+		public SymbolDomain domain;
+		public DomainedContext() {
+		}
+
+		public DomainedContext(ParserRuleContext parent, int invokingStateNumber) {
+			super(parent, invokingStateNumber);
+		}
+	}
+	public static class PositionableBase extends DomainedContext{
+		public InterRepresentHolder startStmtHolder;
+		public InterRepresentHolder endStmtHolder;
+		public PositionableBase(ParserRuleContext parent, int invokingStateNumber) {
+			super(parent, invokingStateNumber);
+		}
+
+		public PositionableBase() {
+		}
+	}
+
+	public static class CompUnitContext extends DomainedContext {
 		public List<DeclContext> decl() {
 			return getRuleContexts(DeclContext.class);
 		}
@@ -197,7 +220,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class DeclContext extends ParserRuleContext {
+	public static class DeclContext extends DomainedContext {
 		public ConstDeclContext constDecl() {
 			return getRuleContext(ConstDeclContext.class,0);
 		}
@@ -259,7 +282,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ConstDeclContext extends ParserRuleContext {
+	public static class ConstDeclContext extends DomainedContext {
 		public BTypeContext bType() {
 			return getRuleContext(BTypeContext.class,0);
 		}
@@ -337,7 +360,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class BTypeContext extends ParserRuleContext {
+	public static class BTypeContext extends DomainedContext {
 		public BTypeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -378,7 +401,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ConstDefContext extends ParserRuleContext {
+	public static class ConstDefContext extends DomainedContext {
 		public TerminalNode Identifier() { return getToken(SysYParser.Identifier, 0); }
 		public TerminalNode Assign() { return getToken(SysYParser.Assign, 0); }
 		public ConstInitValContext constInitVal() {
@@ -461,7 +484,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ConstInitValContext extends ParserRuleContext {
+	public static class ConstInitValContext extends DomainedContext {
 		public ConstExpContext constExp() {
 			return getRuleContext(ConstExpContext.class,0);
 		}
@@ -566,7 +589,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class VarDeclContext extends ParserRuleContext {
+	public static class VarDeclContext extends DomainedContext {
 		public BTypeContext bType() {
 			return getRuleContext(BTypeContext.class,0);
 		}
@@ -642,7 +665,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class VarDefContext extends ParserRuleContext {
+	public static class VarDefContext extends DomainedContext {
 		public TerminalNode Identifier() { return getToken(SysYParser.Identifier, 0); }
 		public List<TerminalNode> LeftBracket() { return getTokens(SysYParser.LeftBracket); }
 		public TerminalNode LeftBracket(int i) {
@@ -756,7 +779,10 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class InitValContext extends ParserRuleContext {
+	public static class InitValContext extends DomainedContext {
+		public VarSymbol symbol;
+		public int symbolOffset;
+		public int whichDim; //第几个维度
 		public ExpContext exp() {
 			return getRuleContext(ExpContext.class,0);
 		}
@@ -861,7 +887,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class FuncDefContext extends ParserRuleContext {
+	public static class FuncDefContext extends DomainedContext {
 		public FuncTypeContext funcType() {
 			return getRuleContext(FuncTypeContext.class,0);
 		}
@@ -933,7 +959,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class FuncTypeContext extends ParserRuleContext {
+	public static class FuncTypeContext extends DomainedContext {
 		public FuncTypeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -983,7 +1009,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class FuncFParamsContext extends ParserRuleContext {
+	public static class FuncFParamsContext extends DomainedContext {
 		public List<FuncFParamContext> funcFParam() {
 			return getRuleContexts(FuncFParamContext.class);
 		}
@@ -1051,7 +1077,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class FuncFParamContext extends ParserRuleContext {
+	public static class FuncFParamContext extends DomainedContext {
 		public BTypeContext bType() {
 			return getRuleContext(BTypeContext.class,0);
 		}
@@ -1143,7 +1169,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class BlockContext extends ParserRuleContext {
+	public static class BlockContext extends PositionableBase implements IHasBreakOrContinue {
 		public TerminalNode LeftBrace() { return getToken(SysYParser.LeftBrace, 0); }
 		public TerminalNode RightBrace() { return getToken(SysYParser.RightBrace, 0); }
 		public List<BlockItemContext> blockItem() {
@@ -1168,6 +1194,28 @@ public class SysYParser extends Parser {
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SysYVisitor ) return ((SysYVisitor<? extends T>)visitor).visitBlock(this);
 			else return visitor.visitChildren(this);
+		}
+
+		private List<InterRepresentHolder> breakQuads = null;
+		private List<InterRepresentHolder> continueQuads= null;
+		@Override
+		public List<InterRepresentHolder> getBreakQuads() {
+			return breakQuads;
+		}
+
+		@Override
+		public List<InterRepresentHolder> getContinueQuads() {
+			return continueQuads;
+		}
+
+		@Override
+		public void setBreakQuads(List<InterRepresentHolder> quads) {
+			this.breakQuads=quads;
+		}
+
+		@Override
+		public void setContinueQuads(List<InterRepresentHolder> quads) {
+			this.continueQuads=quads;
 		}
 	}
 
@@ -1209,7 +1257,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class BlockItemContext extends ParserRuleContext {
+	public static class BlockItemContext extends PositionableBase implements IHasBreakOrContinue{
 		public DeclContext decl() {
 			return getRuleContext(DeclContext.class,0);
 		}
@@ -1232,6 +1280,27 @@ public class SysYParser extends Parser {
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SysYVisitor ) return ((SysYVisitor<? extends T>)visitor).visitBlockItem(this);
 			else return visitor.visitChildren(this);
+		}
+		private List<InterRepresentHolder> breakQuads=null;
+		private List<InterRepresentHolder> continueQuads=null;
+		@Override
+		public List<InterRepresentHolder> getBreakQuads() {
+			return breakQuads;
+		}
+
+		@Override
+		public List<InterRepresentHolder> getContinueQuads() {
+			return continueQuads;
+		}
+
+		@Override
+		public void setBreakQuads(List<InterRepresentHolder> quads) {
+			breakQuads=quads;
+		}
+
+		@Override
+		public void setContinueQuads(List<InterRepresentHolder> quads) {
+			continueQuads=quads;
 		}
 	}
 
@@ -1283,16 +1352,44 @@ public class SysYParser extends Parser {
 		}
 		return _localctx;
 	}
-
-	public static class StmtContext extends ParserRuleContext {
+	public static interface IHasBreakOrContinue
+	{
+		List<InterRepresentHolder> getBreakQuads();
+		List<InterRepresentHolder> getContinueQuads();
+		void setBreakQuads(List<InterRepresentHolder> quads);
+		void setContinueQuads(List<InterRepresentHolder> quads);
+	}
+	public static class StmtContext extends PositionableBase implements IHasBreakOrContinue {
 		public StmtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_stmt; }
-	 
+
 		public StmtContext() { }
 		public void copyFrom(StmtContext ctx) {
 			super.copyFrom(ctx);
+		}
+
+		private List<InterRepresentHolder> breakQuads = null;
+		private List<InterRepresentHolder> continueQuads= null;
+		@Override
+		public List<InterRepresentHolder> getBreakQuads() {
+			return breakQuads;
+		}
+
+		@Override
+		public List<InterRepresentHolder> getContinueQuads() {
+			return continueQuads;
+		}
+
+		@Override
+		public void setBreakQuads(List<InterRepresentHolder> quads) {
+			this.breakQuads=quads;
+		}
+
+		@Override
+		public void setContinueQuads(List<InterRepresentHolder> quads) {
+			this.continueQuads=quads;
 		}
 	}
 	public static class IfStatContext extends StmtContext {
@@ -1609,8 +1706,8 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ExpContextBase extends ParserRuleContext{
-		public AddressOrNum result;
+	public static class ExpContextBase extends DomainedContext{
+		public AddressOrData result;
 
 		public ExpContextBase() {
 		}
@@ -1708,7 +1805,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class LValContext extends ParserRuleContext {
+	public static class LValContext extends DomainedContext {
 		public TerminalNode Identifier() { return getToken(SysYParser.Identifier, 0); }
 		public List<TerminalNode> LeftBracket() { return getTokens(SysYParser.LeftBracket); }
 		public TerminalNode LeftBracket(int i) {
@@ -2007,7 +2104,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class FuncRParamsContext extends ParserRuleContext {
+	public static class FuncRParamsContext extends DomainedContext {
 		public List<ExpContext> exp() {
 			return getRuleContexts(ExpContext.class);
 		}
@@ -2267,7 +2364,7 @@ public class SysYParser extends Parser {
 		}
 		return _localctx;
 	}
-	public static class BranchContextBase extends ParserRuleContext{
+	public static class BranchContextBase extends DomainedContext{
 		public BranchContextBase(ParserRuleContext parent, int invokingStateNumber) {
 			super(parent, invokingStateNumber);
 		}
@@ -2278,7 +2375,7 @@ public class SysYParser extends Parser {
 		public RelExpContextBase(ParserRuleContext parent, int invokingStateNumber) {
 			super(parent, invokingStateNumber);
 		}
-		public AddressOrNum address;
+		public AddressOrData address;
 		public int quad;
 	}
 
@@ -2644,14 +2741,14 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ConstExpContext extends ExpContextBase {
-		public AddExpContext addExp() {
+	public static class ConstExpContext extends ExpContext {
+		/*public AddExpContext addExp() {
 			return getRuleContext(AddExpContext.class,0);
-		}
+		}*/
 		public ConstExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_constExp; }
+		/*@Override public int getRuleIndex() { return RULE_constExp; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
 			if ( listener instanceof SysYListener ) ((SysYListener)listener).enterConstExp(this);
@@ -2664,7 +2761,7 @@ public class SysYParser extends Parser {
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SysYVisitor ) return ((SysYVisitor<? extends T>)visitor).visitConstExp(this);
 			else return visitor.visitChildren(this);
-		}
+		}*/
 	}
 
 	public final ConstExpContext constExp() throws RecognitionException {
