@@ -1,0 +1,10 @@
+int main() {
+    int a = 0;
+
+    int b = 1;
+    a = a + 1;
+    b = a + 1;
+    a = a + 1;
+    a = -a;
+    return a + b;
+}

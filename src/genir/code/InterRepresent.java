@@ -1,7 +1,15 @@
 package genir.code;
 
+import gencode.Address;
+import gencode.Ref;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class InterRepresent {
     public int lineNum;
+
+    public Map<Address, Ref> refMap = new HashMap<>();
 
     public int getLineNum() {
         return lineNum;
@@ -15,4 +23,5 @@ public class InterRepresent {
     {
         return String.format("%-6d: ",lineNum);
     }
+
 }

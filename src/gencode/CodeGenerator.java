@@ -14,9 +14,6 @@ public class CodeGenerator {
     private Map<Integer, Integer> regMapper = new HashMap<>();
     /* 基本块 */
     private Map<Integer, Block> blockMap = new HashMap<>();
-    /* 变量活跃与下次引用 */
-    private Map<String, Boolean> aliveTable = new HashMap<>();
-    private Map<String, IRCode> RefTable = new HashMap<>();
 
     private IRCode irCode;
     private SymbolTableHost tableHost;
@@ -26,14 +23,29 @@ public class CodeGenerator {
         this.tableHost = tableHost;
     }
 
-    public void getNextRef() {
-        for (Block block : blockMap.values()) {
-            for (int i = block.irs.size() - 1; i >= 0; i++) {
-                InterRepresent ir = block.irs.get(i);
-                if (ir instanceof BinocularRepre) {
-                    ir = (BinocularRepre) ir;
+    public void genCode() {
+        transBlock();
+        calNextRef();
+    }
 
-                }
+    public void calNextRef() {
+        for (Block block : blockMap.values()) {
+            Map<Address, Ref> refTable = new HashMap<>();
+            for (int i = block.irs.size() - 1; i >= 0; i--) {
+                
+                InterRepresent ir = block.irs.get(i);
+                Util.traverseAddress(ir, var -> {
+                    Ref ref = refTable.getOrDefault(var, new Ref(null, true));
+                    // a & c
+                    ir.refMap.put(var, ref);
+                    if (var.isLVal) {
+                        // b
+                        refTable.put(var, new Ref(null, false));
+                    } else {
+                        // d
+                        refTable.put(var, new Ref(ir, true));
+                    }
+                });
             }
         }
     }
@@ -97,5 +109,6 @@ public class CodeGenerator {
             return irs.get(irs.size() - 1).lineNum;
         }
     }
+
 
 }

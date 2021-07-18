@@ -2,8 +2,10 @@ int main()
 {
     int result;
     result = 0;
-    int i;
+    int i,j;
     i=1;
+    j = i;
+    j = j + 1;
     while(i<=100 && i >=5)
     {
         result=result+i;

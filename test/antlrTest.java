@@ -1,5 +1,8 @@
 import antlr.SysYLexer;
 import antlr.SysYParser;
+import gencode.Address;
+import gencode.CodeGenerator;
+import gencode.Ref;
 import genir.IRCode;
 import genir.SysYIRListener;
 import genir.code.InterRepresent;
@@ -16,6 +19,7 @@ import symboltable.SysSymbolListener;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public class antlrTest {
 
@@ -110,5 +114,27 @@ public class antlrTest {
     private void prepareSymbol(ParseTree tree, ParseTreeWalker walker, SymbolTableHost symbolTableHost, FuncSymbolTable funcSymbolTable) {
         SysSymbolListener symbolListener=new SysSymbolListener(symbolTableHost, funcSymbolTable);
         walker.walk(symbolListener, tree);
+    }
+
+    @Test
+    public void testRef() {
+        SysYParser parser = getParser("test/ref.sys");
+        ParseTree tree = parser.compUnit();
+        ParseTreeWalker walker = new ParseTreeWalker();
+        SymbolTableHost symbolTableHost=new SymbolTableHost();
+        FuncSymbolTable funcSymbolTable=new FuncSymbolTable();
+        prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
+        SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
+        walker.walk(irListener, tree);
+
+        CodeGenerator codeGenerator = new CodeGenerator(irListener.irCodes, symbolTableHost);
+        codeGenerator.genCode();
+        for (InterRepresent code : irListener.irCodes.codes) {
+            System.out.println(code.toString());
+            for (Address address : code.refMap.keySet()) {
+                Ref ref = code.refMap.get(address);
+                System.out.println("\t" + address + ": " + ref);
+            }
+        }
     }
 }
