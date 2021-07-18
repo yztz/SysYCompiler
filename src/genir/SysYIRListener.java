@@ -26,7 +26,7 @@ public class SysYIRListener implements SysYListener {
         this.funcSymbolTable = funcSymbolTable;
     }
 
-    public IRCode irCodes=new IRCode();
+    public IRCode irCodes = new IRCode();
 
     @Override
     public void enterCompUnit(SysYParser.CompUnitContext ctx) {
@@ -100,23 +100,20 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterVarDef(SysYParser.VarDefContext ctx) {
-        if(ctx.initVal()!=null)
-        {
-            ctx.initVal().symbol= symbolTableHost.searchSymbol(ctx.domain, ctx.Identifier().getSymbol());
-            ctx.initVal().symbolOffset=0;
+        if (ctx.initVal() != null) {
+            ctx.initVal().symbol = symbolTableHost.searchSymbol(ctx.domain, ctx.Identifier().getSymbol());
+            ctx.initVal().symbolOffset = 0;
             ctx.initVal().whichDim = 1;
         }
     }
 
     @Override
     public void exitVarDef(SysYParser.VarDefContext ctx) {
-        if(ctx.initVal()!=null)
-        {
-            if(ctx.initVal().symbol.initValues!=null && ctx.initVal().symbol.getLength()==1)
-            {
+        if (ctx.initVal() != null) {
+            if (ctx.initVal().symbol.initValues != null && ctx.initVal().symbol.getLength() == 1) {
                 SaveRepresent ir = InterRepresentFactory.createSaveRepresent(ctx.initVal().symbol,
-                                                                             new AddressOrData(true, 0),
-                                                                             new AddressOrData(true,ctx.initVal().symbol.initValues[0]));
+                        new AddressOrData(true, 0),
+                        new AddressOrData(true, ctx.initVal().symbol.initValues[0]));
                 irCodes.addCode(ir);
             }
         }
@@ -126,35 +123,33 @@ public class SysYIRListener implements SysYListener {
     public void enterInitVal(SysYParser.InitValContext ctx) {
         List<SysYParser.InitValContext> initVal = ctx.initVal();
         int dimSize = 1;
-        for(int i=ctx.whichDim;i<ctx.symbol.dimensions.length;i++)
-        {
-            dimSize*=ctx.symbol.dimensions[i];
+        for (int i = ctx.whichDim; i < ctx.symbol.dimensions.length; i++) {
+            dimSize *= ctx.symbol.dimensions[i];
         }
         for (int i = 0; i < initVal.size(); i++) {
             SysYParser.InitValContext childInitVal = initVal.get(i);
             childInitVal.symbol = ctx.symbol;
             childInitVal.whichDim = ctx.whichDim + 1;
-            childInitVal.symbolOffset=ctx.symbolOffset+i*dimSize;
+            childInitVal.symbolOffset = ctx.symbolOffset + i * dimSize;
         }
     }
 
     @Override
     public void exitInitVal(SysYParser.InitValContext ctx) {
-        if(ctx.exp()!=null)
-        {
+        if (ctx.exp() != null) {
             AddressOrData initResult = ctx.exp().result;
             if (initResult.isData) {
                 if (ctx.symbol.initValues == null) {
-                    ctx.symbol.initValues=new int[ctx.symbol.getLength()];
+                    ctx.symbol.initValues = new int[ctx.symbol.getLength()];
                 }
-                ctx.symbol.initValues[ctx.symbolOffset]=initResult.item;
-            }else{
+                ctx.symbol.initValues[ctx.symbolOffset] = initResult.item;
+            } else {
                 SaveRepresent ir = InterRepresentFactory.createSaveRepresent(ctx.symbol, new AddressOrData(true, ctx.symbolOffset),
-                                                                             initResult);
+                        initResult);
                 irCodes.addCode(ir);
             }
             /*AddressOrData initResult = ctx.exp().result;
-            */
+             */
         }
     }
 
@@ -168,15 +163,15 @@ public class SysYIRListener implements SysYListener {
         TerminalNode identifier = ctx.Identifier();
         FuncSymbol funcSymbol = funcSymbolTable.getFuncSymbol(identifier.getSymbol().getText());
         InterRepresentHolder startStmtHolder = ctx.block().startStmtHolder;
-        if(startStmtHolder==null)//一条语句也没有
+        if (startStmtHolder == null)//一条语句也没有
         {
             ReturnRepresent returnIR = new ReturnRepresent();
-            funcSymbol.firstStmtHolder=new InterRepresentHolder(returnIR);
+            funcSymbol.firstStmtHolder = new InterRepresentHolder(returnIR);
             irCodes.addCode(returnIR);
-        }else{
-            funcSymbol.firstStmtHolder=startStmtHolder;
+        } else {
+            funcSymbol.firstStmtHolder = startStmtHolder;
 
-            if(ctx.block().endStmtHolder==null || !(ctx.block().endStmtHolder.getInterRepresent() instanceof ReturnRepresent))
+            if (ctx.block().endStmtHolder == null || !(ctx.block().endStmtHolder.getInterRepresent() instanceof ReturnRepresent))
                 irCodes.addCode(new ReturnRepresent()); //如果最后一行不是return，补上return
         }
     }
@@ -218,12 +213,12 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitBlock(SysYParser.BlockContext ctx) {
-        List<InterRepresentHolder> breakQuads=new ArrayList<>();
-        List<InterRepresentHolder> continueQuads=new ArrayList<>();
+        List<InterRepresentHolder> breakQuads = new ArrayList<>();
+        List<InterRepresentHolder> continueQuads = new ArrayList<>();
         for (SysYParser.BlockItemContext blockItemContext : ctx.blockItem()) {
-            if(blockItemContext.getBreakQuads()!=null)
+            if (blockItemContext.getBreakQuads() != null)
                 breakQuads.addAll(blockItemContext.getBreakQuads());
-            if(blockItemContext.getContinueQuads()!=null)
+            if (blockItemContext.getContinueQuads() != null)
                 continueQuads.addAll(blockItemContext.getContinueQuads());
         }
 
@@ -232,8 +227,8 @@ public class SysYIRListener implements SysYListener {
 
         // 找到第一条IR语句
         for (SysYParser.BlockItemContext blockItemContext : ctx.blockItem()) {
-            if (blockItemContext.startStmtHolder!=null) {
-                ctx.startStmtHolder=blockItemContext.startStmtHolder;
+            if (blockItemContext.startStmtHolder != null) {
+                ctx.startStmtHolder = blockItemContext.startStmtHolder;
                 break;
             }
         }
@@ -241,8 +236,8 @@ public class SysYIRListener implements SysYListener {
         // 找到最后一条IR语句
         for (int i = ctx.blockItem().size() - 1; i >= 0; i--) {
             SysYParser.BlockItemContext blockItemContext = ctx.blockItem(i);
-            if (blockItemContext.endStmtHolder!=null) {
-                ctx.endStmtHolder=blockItemContext.endStmtHolder;
+            if (blockItemContext.endStmtHolder != null) {
+                ctx.endStmtHolder = blockItemContext.endStmtHolder;
                 break;
             }
         }
@@ -255,11 +250,10 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitBlockItem(SysYParser.BlockItemContext ctx) {
-        if(ctx.stmt()!=null)
-        {
+        if (ctx.stmt() != null) {
             ctx.setBreakQuads(ctx.stmt().getBreakQuads());
             ctx.setContinueQuads(ctx.stmt().getContinueQuads());
-            ctx.startStmtHolder=ctx.stmt().startStmtHolder;
+            ctx.startStmtHolder = ctx.stmt().startStmtHolder;
             ctx.endStmtHolder = ctx.stmt().endStmtHolder;
         }
     }
@@ -275,15 +269,14 @@ public class SysYIRListener implements SysYListener {
 
         SysYParser.LValContext lValCtx = ctx.lVal();
         ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
-        if(symbolAndOffset!=null)
-        {
+        if (symbolAndOffset != null) {
             for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                 irCodes.addCode(ir);
             }
             SaveRepresent loadRepresent = InterRepresentFactory.createSaveRepresent(symbolAndOffset.symbol
-                    , symbolAndOffset.offsetResult,sourceResult);
+                    , symbolAndOffset.offsetResult, sourceResult);
             irCodes.addCode(loadRepresent);
-            ctx.endStmtHolder=new InterRepresentHolder(loadRepresent);
+            ctx.endStmtHolder = new InterRepresentHolder(loadRepresent);
         }
     }
 
@@ -306,7 +299,7 @@ public class SysYIRListener implements SysYListener {
     public void exitBlockStat(SysYParser.BlockStatContext ctx) {
         ctx.setBreakQuads(ctx.block().getBreakQuads());
         ctx.setContinueQuads(ctx.block().getContinueQuads());
-        ctx.endStmtHolder=ctx.block().endStmtHolder;
+        ctx.endStmtHolder = ctx.block().endStmtHolder;
     }
 
     @Override
@@ -316,32 +309,32 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitIfStat(SysYParser.IfStatContext ctx) {
-        if(ctx.stmt().size()==2) //有else
+        if (ctx.stmt().size() == 2) //有else
         {
-            InterRepresent elseStartIr=ctx.stmt(1).startStmtHolder.getInterRepresent();
+            InterRepresent elseStartIr = ctx.stmt(1).startStmtHolder.getInterRepresent();
             for (GotoRepresent ir : ctx.cond().falseList) {
                 ir.setTargetIR(elseStartIr);
             }
             // 需要插入一句goto，在if的代码块执行完成后跳过else代码块
             GotoRepresent skipElseStmtIR = new GotoRepresent(null);
-            irCodes.insertCode(elseStartIr.lineNum,skipElseStmtIR);
+            irCodes.insertCode(elseStartIr.lineNum, skipElseStmtIR);
             irCodes.bookVacancy(skipElseStmtIR.targetHolder);
-        }else{
+        } else {
             for (GotoRepresent ir : ctx.cond().falseList) {
                 irCodes.bookVacancy(ir.targetHolder);
             }
         }
 
         // 传递breakQuad和continueQuad给父级可能存在的while节点
-        if(ctx.stmt().size()==2) //有else
+        if (ctx.stmt().size() == 2) //有else
         {
-            ctx.setBreakQuads(mergeList(ctx.stmt(0).getBreakQuads(),ctx.stmt(1).getBreakQuads()));
-            ctx.setContinueQuads(mergeList(ctx.stmt(0).getContinueQuads(),ctx.stmt(1).getContinueQuads()));
-        }else{
+            ctx.setBreakQuads(mergeList(ctx.stmt(0).getBreakQuads(), ctx.stmt(1).getBreakQuads()));
+            ctx.setContinueQuads(mergeList(ctx.stmt(0).getContinueQuads(), ctx.stmt(1).getContinueQuads()));
+        } else {
             ctx.setBreakQuads(ctx.stmt(0).getBreakQuads());
             ctx.setContinueQuads(ctx.stmt(0).getContinueQuads());
         }
-        ctx.endStmtHolder = ctx.stmt(ctx.stmt().size()-1).endStmtHolder;
+        ctx.endStmtHolder = ctx.stmt(ctx.stmt().size() - 1).endStmtHolder;
     }
 
     @Override
@@ -369,8 +362,7 @@ public class SysYIRListener implements SysYListener {
             }
         }
 
-        if(ctx.stmt().getContinueQuads()!=null)
-        {
+        if (ctx.stmt().getContinueQuads() != null) {
             for (InterRepresentHolder continueQuad : ctx.stmt().getContinueQuads()) {
                 continueQuad.setInterRepresent(whileStartIR);
             }
@@ -386,11 +378,11 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitBreakStat(SysYParser.BreakStatContext ctx) {
-        GotoRepresent breakGoto=new GotoRepresent(null);
+        GotoRepresent breakGoto = new GotoRepresent(null);
         ctx.setBreakQuads(new ArrayList<>());
         ctx.getBreakQuads().add(breakGoto.targetHolder);
         irCodes.addCode(breakGoto);
-        ctx.endStmtHolder=new InterRepresentHolder(breakGoto);
+        ctx.endStmtHolder = new InterRepresentHolder(breakGoto);
     }
 
     @Override
@@ -400,11 +392,11 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitContinueStat(SysYParser.ContinueStatContext ctx) {
-        GotoRepresent continueGoto=new GotoRepresent(null);
+        GotoRepresent continueGoto = new GotoRepresent(null);
         ctx.setContinueQuads(new ArrayList<>());
         ctx.getContinueQuads().add(continueGoto.targetHolder);
         irCodes.addCode(continueGoto);
-        ctx.endStmtHolder=new InterRepresentHolder(continueGoto);
+        ctx.endStmtHolder = new InterRepresentHolder(continueGoto);
     }
 
     @Override
@@ -416,12 +408,12 @@ public class SysYIRListener implements SysYListener {
     public void exitReturnStat(SysYParser.ReturnStatContext ctx) {
         ReturnRepresent returnRepresent;
         if (ctx.exp() != null) {
-            returnRepresent =new ReturnRepresent(ctx.exp().result);
-        }else{
-            returnRepresent =new ReturnRepresent();
+            returnRepresent = new ReturnRepresent(ctx.exp().result);
+        } else {
+            returnRepresent = new ReturnRepresent();
         }
         irCodes.addCode(returnRepresent);
-        ctx.endStmtHolder=new InterRepresentHolder(returnRepresent);
+        ctx.endStmtHolder = new InterRepresentHolder(returnRepresent);
     }
 
     @Override
@@ -431,7 +423,7 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitExp(SysYParser.ExpContext ctx) {
-        ctx.result=ctx.addExp().result;
+        ctx.result = ctx.addExp().result;
     }
 
     @Override
@@ -441,8 +433,8 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitCond(SysYParser.CondContext ctx) {
-        ctx.trueList=ctx.lOrExp().trueList;
-        ctx.falseList=ctx.lOrExp().falseList;
+        ctx.trueList = ctx.lOrExp().trueList;
+        ctx.falseList = ctx.lOrExp().falseList;
         for (GotoRepresent ir : ctx.trueList) {
             irCodes.bookVacancy(ir.targetHolder);
             //System.out.println("true "+ir.lineNum);
@@ -467,15 +459,13 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void exitPrimaryExp(SysYParser.PrimaryExpContext ctx) {
         TerminalNode numTerminal = ctx.Integer_const();
-        if(numTerminal!=null)
-        {
+        if (numTerminal != null) {
             ctx.result = new AddressOrData(true, Integer.parseInt(numTerminal.getSymbol().getText()));
-        }else if(ctx.lVal()!=null) //左值，变量
+        } else if (ctx.lVal() != null) //左值，变量
         {
             SysYParser.LValContext lValCtx = ctx.lVal();
             ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
-            if(symbolAndOffset!=null)
-            {
+            if (symbolAndOffset != null) {
                 for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                     irCodes.addCode(ir);
                 }
@@ -484,8 +474,8 @@ public class SysYIRListener implements SysYListener {
                 irCodes.addCode(loadRepresent);
                 ctx.result = loadRepresent.target;
             }
-        }else{
-            ctx.result=ctx.exp().result;
+        } else {
+            ctx.result = ctx.exp().result;
         }
     }
 
@@ -496,7 +486,7 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitPrimaryExpr(SysYParser.PrimaryExprContext ctx) {
-        ctx.result=ctx.primaryExp().result;
+        ctx.result = ctx.primaryExp().result;
     }
 
     @Override
@@ -507,8 +497,8 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void exitFunctionExpr(SysYParser.FunctionExprContext ctx) {
         TerminalNode identifier = ctx.Identifier();
-        FuncSymbol funcSymbol=funcSymbolTable.getFuncSymbol(identifier.getSymbol().getText());
-        if(funcSymbol==null)
+        FuncSymbol funcSymbol = funcSymbolTable.getFuncSymbol(identifier.getSymbol().getText());
+        if (funcSymbol == null)
             System.out.println("Function is not defined");
 
         CallRepresent ir;
@@ -516,10 +506,10 @@ public class SysYIRListener implements SysYListener {
             List<SysYParser.ExpContext> expContextList = ctx.funcRParams().exp();
             AddressOrData[] params = new AddressOrData[expContextList.size()];
             for (int i = 0; i < expContextList.size(); i++) {
-                params[i]=expContextList.get(i).result;
+                params[i] = expContextList.get(i).result;
             }
-            ir = InterRepresentFactory.createFuncCallRepresent(funcSymbol,params);
-        }else{
+            ir = InterRepresentFactory.createFuncCallRepresent(funcSymbol, params);
+        } else {
             ir = InterRepresentFactory.createFuncCallRepresent(funcSymbol);
         }
         irCodes.addCode(ir);
@@ -535,20 +525,17 @@ public class SysYIRListener implements SysYListener {
     public void exitSignExpr(SysYParser.SignExprContext ctx) {
 
         UnaryRepre.UnaryOp opcode = null;
-        if(ctx.Plus()!=null)
-        {
+        if (ctx.Plus() != null) {
             opcode = UnaryRepre.UnaryOp.ADD;
-        }else if(ctx.Minus()!=null)
-        {
+        } else if (ctx.Minus() != null) {
             opcode = UnaryRepre.UnaryOp.MINUS;
-        }else if(ctx.Not()!=null)
-        {
+        } else if (ctx.Not() != null) {
             opcode = UnaryRepre.UnaryOp.NOT;
         }
 
         UnaryRepre ir = InterRepresentFactory.createUnaryRepresent(opcode, ctx.unaryExp().result);
         irCodes.addCode(ir);
-        ctx.result=ir.target;
+        ctx.result = ir.target;
     }
 
     @Override
@@ -568,22 +555,21 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitMulExp(SysYParser.MulExpContext ctx) {
-        if (ctx.op==null) {
-            ctx.result=ctx.unaryExp().result;
-        }else{
-            BinocularRepre.Opcodes opcodes=null;
+        if (ctx.op == null) {
+            ctx.result = ctx.unaryExp().result;
+        } else {
+            BinocularRepre.Opcodes opcodes = null;
             if (ctx.Star() != null) {
-                opcodes= BinocularRepre.Opcodes.MUL;
-            }else if(ctx.Div()!=null)
-            {
-                opcodes= BinocularRepre.Opcodes.DIV;
-            }else if(ctx.Mod()!=null){
-                opcodes= BinocularRepre.Opcodes.MOD;
-            }else{
+                opcodes = BinocularRepre.Opcodes.MUL;
+            } else if (ctx.Div() != null) {
+                opcodes = BinocularRepre.Opcodes.DIV;
+            } else if (ctx.Mod() != null) {
+                opcodes = BinocularRepre.Opcodes.MOD;
+            } else {
                 System.err.println("Unknown opcodes");
             }
-            BinocularRepre ir= InterRepresentFactory.createBinocularRepresent(opcodes,ctx.mulExp().result,
-                                                                              ctx.unaryExp().result);
+            BinocularRepre ir = InterRepresentFactory.createBinocularRepresent(opcodes, ctx.mulExp().result,
+                    ctx.unaryExp().result);
             irCodes.addCode(ir);
             ctx.result = ir.target;
         }
@@ -596,35 +582,33 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitAddExp(SysYParser.AddExpContext ctx) {
-        if (ctx.op==null) {
-            ctx.result=ctx.mulExp().result;
-        }else{
-            BinocularRepre.Opcodes opcodes=null;
+        if (ctx.op == null) {
+            ctx.result = ctx.mulExp().result;
+        } else {
+            BinocularRepre.Opcodes opcodes = null;
             if (ctx.Plus() != null) {
-                opcodes= BinocularRepre.Opcodes.ADD;
-            }else if(ctx.Minus()!=null)
-            {
-                opcodes= BinocularRepre.Opcodes.MINUS;
-            }else{
+                opcodes = BinocularRepre.Opcodes.ADD;
+            } else if (ctx.Minus() != null) {
+                opcodes = BinocularRepre.Opcodes.MINUS;
+            } else {
                 System.err.println("Unknown opcodes");
             }
-            BinocularRepre ir= InterRepresentFactory.createBinocularRepresent(opcodes, ctx.addExp().result,
-                                                                              ctx.mulExp().result);
+            BinocularRepre ir = InterRepresentFactory.createBinocularRepresent(opcodes, ctx.addExp().result,
+                    ctx.mulExp().result);
             irCodes.addCode(ir);
             ctx.result = ir.target;
         }
     }
 
     private <T> List<T> mergeList(List<T> from1,
-                           List<T> from2)
-    {
+                                  List<T> from2) {
         List<T> result = null;
-        if(from1!=null || from2!=null)
-            result=new ArrayList<>();
+        if (from1 != null || from2 != null)
+            result = new ArrayList<>();
 
-        if(from1!=null)
+        if (from1 != null)
             result.addAll(from1);
-        if(from2!=null)
+        if (from2 != null)
             result.addAll(from2);
         return result;
     }
@@ -638,33 +622,33 @@ public class SysYIRListener implements SysYListener {
                                   AddressOrData address1, AddressOrData address2) {
         IfGotoRepresent ifGoto = new IfGotoRepresent(null, relOp, address1, address2);
         GotoRepresent goTo = new GotoRepresent(null);
-        ctx.trueList=new ArrayList<>();
-        ctx.falseList=new ArrayList<>();
+        ctx.trueList = new ArrayList<>();
+        ctx.falseList = new ArrayList<>();
         ctx.trueList.add(ifGoto);
         ctx.falseList.add(goTo);
         irCodes.addCode(ifGoto);
         irCodes.addCode(goTo);
     }
+
     @Override
     public void exitRelExp(SysYParser.RelExpContext ctx) {
-        if (ctx.op==null) {
-            ctx.address=ctx.addExp().result;
-        }else
-        {
-            IfGotoRepresent.RelOp relOp= null;
-            if(ctx.Greater()!=null){
-                relOp= IfGotoRepresent.RelOp.GREATER;
-            }else if(ctx.Less()!=null){
-                relOp= IfGotoRepresent.RelOp.LESS;
-            }else if(ctx.GreaterEqual()!=null){
-                relOp= IfGotoRepresent.RelOp.GREATER_EQUAL;
-            }else if(ctx.LessEqual()!=null){
-                relOp= IfGotoRepresent.RelOp.LESS_EQUAL;
-            }else{
+        if (ctx.op == null) {
+            ctx.address = ctx.addExp().result;
+        } else {
+            IfGotoRepresent.RelOp relOp = null;
+            if (ctx.Greater() != null) {
+                relOp = IfGotoRepresent.RelOp.GREATER;
+            } else if (ctx.Less() != null) {
+                relOp = IfGotoRepresent.RelOp.LESS;
+            } else if (ctx.GreaterEqual() != null) {
+                relOp = IfGotoRepresent.RelOp.GREATER_EQUAL;
+            } else if (ctx.LessEqual() != null) {
+                relOp = IfGotoRepresent.RelOp.LESS_EQUAL;
+            } else {
                 System.err.println("Unknown rel opcode");
             }
 
-            createIfGotoPair(ctx, relOp,ctx.relExp().address,ctx.addExp().result);
+            createIfGotoPair(ctx, relOp, ctx.relExp().address, ctx.addExp().result);
         }
     }
 
@@ -675,28 +659,26 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitEqExp(SysYParser.EqExpContext ctx) {
-        if(ctx.op==null)
-        {
-            ctx.quad=ctx.relExp().quad;
-            ctx.trueList=ctx.relExp().trueList;
-            ctx.falseList=ctx.relExp().falseList;
-            ctx.address=ctx.relExp().address;
-        }else{
-            ctx.quad= irCodes.getNextLineNum();
-            IfGotoRepresent.RelOp relOp= null;
-            if(ctx.Equal()!=null){
-                relOp= IfGotoRepresent.RelOp.EQUAL;
-            }else if(ctx.NotEqual()!=null){
-                relOp= IfGotoRepresent.RelOp.NOT_EQUAL;
-            }else{
+        if (ctx.op == null) {
+            ctx.quad = ctx.relExp().quad;
+            ctx.trueList = ctx.relExp().trueList;
+            ctx.falseList = ctx.relExp().falseList;
+            ctx.address = ctx.relExp().address;
+        } else {
+            ctx.quad = irCodes.getNextLineNum();
+            IfGotoRepresent.RelOp relOp = null;
+            if (ctx.Equal() != null) {
+                relOp = IfGotoRepresent.RelOp.EQUAL;
+            } else if (ctx.NotEqual() != null) {
+                relOp = IfGotoRepresent.RelOp.NOT_EQUAL;
+            } else {
                 System.err.println("Unknown rel opcode");
             }
 
 
-            createIfGotoPair(ctx, relOp,ctx.eqExp().address,ctx.relExp().address);
+            createIfGotoPair(ctx, relOp, ctx.eqExp().address, ctx.relExp().address);
         }
     }
-
 
 
     @Override
@@ -706,16 +688,16 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitLAndExp(SysYParser.LAndExpContext ctx) {
-        if (ctx.And()==null) {
+        if (ctx.And() == null) {
             ctx.quad = ctx.eqExp().quad;
-            ctx.address=ctx.eqExp().address;
+            ctx.address = ctx.eqExp().address;
 
-            ctx.trueList=ctx.eqExp().trueList;
-            ctx.falseList=ctx.eqExp().falseList;
-        }else{
+            ctx.trueList = ctx.eqExp().trueList;
+            ctx.falseList = ctx.eqExp().falseList;
+        } else {
             ctx.quad = ctx.lAndExp().quad;
-            ctx.trueList=ctx.eqExp().trueList;
-            ctx.falseList = mergeList(ctx.lAndExp().falseList,ctx.eqExp().falseList);
+            ctx.trueList = ctx.eqExp().trueList;
+            ctx.falseList = mergeList(ctx.lAndExp().falseList, ctx.eqExp().falseList);
 
             InterRepresent targetIR = irCodes.getInterRepresent(ctx.eqExp().quad);
             // 回填
@@ -732,15 +714,15 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitLOrExp(SysYParser.LOrExpContext ctx) {
-        if (ctx.Or()==null) {
+        if (ctx.Or() == null) {
             ctx.quad = ctx.lAndExp().quad;
-            ctx.address=ctx.lAndExp().address;
+            ctx.address = ctx.lAndExp().address;
 
-            ctx.trueList=ctx.lAndExp().trueList;
-            ctx.falseList=ctx.lAndExp().falseList;
-        }else{
+            ctx.trueList = ctx.lAndExp().trueList;
+            ctx.falseList = ctx.lAndExp().falseList;
+        } else {
             ctx.quad = ctx.lOrExp().quad;
-            ctx.trueList = mergeList(ctx.lOrExp().trueList,ctx.lAndExp().trueList);
+            ctx.trueList = mergeList(ctx.lOrExp().trueList, ctx.lAndExp().trueList);
             ctx.falseList = ctx.lAndExp().falseList;
 
             InterRepresent targetIR = irCodes.getInterRepresent(ctx.lAndExp().quad);
@@ -773,9 +755,8 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterEveryRule(ParserRuleContext parserRuleContext) {
-        if(parserRuleContext instanceof SysYParser.PositionableBase)
-        {
-            SysYParser.PositionableBase stmtContext=(SysYParser.PositionableBase) parserRuleContext;
+        if (parserRuleContext instanceof SysYParser.PositionableBase) {
+            SysYParser.PositionableBase stmtContext = (SysYParser.PositionableBase) parserRuleContext;
             stmtContext.startStmtHolder = new InterRepresentHolder(null);
             irCodes.bookVacancy(stmtContext.startStmtHolder);
         }

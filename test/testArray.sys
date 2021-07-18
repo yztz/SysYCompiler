@@ -1,0 +1,11 @@
+void main() {
+    int a[5][10];
+    func(a[2][3]);
+
+}
+
+void func(int a) {
+    int b = 2;
+    a = a + 1;
+    b = a + 3;
+}

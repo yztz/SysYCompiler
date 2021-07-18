@@ -2,6 +2,7 @@ package symboltable;
 
 
 import com.sun.istack.internal.Nullable;
+import genir.code.InterRepresent;
 import org.antlr.v4.runtime.Token;
 
 public class VarSymbol {
@@ -12,19 +13,28 @@ public class VarSymbol {
     public BType bType = BType.INT; //好像只有int
     public int[] dimensions;
     public boolean isFuncParam = false;
+    public SymbolDomain domain;
+
+//    public InterRepresent nextRef;
+//    public boolean isAlive = true;
+
+
+
     @Nullable
     public int[] initValues;
-    public VarSymbol(int offset, Token varToken) {
+    public VarSymbol(int offset, Token varToken, SymbolDomain domain) {
         this.offset = offset;
         this.varToken = varToken;
+        this.domain = domain;
         dimensions=new int[]{1};
         length = 1;
     }
 
-    public VarSymbol(int offset, Token varToken, int[] dimensions) {
+    public VarSymbol(int offset, Token varToken, int[] dimensions, SymbolDomain domain) {
         this.offset = offset;
         this.varToken = varToken;
         this.dimensions = dimensions;
+        this.domain = domain;
         length = 1;
         for (int dimSize : dimensions) {
             length *=dimSize;

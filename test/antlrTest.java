@@ -1,5 +1,6 @@
 import antlr.SysYLexer;
 import antlr.SysYParser;
+import genir.IRCode;
 import genir.SysYIRListener;
 import genir.code.InterRepresent;
 import org.antlr.v4.runtime.CharStream;
@@ -14,6 +15,7 @@ import symboltable.SymbolTableHost;
 import symboltable.SysSymbolListener;
 
 import java.io.IOException;
+import java.util.List;
 
 public class antlrTest {
 
@@ -56,15 +58,7 @@ public class antlrTest {
 
     @Test
     public void testExp() {
-        ParseTree tree = getParser("test/testExp.sys").exp();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        SymbolTableHost symbolTableHost=new SymbolTableHost();
-        FuncSymbolTable funcSymbolTable=new FuncSymbolTable();
-        prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
-
-        SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
-        walker.walk(irListener, tree);
-        for (InterRepresent code : irListener.irCodes.codes) {
+        for (InterRepresent code : getIR("test/testExp.sys")) {
             System.out.println(code.toString());
         }
     }
@@ -72,23 +66,13 @@ public class antlrTest {
     @Test
     public void testIf()
     {
-        SysYParser parser = getParser("test/testWhileIf.sys");
-        ParseTree tree = parser.stmt();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        SymbolTableHost symbolTableHost=new SymbolTableHost();
-        FuncSymbolTable funcSymbolTable=new FuncSymbolTable();
-        prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
-        SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
-        walker.walk(irListener, tree);
-        for (InterRepresent code : irListener.irCodes.codes) {
+        for (InterRepresent code : getIR("test/testWhileIf.sys")) {
             System.out.println(code.toString());
         }
     }
 
-    @Test
-    public void testFunc()
-    {
-        SysYParser parser = getParser("test/testFunc.sys");
+    public List<InterRepresent> getIR(String filepath) {
+        SysYParser parser = getParser(filepath);
         ParseTree tree = parser.compUnit();
         ParseTreeWalker walker = new ParseTreeWalker();
         SymbolTableHost symbolTableHost=new SymbolTableHost();
@@ -96,7 +80,14 @@ public class antlrTest {
         prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
         SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
         walker.walk(irListener, tree);
-        for (InterRepresent code : irListener.irCodes.codes) {
+
+        return irListener.irCodes.codes;
+    }
+
+    @Test
+    public void testFunc()
+    {
+        for (InterRepresent code : getIR("test/testFunc.sys")) {
             System.out.println(code.toString());
         }
     }
@@ -104,15 +95,14 @@ public class antlrTest {
     @Test
     public void testFull()
     {
-        SysYParser parser = getParser("test/testFull.sys");
-        ParseTree tree = parser.compUnit();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        SymbolTableHost symbolTableHost=new SymbolTableHost();
-        FuncSymbolTable funcSymbolTable=new FuncSymbolTable();
-        prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
-        SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
-        walker.walk(irListener, tree);
-        for (InterRepresent code : irListener.irCodes.codes) {
+        for (InterRepresent code : getIR("test/testFull.sys")) {
+            System.out.println(code.toString());
+        }
+    }
+
+    @Test
+    public void testArray() {
+        for (InterRepresent code : getIR("test/testArray.sys")) {
             System.out.println(code.toString());
         }
     }

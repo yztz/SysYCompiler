@@ -39,19 +39,19 @@ public class SymbolTable {
      */
     public void addSymbol(Token token,int[] dimensions) //类型只有一个int
     {
-        offsets.put(token.getText(),new VarSymbol(totalOffset,token,dimensions));
+        offsets.put(token.getText(),new VarSymbol(totalOffset,token,dimensions, domain));
         totalOffset+=4;
     }
 
     public void addSymbol(Token token) //类型只有一个int
     {
-        offsets.put(token.getText(),new VarSymbol(totalOffset,token));
+        offsets.put(token.getText(),new VarSymbol(totalOffset,token, domain));
         totalOffset+=4;
     }
 
     public void addParam(Token token)
     {
-        VarSymbol symbol = new VarSymbol(totalOffset, token);
+        VarSymbol symbol = new VarSymbol(totalOffset, token, domain);
         symbol.isFuncParam = true;
         offsets.put(token.getText(),symbol);
         totalOffset+=4;
@@ -59,7 +59,7 @@ public class SymbolTable {
 
     public void addParam(Token token,int[] dim)
     {
-        VarSymbol symbol = new VarSymbol(totalOffset, token,dim);
+        VarSymbol symbol = new VarSymbol(totalOffset, token,dim, domain);
         symbol.isFuncParam = true;
         offsets.put(token.getText(),symbol);
         totalOffset+=4;
@@ -67,7 +67,6 @@ public class SymbolTable {
 
     /**
      * 返回符号相对的偏移量
-     * @param token 符号token
      * @return 偏移量，-1表示符号不存在
      */
     public int getSymbolOffset(String ident)
