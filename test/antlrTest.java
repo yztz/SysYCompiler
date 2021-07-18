@@ -118,7 +118,7 @@ public class antlrTest {
 
     @Test
     public void testRef() {
-        SysYParser parser = getParser("test/ref.sys");
+        SysYParser parser = getParser("test/testFull.sys");
         ParseTree tree = parser.compUnit();
         ParseTreeWalker walker = new ParseTreeWalker();
         SymbolTableHost symbolTableHost=new SymbolTableHost();
@@ -128,13 +128,16 @@ public class antlrTest {
         walker.walk(irListener, tree);
 
         CodeGenerator codeGenerator = new CodeGenerator(irListener.irCodes, symbolTableHost);
+
         codeGenerator.genCode();
-        for (InterRepresent code : irListener.irCodes.codes) {
-            System.out.println(code.toString());
-            for (Address address : code.refMap.keySet()) {
-                Ref ref = code.refMap.get(address);
-                System.out.println("\t" + address + ": " + ref);
-            }
-        }
+//        for (InterRepresent code : irListener.irCodes.codes) {
+//            System.out.println(code.toString());
+//            for (Address address : code.refMap.keySet()) {
+//                Ref ref = code.refMap.get(address);
+//                System.out.println("\t" + address + ": " + ref);
+//            }
+//        }
+        codeGenerator.printBlock();
+        codeGenerator.printCode();
     }
 }

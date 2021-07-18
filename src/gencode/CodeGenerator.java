@@ -11,9 +11,10 @@ import java.util.*;
 
 public class CodeGenerator {
     /* 临时变量与寄存器的映射 */
-    private Map<Integer, Integer> regMapper = new HashMap<>();
+    private Map<Address, Register> regMapper = new HashMap<>();
     /* 基本块 */
     private Map<Integer, Block> blockMap = new HashMap<>();
+
 
     private IRCode irCode;
     private SymbolTableHost tableHost;
@@ -26,6 +27,23 @@ public class CodeGenerator {
     public void genCode() {
         transBlock();
         calNextRef();
+        RegisterGetter registerGetter = new RegGetterImpl();
+        regMapper = registerGetter.getRegister(irCode);
+    }
+    public void printBlock() {
+        for (Block block : blockMap.values()) {
+            System.out.println(block.getStartLine() +  " ---> " + block.getEndLine());
+        }
+    }
+
+    public void printCode() {
+        for (InterRepresent ir : irCode.codes) {
+            System.out.print(ir + "\t\t");
+            Util.traverseAddress(ir, var -> {
+                System.out.print(var + " => " + regMapper.get(var) + " ");
+            });
+            System.out.println();
+        }
     }
 
     public void calNextRef() {
@@ -59,7 +77,7 @@ public class CodeGenerator {
         int len = codes.size();
         // 第一条语句
         enterPoints.add(codes.get(0));
-        for (int i = 0; i < len; i++) {
+        for (int i = 1; i < len; i++) {
             InterRepresent ir = codes.get(i);
             if (ir instanceof GotoRepresent) {
                 // goto语句的下一条语句
@@ -77,6 +95,7 @@ public class CodeGenerator {
                     // TODO 还未考虑halt
                     block.addIR(codes.get(i));
                 }
+                i--;
                 blockMap.put(block.id, block);
             }
         }
