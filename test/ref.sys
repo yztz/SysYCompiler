@@ -1,6 +1,7 @@
+const int a = 1;
 int main() {
-    int a = 0;
-    int b = a + 1;
-    int c = b + 1;
-    return a + b + c;
+
+    int b;
+    b = a;
+    return 0;
 }

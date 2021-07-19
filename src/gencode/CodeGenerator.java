@@ -46,6 +46,9 @@ public class CodeGenerator {
         }
     }
 
+    /**
+     * 计算变量的下次引用与活跃度
+     */
     public void calNextRef() {
         for (Block block : blockMap.values()) {
             Map<Address, Ref> refTable = new HashMap<>();
@@ -100,6 +103,8 @@ public class CodeGenerator {
             }
         }
     }
+
+
 
     static class Block {
         private static int next_id = 0;

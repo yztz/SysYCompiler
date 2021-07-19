@@ -38,4 +38,9 @@ public class Address implements Location {
     public int hashCode() {
         return Objects.hash(address);
     }
+
+    @Override
+    public String getName() {
+        return address + "";
+    }
 }

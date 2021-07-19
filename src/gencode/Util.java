@@ -7,6 +7,11 @@ import java.util.function.Consumer;
 
 public class Util {
 
+    /**
+     * 遍历IR中的每个临时变量
+     * @param ir
+     * @param consumer
+     */
     public static void traverseAddress(InterRepresent ir, Consumer<Address> consumer) {
         if (null == ir) return;
 

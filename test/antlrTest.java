@@ -118,7 +118,7 @@ public class antlrTest {
 
     @Test
     public void testRef() {
-        SysYParser parser = getParser("test/testFull.sys");
+        SysYParser parser = getParser("test/ref.sys");
         ParseTree tree = parser.compUnit();
         ParseTreeWalker walker = new ParseTreeWalker();
         SymbolTableHost symbolTableHost=new SymbolTableHost();

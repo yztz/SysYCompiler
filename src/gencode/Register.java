@@ -2,24 +2,29 @@ package gencode;
 
 public enum Register implements Location {
     /* 通用 */
-    R0,
-    R1,
-    R2,
-    R3,
-    R4,
-    R5,
-    R6,
-    R7,
-    R8,
-    R9,
-    R10,
-    R11,    // FP
-    R12,    // IP
+    r0,
+    r1,
+    r2,
+    r3,
+    r4,
+    r5,
+    r6,
+    r7,
+    r8,
+    r9,
+    r10,
+    r11,    // FP
+    r12,    // IP
 
     /* SP */
-    R13,
+    r13,
     /* LR */
-    R14,
+    r14,
     /* PC */
-    R15;
+    r15;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }
