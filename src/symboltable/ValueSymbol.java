@@ -7,14 +7,15 @@ public class ValueSymbol {
     public int[] dimensions;
     protected int length = 0;
     protected int byteSize = 0;
+    public SymbolDomain domain;
 
-    public ValueSymbol(Token symbolToken) {
+    public ValueSymbol(Token symbolToken, SymbolDomain domain) {
         this.symbolToken = symbolToken;
         dimensions=new int[]{1};
         length = 1;
     }
 
-    public ValueSymbol(Token symbolToken, int[] dimensions) {
+    public ValueSymbol(Token symbolToken, int[] dimensions, SymbolDomain domain) {
         this.symbolToken = symbolToken;
         this.dimensions = dimensions;
         length = 1;

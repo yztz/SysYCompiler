@@ -35,21 +35,21 @@ public class SymbolTable {
      */
     public void addSymbol(Token token,int[] dimensions,int[] initValues) //类型只有一个int
     {
-        VarSymbol symbol = new VarSymbol(totalOffset, token, dimensions, initValues);
+        VarSymbol symbol = new VarSymbol(totalOffset, token, dimensions, initValues, domain);
         symbols.put(token.getText(), symbol);
         totalOffset+=symbol.length*4;
     }
 
-    public void addSymbol(Token token,int[] initValues) //类型只有一个int
+    public void addSymbol(Token token,int[] initValues, SymbolDomain domain) //类型只有一个int
     {
-        VarSymbol symbol = new VarSymbol(totalOffset, token, initValues);
+        VarSymbol symbol = new VarSymbol(totalOffset, token, initValues, domain);
         symbols.put(token.getText(), symbol);
         totalOffset+=symbol.length*4;
     }
 
     public void addParam(Token token)
     {
-        VarSymbol symbol = new VarSymbol(totalOffset, token , null);
+        VarSymbol symbol = new VarSymbol(totalOffset, token , null, domain);
         symbol.isFuncParam = true;
         symbols.put(token.getText(), symbol);
         //totalOffset+=4;
