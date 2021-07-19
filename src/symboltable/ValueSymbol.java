@@ -11,18 +11,21 @@ public class ValueSymbol {
 
     public ValueSymbol(Token symbolToken, SymbolDomain domain) {
         this.symbolToken = symbolToken;
-        dimensions=new int[]{1};
+        dimensions = new int[]{1};
         length = 1;
+        this.domain = domain;
     }
 
     public ValueSymbol(Token symbolToken, int[] dimensions, SymbolDomain domain) {
         this.symbolToken = symbolToken;
         this.dimensions = dimensions;
+        this.domain = domain;
         length = 1;
         for (int dimSize : dimensions) {
-            length *=dimSize;
+            length *= dimSize;
         }
-        byteSize=length*4;
+        byteSize = length * 4;
+
     }
 
     /**
