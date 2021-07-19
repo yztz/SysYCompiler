@@ -6,9 +6,7 @@ import genir.code.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import symboltable.FuncSymbol;
-import symboltable.FuncSymbolTable;
-import symboltable.SymbolTableHost;
+import symboltable.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,62 +98,37 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterVarDef(SysYParser.VarDefContext ctx) {
-        if(ctx.initVal()!=null)
-        {
-            ctx.initVal().symbol= symbolTableHost.searchSymbol(ctx.domain, ctx.Identifier().getSymbol());
-            ctx.initVal().symbolOffset=0;
-            ctx.initVal().whichDim = 1;
-        }
+
     }
 
     @Override
     public void exitVarDef(SysYParser.VarDefContext ctx) {
         if(ctx.initVal()!=null)
         {
-            if(ctx.initVal().symbol.initValues!=null && ctx.initVal().symbol.getLength()==1)
+            if(ctx.initVal().initValues!=null && ctx.initVal().initValues.length==1)
             {
-                SaveRepresent ir = InterRepresentFactory.createSaveRepresent(ctx.initVal().symbol,
-                                                                             new AddressOrData(true, 0),
-                                                                             new AddressOrData(true,ctx.initVal().symbol.initValues[0]));
-                irCodes.addCode(ir);
+                VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,ctx.Identifier().getSymbol());
+                if(symbol!=null)
+                {
+                    // todo 当只有一个数据时，直接生成一条中间表示
+                    SaveRepresent ir = InterRepresentFactory.createSaveRepresent(symbol,
+                                                                                 new AddressOrData(true, 0),
+                                                                                 new AddressOrData(true,
+                                                                                                   ctx.initVal().initValues[0]));
+                    irCodes.addCode(ir);
+                }
             }
         }
     }
 
     @Override
     public void enterInitVal(SysYParser.InitValContext ctx) {
-        List<SysYParser.InitValContext> initVal = ctx.initVal();
-        int dimSize = 1;
-        for(int i=ctx.whichDim;i<ctx.symbol.dimensions.length;i++)
-        {
-            dimSize*=ctx.symbol.dimensions[i];
-        }
-        for (int i = 0; i < initVal.size(); i++) {
-            SysYParser.InitValContext childInitVal = initVal.get(i);
-            childInitVal.symbol = ctx.symbol;
-            childInitVal.whichDim = ctx.whichDim + 1;
-            childInitVal.symbolOffset=ctx.symbolOffset+i*dimSize;
-        }
+
     }
 
     @Override
     public void exitInitVal(SysYParser.InitValContext ctx) {
-        if(ctx.exp()!=null)
-        {
-            AddressOrData initResult = ctx.exp().result;
-            if (initResult.isData) {
-                if (ctx.symbol.initValues == null) {
-                    ctx.symbol.initValues=new int[ctx.symbol.getLength()];
-                }
-                ctx.symbol.initValues[ctx.symbolOffset]=initResult.item;
-            }else{
-                SaveRepresent ir = InterRepresentFactory.createSaveRepresent(ctx.symbol, new AddressOrData(true, ctx.symbolOffset),
-                                                                             initResult);
-                irCodes.addCode(ir);
-            }
-            /*AddressOrData initResult = ctx.exp().result;
-            */
-        }
+
     }
 
     @Override

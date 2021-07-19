@@ -142,6 +142,19 @@ public class SysYParser extends Parser {
 		}
 	}
 
+	public static class InitValContextBase extends DomainedContext{
+		public int[] initValues;
+		public int symbolOffset;
+		public int whichDim; //第几个维度
+		public int[] dimensions;
+		public Token ident;
+		public InitValContextBase() {
+		}
+
+		public InitValContextBase(ParserRuleContext parent, int invokingStateNumber) {
+			super(parent, invokingStateNumber);
+		}
+	}
 	public static class CompUnitContext extends DomainedContext {
 		public List<DeclContext> decl() {
 			return getRuleContexts(DeclContext.class);
@@ -484,7 +497,8 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ConstInitValContext extends DomainedContext {
+	public static class ConstInitValContext extends InitValContextBase {
+
 		public ConstExpContext constExp() {
 			return getRuleContext(ConstExpContext.class,0);
 		}
@@ -779,10 +793,8 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class InitValContext extends DomainedContext {
-		public VarSymbol symbol;
-		public int symbolOffset;
-		public int whichDim; //第几个维度
+	public static class InitValContext extends InitValContextBase {
+
 		public ExpContext exp() {
 			return getRuleContext(ExpContext.class,0);
 		}

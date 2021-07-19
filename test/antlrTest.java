@@ -8,10 +8,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
-import symboltable.FuncSymbol;
-import symboltable.FuncSymbolTable;
-import symboltable.SymbolTableHost;
-import symboltable.SysSymbolListener;
+import symboltable.*;
 
 import java.io.IOException;
 
@@ -118,7 +115,7 @@ public class antlrTest {
     }
 
     private void prepareSymbol(ParseTree tree, ParseTreeWalker walker, SymbolTableHost symbolTableHost, FuncSymbolTable funcSymbolTable) {
-        SysSymbolListener symbolListener=new SysSymbolListener(symbolTableHost, funcSymbolTable);
-        walker.walk(symbolListener, tree);
+        SymbolScanner scanner = new SymbolScanner(symbolTableHost,funcSymbolTable);
+        scanner.scanSymbol(tree);
     }
 }
