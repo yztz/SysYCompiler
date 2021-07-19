@@ -1,20 +1,16 @@
 package symboltable;
 
 
-import antlr.SysYParser;
-import com.sun.istack.internal.Nullable;
 import org.antlr.v4.runtime.Token;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SymbolTable {
     private final SymbolDomain domain;
     private final FuncSymbol func;
     private int totalOffset=0;
-    private final Map<String,VarSymbol> offsets=new HashMap<>();
+    private final Map<String,ValueSymbol> symbols = new HashMap<>();
     public SymbolTable(SymbolDomain domain,FuncSymbol func) {
         this.domain = domain;
         this.func = func;
@@ -37,52 +33,54 @@ public class SymbolTable {
      * 向符号表中登记符号
      * @param token 符号
      */
-    public void addSymbol(Token token,int[] dimensions) //类型只有一个int
+    public void addSymbol(Token token,int[] dimensions,int[] initValues) //类型只有一个int
     {
-        offsets.put(token.getText(),new VarSymbol(totalOffset,token,dimensions, domain));
-        totalOffset+=4;
+        VarSymbol symbol = new VarSymbol(totalOffset, token, dimensions, initValues);
+        symbols.put(token.getText(), symbol);
+        totalOffset+=symbol.length*4;
     }
 
-    public void addSymbol(Token token) //类型只有一个int
+    public void addSymbol(Token token,int[] initValues) //类型只有一个int
     {
-        offsets.put(token.getText(),new VarSymbol(totalOffset,token, domain));
-        totalOffset+=4;
+        VarSymbol symbol = new VarSymbol(totalOffset, token, initValues);
+        symbols.put(token.getText(), symbol);
+        totalOffset+=symbol.length*4;
     }
 
     public void addParam(Token token)
     {
-        VarSymbol symbol = new VarSymbol(totalOffset, token, domain);
+        VarSymbol symbol = new VarSymbol(totalOffset, token , null);
         symbol.isFuncParam = true;
-        offsets.put(token.getText(),symbol);
-        totalOffset+=4;
+        symbols.put(token.getText(), symbol);
+        //totalOffset+=4;
     }
 
     public void addParam(Token token,int[] dim)
     {
-        VarSymbol symbol = new VarSymbol(totalOffset, token,dim, domain);
+        VarSymbol symbol = new VarSymbol(totalOffset, token,dim,null);
         symbol.isFuncParam = true;
-        offsets.put(token.getText(),symbol);
-        totalOffset+=4;
+        symbols.put(token.getText(), symbol);
+        //totalOffset+=4;
+    }
+    public void addConst(Token token,int constValue)
+    {
+        ConstSymbol symbol = new ConstSymbol(constValue,token);
+        symbols.put(token.getText(), symbol);
     }
 
-    /**
-     * 返回符号相对的偏移量
-     * @return 偏移量，-1表示符号不存在
-     */
-    public int getSymbolOffset(String ident)
+    public void addConst(Token token,int[] dim,int[] constValues)
     {
-        if(offsets.containsKey(ident))
-            return offsets.get(ident).offset;
-        return -1;
+        ConstSymbol symbol = new ConstSymbol(constValues, token,dim);
+        symbols.put(token.getText(), symbol);
     }
 
     public boolean containSymbol(String ident)
     {
-        return offsets.containsKey(ident);
+        return symbols.containsKey(ident);
     }
 
-    public VarSymbol getSymbol(String ident)
+    public ValueSymbol getSymbol(String ident)
     {
-        return offsets.getOrDefault(ident,null);
+        return symbols.getOrDefault(ident, null);
     }
 }

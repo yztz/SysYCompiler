@@ -1,9 +1,9 @@
 package genir.code;
 
 import antlr.SysYParser;
-import genir.IRCode;
 import org.antlr.v4.runtime.Token;
 import symboltable.SymbolTableHost;
+import symboltable.ValueSymbol;
 import symboltable.VarSymbol;
 
 import java.util.ArrayList;
@@ -22,15 +22,26 @@ public class ListenerUtil {
         }
     }
 
+    /**
+     * 获取符号和偏移量，这个偏移是数组下标对应的偏移
+     * @param symbolTableHost 符号表
+     * @param ctx LVal上下文，从语法树中获取
+     * @return 符号和偏移量
+     */
     public static SymbolWithOffset getSymbolAndOffset(SymbolTableHost symbolTableHost, SysYParser.LValContext ctx)
     {
         Token token = ctx.Identifier().getSymbol();
-        VarSymbol varSymbol = symbolTableHost.searchSymbol(ctx.domain, token);
+        ValueSymbol varSymbol = symbolTableHost.searchVarSymbol(ctx.domain, token);
         List<InterRepresent> irToCalculateOffset = new ArrayList<>();
         if(varSymbol==null){
             System.err.println("Symbol is not defined");
             return null;
-        }else {
+        }else if(!(varSymbol instanceof VarSymbol))
+        {
+            System.err.println("Symbol is not variable");
+            return null;
+        }
+        else {
             int[] dimensions = varSymbol.dimensions;
             int[] dimSizes = new int[dimensions.length];
             for (int i = 0; i < dimensions.length; i++) {
@@ -81,7 +92,7 @@ public class ListenerUtil {
                 offset = irAdd.target;
             }
 
-            return new SymbolWithOffset(varSymbol, offset, irToCalculateOffset);
+            return new SymbolWithOffset((VarSymbol) varSymbol, offset, irToCalculateOffset);
 
         }
     }

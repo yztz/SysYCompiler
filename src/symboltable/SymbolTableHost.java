@@ -1,7 +1,6 @@
 package symboltable;
 
 
-import antlr.SysYParser;
 import com.sun.istack.internal.Nullable;
 import org.antlr.v4.runtime.Token;
 
@@ -30,7 +29,7 @@ public class SymbolTableHost {
     }
 
     @Nullable
-    public VarSymbol searchSymbol(SymbolDomain startDomain,Token symbolToken)
+    public VarSymbol searchVarSymbol(SymbolDomain startDomain, Token symbolToken)
     {
         String ident = symbolToken.getText();
         SymbolDomain domain = startDomain;
@@ -38,10 +37,11 @@ public class SymbolTableHost {
         while (domain!=null)
         {
             if (domain.symbolTable.containSymbol(ident)) {
-                VarSymbol varSymbol = domain.symbolTable.getSymbol(ident);
-                if(varSymbol.varToken.getStartIndex()<=symbolToken.getStartIndex()) //检查是否在使用前定义
+                ValueSymbol varSymbol = domain.symbolTable.getSymbol(ident);
+                if(varSymbol instanceof VarSymbol && varSymbol.symbolToken.getStartIndex()<=symbolToken.getStartIndex())
+                    //检查是否在使用前定义
                 {
-                    result=varSymbol;
+                    result=(VarSymbol) varSymbol;
                     break;
                 }
             }

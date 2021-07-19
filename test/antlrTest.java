@@ -12,10 +12,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.Test;
-import symboltable.FuncSymbol;
-import symboltable.FuncSymbolTable;
-import symboltable.SymbolTableHost;
-import symboltable.SysSymbolListener;
+import symboltable.*;
 
 import java.io.IOException;
 import java.util.List;

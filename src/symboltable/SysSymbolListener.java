@@ -3,6 +3,8 @@ package symboltable;
 import antlr.SysYListener;
 import antlr.SysYParser;
 import genir.code.AddressOrData;
+import genir.code.InterRepresentFactory;
+import genir.code.SaveRepresent;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -47,12 +49,37 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void enterConstDecl(SysYParser.ConstDeclContext ctx) {
-
+        for (SysYParser.ConstDefContext defCtx : ctx.constDef()) {
+            TerminalNode identifier = defCtx.Identifier();
+            if(defCtx.constExp()==null || defCtx.constExp().isEmpty()) //不是数组
+            {
+                defCtx.constInitVal().initValues = new int[1];
+                defCtx.constInitVal().dimensions= new int[]{1};
+            }
+            else{ //是数组
+                defCtx.constInitVal().dimensions = getDimsFromConstExp(defCtx.constExp());
+                int length = getLengthFromDimensions(defCtx.constInitVal().dimensions);
+                defCtx.constInitVal().initValues = new int[length];
+            }
+            defCtx.constInitVal().whichDim = 1;
+            defCtx.constInitVal().ident = identifier.getSymbol();
+            defCtx.constInitVal().symbolOffset=0;
+        }
     }
 
     @Override
     public void exitConstDecl(SysYParser.ConstDeclContext ctx) {
-
+        for (SysYParser.ConstDefContext defCtx : ctx.constDef()) {
+            TerminalNode identifier = defCtx.Identifier();
+            if(defCtx.constExp()==null) //不是数组
+            {
+                currentSymbolTable.addConst(identifier.getSymbol(),defCtx.constInitVal().initValues[0]);
+            }
+            else{ //是数组
+                currentSymbolTable.addConst(identifier.getSymbol(),defCtx.constInitVal().dimensions,
+                                            defCtx.constInitVal().initValues);
+            }
+        }
     }
 
     @Override
@@ -74,19 +101,71 @@ public class SysSymbolListener implements SysYListener {
     public void exitConstDef(SysYParser.ConstDefContext ctx) {
 
     }
+    private void enterInitValBase(SysYParser.InitValContextBase ctx,
+                                  List<? extends SysYParser.InitValContextBase> children)
+    {
 
+        int dimSize = 1;
+        for(int i=ctx.whichDim;i<ctx.dimensions.length;i++)
+        {
+            dimSize*=ctx.dimensions[i];
+        }
+        for (int i = 0; i < children.size(); i++) {
+            SysYParser.InitValContextBase childInitVal = children.get(i);
+            childInitVal.ident = ctx.ident;
+            childInitVal.dimensions = ctx.dimensions;
+            childInitVal.initValues = ctx.initValues;
+            childInitVal.whichDim = ctx.whichDim + 1;
+            childInitVal.symbolOffset=ctx.symbolOffset+i*dimSize;
+        }
+    }
     @Override
     public void enterConstInitVal(SysYParser.ConstInitValContext ctx) {
-
+        enterInitValBase(ctx,ctx.constInitVal());
     }
 
     @Override
     public void exitConstInitVal(SysYParser.ConstInitValContext ctx) {
+        if(ctx.constExp()!=null)
+        {
+            AddressOrData initResult = ctx.constExp().result;
+            if (initResult.isData) {
+                ctx.initValues[ctx.symbolOffset]=initResult.item;
+            }else{
 
+                //todo 这些咋办
+                /*VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,ctx.ident);
+                SaveRepresent ir = InterRepresentFactory.createSaveRepresent(ctx.symbol, new AddressOrData(true, ctx.symbolOffset),
+                                                                             initResult);
+                irCodes.addCode(ir);*/
+            }
+        }
     }
 
     @Override
     public void enterVarDecl(SysYParser.VarDeclContext ctx) {
+        List<SysYParser.VarDefContext> varDefs = ctx.varDef();
+        for (SysYParser.VarDefContext varDefCtx : varDefs) {
+            TerminalNode identifier = varDefCtx.Identifier();
+
+            //没有初始值，不要执行下面的
+            if(varDefCtx.initVal()==null) continue;
+
+            if (varDefCtx.constExp() == null) //不是数组
+            {
+                varDefCtx.initVal().dimensions = new int[]{1};
+                varDefCtx.initVal().initValues = new int[1];
+            }
+            else{ //是数组
+                int[] dims = getDimsFromConstExp(varDefCtx.constExp());
+                varDefCtx.initVal().dimensions = dims;
+                int length = getLengthFromDimensions(dims);
+                varDefCtx.initVal().initValues = new int[length];
+            }
+            varDefCtx.initVal().ident= identifier.getSymbol();
+            varDefCtx.initVal().symbolOffset=0;
+            varDefCtx.initVal().whichDim = 1;
+        }
     }
 
     @Override
@@ -94,22 +173,38 @@ public class SysSymbolListener implements SysYListener {
         List<SysYParser.VarDefContext> varDefs = ctx.varDef();
         for (SysYParser.VarDefContext varDefCtx : varDefs) {
             TerminalNode identifier = varDefCtx.Identifier();
-            if(varDefCtx.constExp()==null) //不是数组
-                currentSymbolTable.addSymbol(identifier.getSymbol());
-            else{ //是数组
-                int[] dims= new int[varDefCtx.constExp().size()];
-                for (int i = 0; i < varDefCtx.constExp().size(); i++) {
-                    if (varDefCtx.constExp().get(i).result!=null&&
-                            varDefCtx.constExp().get(i).result.isData) {
-                        dims[i]=varDefCtx.constExp().get(i).result.item;
-                    }else{
-                        dims[i]=1;
-                        System.err.println("Array size must be constant");
-                    }
-                }
-                currentSymbolTable.addSymbol(identifier.getSymbol(),dims);
+
+            int[] initValues = null;
+            int[] dimensions = null;
+            if(varDefCtx.initVal()!=null)
+            {
+                initValues = varDefCtx.initVal().initValues;
+            }
+            int[] dims = getDimsFromConstExp(varDefCtx.constExp());
+            // 遍历完成，记录数据
+            currentSymbolTable.addSymbol(identifier.getSymbol(),dims,initValues);
+        }
+    }
+    private int getLengthFromDimensions(int[] dimensions)
+    {
+        int length = 1;
+        for (int dim : dimensions) {
+            length*=dim;
+        }
+        return length;
+    }
+    private int[] getDimsFromConstExp(List<SysYParser.ConstExpContext> expCtxList) {
+        int[] dims= new int[expCtxList.size()];
+        for (int i = 0; i < expCtxList.size(); i++) {
+            if (expCtxList.get(i).result!=null&&
+                    expCtxList.get(i).result.isData) {
+                dims[i]= expCtxList.get(i).result.item;
+            }else{
+                dims[i]=1;
+                System.err.println("Array size must be constant");
             }
         }
+        return dims;
     }
 
     @Override
@@ -124,12 +219,25 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void enterInitVal(SysYParser.InitValContext ctx) {
-
+        enterInitValBase(ctx,ctx.initVal());
     }
 
     @Override
     public void exitInitVal(SysYParser.InitValContext ctx) {
+        if(ctx.exp()!=null)
+        {
+            AddressOrData initResult = ctx.exp().result;
+            if (initResult.isData) {
+                ctx.initValues[ctx.symbolOffset]=initResult.item;
+            }else{
 
+                //todo 这些咋办
+                /*VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,ctx.ident);
+                SaveRepresent ir = InterRepresentFactory.createSaveRepresent(ctx.symbol, new AddressOrData(true, ctx.symbolOffset),
+                                                                             initResult);
+                irCodes.addCode(ir);*/
+            }
+        }
     }
 
     @Override
@@ -333,7 +441,6 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitExp(SysYParser.ExpContext ctx) {
-        ctx.result=ctx.addExp().result;
     }
 
     @Override
@@ -374,10 +481,7 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitPrimaryExp(SysYParser.PrimaryExpContext ctx) {
-        if(ctx.Integer_const()!=null)
-        {
-            ctx.result=new AddressOrData(true, Integer.parseInt(ctx.Integer_const().getSymbol().getText()));
-        }
+
     }
 
     @Override
@@ -387,7 +491,7 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitPrimaryExpr(SysYParser.PrimaryExprContext ctx) {
-        ctx.result=ctx.primaryExp().result;
+
     }
 
     @Override
@@ -407,17 +511,7 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitSignExpr(SysYParser.SignExprContext ctx) {
-        if(ctx.unaryExp().result!=null && ctx.unaryExp().result.isData)
-        {
-            int unaryResult = ctx.unaryExp().result.item;
-            if(ctx.Plus()!=null)
-            {
-                ctx.result=new AddressOrData(true, unaryResult>0?unaryResult:-unaryResult);
-            }else if(ctx.Minus()!=null)
-            {
-                ctx.result=new AddressOrData(true, unaryResult<0?unaryResult:-unaryResult);
-            }
-        }
+
     }
 
     @Override
@@ -437,23 +531,7 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitMulExp(SysYParser.MulExpContext ctx) {
-        if(ctx.op==null)
-            ctx.result=ctx.unaryExp().result;
-        else if(ctx.mulExp().result!=null && ctx.unaryExp().result!=null &&
-                ctx.mulExp().result.isData && ctx.unaryExp().result.isData){
-            int r=0;
-            if(ctx.Star()!=null)
-            {
-                r=ctx.mulExp().result.item *ctx.unaryExp().result.item;
-            }else if(ctx.Div()!=null)
-            {
-                r=ctx.mulExp().result.item / ctx.unaryExp().result.item;
-            }else if(ctx.Mod()!=null)
-            {
-                r=ctx.mulExp().result.item % ctx.unaryExp().result.item;
-            }
-            ctx.result=new AddressOrData(true, r);
-        }
+
     }
 
     @Override
@@ -463,20 +541,7 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitAddExp(SysYParser.AddExpContext ctx) {
-        if(ctx.op==null)
-            ctx.result=ctx.mulExp().result;
-        else if(ctx.mulExp().result!=null && ctx.addExp().result!=null &&
-                ctx.mulExp().result.isData && ctx.addExp().result.isData){
-            int r=0;
-            if(ctx.Plus()!=null)
-            {
-                r=ctx.mulExp().result.item +ctx.addExp().result.item;
-            }else if(ctx.Minus()!=null)
-            {
-                r=ctx.addExp().result.item - ctx.mulExp().result.item;
-            }
-            ctx.result=new AddressOrData(true, r);
-        }
+
     }
 
     @Override
@@ -526,7 +591,7 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitConstExp(SysYParser.ConstExpContext ctx) {
-        ctx.result = ctx.addExp().result;
+
     }
 
     @Override
