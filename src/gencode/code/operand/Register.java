@@ -1,6 +1,9 @@
-package gencode;
+package gencode.code.operand;
 
-public enum Register {
+import gencode.code.interfaces.Location;
+import gencode.code.interfaces.RegOrImm;
+
+public enum Register implements RegOrImm {
     /* 通用 */
     r0,
     r1,
@@ -22,5 +25,4 @@ public enum Register {
     r14,
     /* PC */
     r15;
-
 }

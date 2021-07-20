@@ -1,6 +1,6 @@
 package gencode;
 
-import genir.IRCode;
+import gencode.code.operand.Register;
 import genir.code.InterRepresent;
 
 import java.util.Map;
