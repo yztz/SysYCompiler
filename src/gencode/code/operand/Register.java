@@ -16,13 +16,13 @@ public enum Register implements RegOrImm {
     r8,
     r9,
     r10,
-    r11,    // FP
-    r12,    // IP
+    fp,    // FP
+    ip,    // IP
 
     /* SP */
-    r13,
+    sp,
     /* LR */
-    r14,
+    lr,
     /* PC */
-    r15;
+    pc
 }

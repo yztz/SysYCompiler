@@ -13,10 +13,12 @@ public class GenCodeTest {
 
     @Test
     public void testCode() {
-        System.out.print(CodeFactory.sub(Register.r0, Register.r1, 0).setLabel("L1"));
+        System.out.print(CodeFactory.sub(Register.r0, Register.r1, 0).setLabel(CodeFactory.getLabel()));
         System.out.print(CodeFactory.mul(Register.r0, Register.r1, 0));
-        System.out.print(CodeFactory.div(Register.r0, Register.r1, 2).setLabel("L2"));
+        System.out.print(CodeFactory.div(Register.r0, Register.r1, 2).setLabel(CodeFactory.getLabel()));
         System.out.print(CodeFactory.str(Register.r1, new LocWithOffset(Register.r0, 10)));
+        System.out.print(CodeFactory.ldr(Register.r1, new LocWithOffset(Register.r0, 10)));
         System.out.print(CodeFactory.push(Register.r1, Register.r2));
+        System.out.print(CodeFactory.cmp(Register.r1, 1));
     }
 }
