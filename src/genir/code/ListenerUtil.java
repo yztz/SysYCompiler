@@ -11,11 +11,11 @@ import java.util.List;
 
 public class ListenerUtil {
     public static class SymbolWithOffset{
-        public VarSymbol symbol;
+        public ValueSymbol symbol;
         public AddressOrData offsetResult;
         public List<InterRepresent> irToCalculateOffset;
 
-        public SymbolWithOffset(VarSymbol symbol, AddressOrData offsetResult, List<InterRepresent> irToCalculateOffset) {
+        public SymbolWithOffset(ValueSymbol symbol, AddressOrData offsetResult, List<InterRepresent> irToCalculateOffset) {
             this.symbol = symbol;
             this.offsetResult = offsetResult;
             this.irToCalculateOffset = irToCalculateOffset;
@@ -31,14 +31,10 @@ public class ListenerUtil {
     public static SymbolWithOffset getSymbolAndOffset(SymbolTableHost symbolTableHost, SysYParser.LValContext ctx)
     {
         Token token = ctx.Identifier().getSymbol();
-        ValueSymbol varSymbol = symbolTableHost.searchVarSymbol(ctx.domain, token);
+        ValueSymbol varSymbol = symbolTableHost.searchSymbol(ctx.domain, token);
         List<InterRepresent> irToCalculateOffset = new ArrayList<>();
         if(varSymbol==null){
             System.err.println("Symbol is not defined");
-            return null;
-        }else if(!(varSymbol instanceof VarSymbol))
-        {
-            System.err.println("Symbol is not variable");
             return null;
         }
         else {
@@ -92,7 +88,7 @@ public class ListenerUtil {
                 offset = irAdd.target;
             }
 
-            return new SymbolWithOffset((VarSymbol) varSymbol, offset, irToCalculateOffset);
+            return new SymbolWithOffset(varSymbol, offset, irToCalculateOffset);
 
         }
     }

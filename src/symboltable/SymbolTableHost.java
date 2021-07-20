@@ -51,4 +51,27 @@ public class SymbolTableHost {
 
         return result;
     }
+
+    public ValueSymbol searchSymbol(SymbolDomain startDomain, Token symbolToken)
+    {
+        String ident = symbolToken.getText();
+        SymbolDomain domain = startDomain;
+        ValueSymbol result = null;
+        while (domain!=null)
+        {
+            if (domain.symbolTable.containSymbol(ident)) {
+                ValueSymbol varSymbol = domain.symbolTable.getSymbol(ident);
+                if(varSymbol.symbolToken.getStartIndex()<=symbolToken.getStartIndex())
+                //检查是否在使用前定义
+                {
+                    result=varSymbol;
+                    break;
+                }
+            }
+
+            domain=domain.fatherDomain;
+        }
+
+        return result;
+    }
 }

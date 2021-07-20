@@ -248,12 +248,12 @@ public class SysYIRListener implements SysYListener {
 
         SysYParser.LValContext lValCtx = ctx.lVal();
         ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
-        if(symbolAndOffset!=null)
+        if(symbolAndOffset!=null && symbolAndOffset.symbol instanceof VarSymbol)
         {
             for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                 irCodes.addCode(ir);
             }
-            SaveRepresent loadRepresent = InterRepresentFactory.createSaveRepresent(symbolAndOffset.symbol
+            SaveRepresent loadRepresent = InterRepresentFactory.createSaveRepresent((VarSymbol)symbolAndOffset.symbol
                     , symbolAndOffset.offsetResult,sourceResult);
             irCodes.addCode(loadRepresent);
             ctx.endStmtHolder=new InterRepresentHolder(loadRepresent);
@@ -447,12 +447,12 @@ public class SysYIRListener implements SysYListener {
         {
             SysYParser.LValContext lValCtx = ctx.lVal();
             ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
-            if(symbolAndOffset!=null)
+            if(symbolAndOffset!=null && symbolAndOffset.symbol instanceof VarSymbol)
             {
                 for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                     irCodes.addCode(ir);
                 }
-                LoadRepresent loadRepresent = InterRepresentFactory.createLoadRepresent(symbolAndOffset.symbol
+                LoadRepresent loadRepresent = InterRepresentFactory.createLoadRepresent((VarSymbol) symbolAndOffset.symbol
                         , symbolAndOffset.offsetResult);
                 irCodes.addCode(loadRepresent);
                 ctx.result = loadRepresent.target;

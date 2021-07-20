@@ -4,6 +4,7 @@ import antlr.SysYListener;
 import antlr.SysYParser;
 import genir.code.AddressOrData;
 import genir.code.InterRepresentFactory;
+import genir.code.ListenerUtil;
 import genir.code.SaveRepresent;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -441,6 +442,7 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitExp(SysYParser.ExpContext ctx) {
+        ctx.result = ctx.addExp().result;
     }
 
     @Override
@@ -481,7 +483,25 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitPrimaryExp(SysYParser.PrimaryExpContext ctx) {
+        if(ctx.lVal()!=null)
+        {
+            SysYParser.LValContext lValCtx = ctx.lVal();
+            ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
+            if(symbolAndOffset==null)
+            {
+                System.err.println("Can't find symbol:"+ctx.lVal().Identifier().getSymbol().getText());
+                return;
+            }
 
+
+            if(symbolAndOffset.symbol instanceof ConstSymbol
+                    && symbolAndOffset.offsetResult.isData)
+            {
+                ctx.result =
+                        new AddressOrData (true,
+                                           ((ConstSymbol) symbolAndOffset.symbol).constVal[symbolAndOffset.offsetResult.item]);
+            }
+        }
     }
 
     @Override
@@ -491,7 +511,7 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitPrimaryExpr(SysYParser.PrimaryExprContext ctx) {
-
+        ctx.result = ctx.primaryExp().result;
     }
 
     @Override
@@ -531,7 +551,8 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitMulExp(SysYParser.MulExpContext ctx) {
-
+        if(ctx.op == null)
+            ctx.result = ctx.unaryExp().result;
     }
 
     @Override
@@ -541,7 +562,8 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitAddExp(SysYParser.AddExpContext ctx) {
-
+        if(ctx.op==null)
+            ctx.result = ctx.mulExp().result;
     }
 
     @Override
