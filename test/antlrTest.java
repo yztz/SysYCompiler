@@ -43,7 +43,7 @@ public class antlrTest {
         ParseTreeWalker walker = new ParseTreeWalker();
         SymbolTableHost symbolTableHost=new SymbolTableHost();
         FuncSymbolTable funcSymbolTable=new FuncSymbolTable();
-        prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
+        prepareSymbol(tree, symbolTableHost, funcSymbolTable);
 
         SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
         walker.walk(irListener, tree);
@@ -78,7 +78,7 @@ public class antlrTest {
         ParseTreeWalker walker = new ParseTreeWalker();
         SymbolTableHost symbolTableHost=new SymbolTableHost();
         FuncSymbolTable funcSymbolTable=new FuncSymbolTable();
-        prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
+        prepareSymbol(tree, symbolTableHost, funcSymbolTable);
         SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
         walker.walk(irListener, tree);
 
@@ -108,9 +108,9 @@ public class antlrTest {
         }
     }
 
-    private void prepareSymbol(ParseTree tree, ParseTreeWalker walker, SymbolTableHost symbolTableHost, FuncSymbolTable funcSymbolTable) {
-        SysSymbolListener symbolListener=new SysSymbolListener(symbolTableHost, funcSymbolTable);
-        walker.walk(symbolListener, tree);
+    private void prepareSymbol(ParseTree tree, SymbolTableHost symbolTableHost, FuncSymbolTable funcSymbolTable) {
+        SymbolScanner scanner = new SymbolScanner(symbolTableHost,funcSymbolTable);
+        scanner.scanSymbol(tree);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class antlrTest {
         ParseTreeWalker walker = new ParseTreeWalker();
         SymbolTableHost symbolTableHost=new SymbolTableHost();
         FuncSymbolTable funcSymbolTable=new FuncSymbolTable();
-        prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
+        prepareSymbol(tree,symbolTableHost, funcSymbolTable);
         SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
         walker.walk(irListener, tree);
 

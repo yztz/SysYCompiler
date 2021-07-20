@@ -10,10 +10,10 @@ import symboltable.SymbolTableHost;
 import java.util.*;
 
 public class CodeGenerator {
-    /* 临时变量与寄存器的映射 */
-    private Map<Address, Register> regMapper = new HashMap<>();
     /* 基本块 */
     private Map<Integer, Block> blockMap = new HashMap<>();
+    /* 寄存器分配器 */
+    private RegisterGetter registerGetter = new RegGetterImpl();
 
 
     private IRCode irCode;
@@ -27,9 +27,16 @@ public class CodeGenerator {
     public void genCode() {
         transBlock();
         calNextRef();
-        RegisterGetter registerGetter = new RegGetterImpl();
-        regMapper = registerGetter.getRegister(irCode);
+        mapRegister();
     }
+
+    public void mapRegister() {
+
+        for (InterRepresent ir : irCode.codes) {
+            registerGetter.getMapOfIR(ir);
+        }
+    }
+
     public void printBlock() {
         for (Block block : blockMap.values()) {
             System.out.println(block.getStartLine() +  " ---> " + block.getEndLine());
@@ -40,7 +47,7 @@ public class CodeGenerator {
         for (InterRepresent ir : irCode.codes) {
             System.out.print(ir + "\t\t");
             Util.traverseAddress(ir, var -> {
-                System.out.print(var + " => " + regMapper.get(var) + " ");
+                System.out.print(var + " => " + registerGetter.getVarDesc().get(var) + " ");
             });
             System.out.println();
         }

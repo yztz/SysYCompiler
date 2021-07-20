@@ -1,6 +1,6 @@
 package gencode;
 
-public enum Register implements Location {
+public enum Register {
     /* 通用 */
     r0,
     r1,
@@ -23,8 +23,4 @@ public enum Register implements Location {
     /* PC */
     r15;
 
-    @Override
-    public String getName() {
-        return this.name();
-    }
 }

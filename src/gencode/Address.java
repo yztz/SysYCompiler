@@ -4,7 +4,7 @@ import genir.code.AddressOrData;
 
 import java.util.Objects;
 
-public class Address implements Location {
+public class Address {
     public int address;
     public boolean isLVal = false;
 
@@ -39,8 +39,5 @@ public class Address implements Location {
         return Objects.hash(address);
     }
 
-    @Override
-    public String getName() {
-        return address + "";
-    }
+
 }
