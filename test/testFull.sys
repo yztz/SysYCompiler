@@ -16,4 +16,11 @@ int main()
         result=result+i;
         i=i+1;
     }
+
+    if(result > 200 && i < 100)
+    {
+        result = 300;
+    }else {
+        result = 100;
+    }
 }

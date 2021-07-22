@@ -1,15 +1,15 @@
 package genir.code;
 
-import genir.IRGroup;
 import genir.IRSection;
+import genir.IRGroup;
 
 public class InterRepresent{
-    public IRSection section;
-    public IRGroup getGroup()
+    public IRGroup section;
+    public IRSection getGroup()
     {
-        return section.getGroup();
+        return section.getSection();
     }
-    public IRSection getSection()
+    public IRGroup getSection()
     {
         return section;
     }

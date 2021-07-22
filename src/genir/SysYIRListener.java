@@ -31,17 +31,17 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void enterCompUnit(SysYParser.CompUnitContext ctx) {
         if (ctx.decl()!=null && ctx.decl().size()>0) {
-            IRGroup declGroup = new IRGroup("declare symbol");
+            IRSection declGroup = new IRSection("declare symbol");
             irUnion.children.add(declGroup);
             for (int i = 0; i < ctx.children.size(); i++) {
 
                 if (ctx.children.get(i)instanceof SysYParser.DeclContext) {
                     if(i!=0 && !(ctx.children.get(i-1) instanceof SysYParser.DeclContext))
                     {
-                        declGroup = new IRGroup("declare symbol");
+                        declGroup = new IRSection("declare symbol");
                         irUnion.children.add(declGroup);
                     }
-                    ((SysYParser.DeclContext) ctx.children.get(i)).irGroup=declGroup;
+                    // todo ((SysYParser.DeclContext) ctx.children.get(i)).irGroup=declGroup;
                 }
             }
         }
@@ -56,9 +56,9 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterDecl(SysYParser.DeclContext ctx) {
-        if (ctx.varDecl()!=null) {
+        /*if (ctx.varDecl()!=null) {
             ctx.varDecl().irGroup = ctx.irGroup;
-        }
+        }*/
     }
 
     @Override
@@ -108,10 +108,12 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterVarDecl(SysYParser.VarDeclContext ctx) {
+        if (_currentIRFunc!=null) {
+            _currentIRFunc.startSection("declare symbol");
+        }
         for (SysYParser.VarDefContext varDefCtx : ctx.varDef()) {
             VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,varDefCtx.Identifier().getSymbol());
-            varDefCtx.irSection = new IRSection("Init variable:"+symbol.symbolToken.getText());
-            ctx.irGroup.addSection(varDefCtx.irSection);
+            varDefCtx.irGroup = new IRGroup("Init variable:"+symbol.symbolToken.getText());
         }
     }
 
@@ -124,7 +126,7 @@ public class SysYIRListener implements SysYListener {
     public void enterVarDef(SysYParser.VarDefContext ctx) {
         if(ctx.initVal()!=null)
         {
-            ctx.initVal().irSection = ctx.irSection;
+            ctx.initVal().irGroup = ctx.irGroup;
         }
     }
 
@@ -147,7 +149,7 @@ public class SysYIRListener implements SysYListener {
                         symbol.initIR = new IRSection("Init variable:"+symbol.symbolToken.toString());
                     }
                     symbol.initIR.addCode(ir);*/
-                    symbol.initIR = ctx.initVal().irSection;
+                    symbol.initIR = ctx.initVal().irGroup;
                 }
             }
         }
@@ -158,7 +160,7 @@ public class SysYIRListener implements SysYListener {
         if(ctx.initVal()!=null)
         {
             for (SysYParser.InitValContext initValCtx : ctx.initVal()) {
-                initValCtx.irSection = ctx.irSection;
+                initValCtx.irGroup = ctx.irGroup;
             }
         }
     }
@@ -174,11 +176,11 @@ public class SysYIRListener implements SysYListener {
             if (initResult!=null && initResult.isData) {
                 SaveRepresent ir = InterRepresentFactory.createSaveRepresent(symbol, new AddressOrData(true, ctx.symbolOffset),
                                                                              initResult);
-                ctx.irSection.addCode(ir);
+                ctx.irGroup.addCode(ir);
             }else{
-                ctx.irSection.merge(ctx.exp().irSection);
+                ctx.irGroup.merge(ctx.exp().irGroup);
                 SaveRepresent ir = InterRepresentFactory.createSaveRepresent(symbol, ctx.exp().result, initResult);
-                ctx.irSection.addCode(ir);
+                ctx.irGroup.addCode(ir);
             }
         }
     }
@@ -187,8 +189,6 @@ public class SysYIRListener implements SysYListener {
     public void enterFuncDef(SysYParser.FuncDefContext ctx) {
         _currentIRFunc = new IRFunction();
         irUnion.children.add(_currentIRFunc);
-        ctx.block().irGroup = new IRGroup("function body");
-        _currentIRFunc.addGroup(ctx.block().irGroup);
     }
 
     @Override
@@ -199,9 +199,9 @@ public class SysYIRListener implements SysYListener {
         if(_currentIRFunc.getLineOccupied()==0||
             !(_currentIRFunc.getLast().getLastIR() instanceof ReturnRepresent))
         {
-            IRSection irSection = new IRSection("default return");
-            _currentIRFunc.getLast().addSection(irSection);
-            irSection.addCode(new ReturnRepresent());
+            IRGroup irGroup = new IRGroup("default return");
+            irGroup.addCode(new ReturnRepresent());
+            _currentIRFunc.addGroup(irGroup);
         }
 
     }
@@ -238,11 +238,7 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterBlock(SysYParser.BlockContext ctx) {
-        /*ctx.irGroup=new IRGroup("block");
-        _currentIRFunc.addSection(ctx.irGroup);*/
-        for (SysYParser.BlockItemContext itemContext : ctx.blockItem()) {
-            itemContext.irGroup = ctx.irGroup;
-        }
+
     }
 
     @Override
@@ -262,20 +258,13 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterBlockItem(SysYParser.BlockItemContext ctx) {
-        if (ctx.stmt()!=null) {
-            ctx.stmt().irGroup = ctx.irGroup;
-        }
-        if(ctx.decl()!=null)
-        {
-            ctx.decl().irGroup = ctx.irGroup;
-        }
+
     }
 
     @Override
     public void exitBlockItem(SysYParser.BlockItemContext ctx) {
         if(ctx.stmt()!=null)
         {
-            ctx.irGroup = ctx.stmt().irGroup;
             ctx.setBreakQuads(ctx.stmt().getBreakQuads());
             ctx.setContinueQuads(ctx.stmt().getContinueQuads());
         }
@@ -284,17 +273,17 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void enterAssignStat(SysYParser.AssignStatContext ctx) {
         //IRSection expIrSection = new IRSection("compute exp value:"+ctx.exp().getText());
-        IRSection lValSection = new IRSection("compute index of array:"+ctx.lVal().getText());
+        IRGroup lValSection = new IRGroup("compute index of array:"+ctx.lVal().getText());
         //ctx.irGroup.addSection(expIrSection);
         //ctx.irGroup.addSection(lValSection);
         //ctx.exp().irSection = expIrSection;
-        ctx.lVal().irSection = lValSection;
+        ctx.lVal().irGroup = lValSection;
     }
 
     @Override
     public void exitAssignStat(SysYParser.AssignStatContext ctx) {
-        ctx.irGroup.addSection(ctx.exp().irSection);
-        ctx.irGroup.addSection(ctx.lVal().irSection);
+        _currentIRFunc.addGroup(ctx.exp().irGroup);
+        _currentIRFunc.addGroup(ctx.lVal().irGroup);
         AddressOrData sourceResult = ctx.exp().result;
 
         SysYParser.LValContext lValCtx = ctx.lVal();
@@ -302,12 +291,14 @@ public class SysYIRListener implements SysYListener {
         if(symbolAndOffset!=null && symbolAndOffset.symbol instanceof VarSymbol)
         {
             for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
-                lValCtx.irSection.addCode(ir);
+                lValCtx.irGroup.addCode(ir);
             }
             SaveRepresent saveRepresent = InterRepresentFactory.createSaveRepresent((VarSymbol)symbolAndOffset.symbol
                     , symbolAndOffset.offsetResult,sourceResult);
-            lValCtx.irSection.addCode(saveRepresent);
+            lValCtx.irGroup.addCode(saveRepresent);
         }
+        ctx.startStmt=(ctx.exp().irGroup.getLineOccupied()>0?ctx.exp().irGroup:ctx.lVal().irGroup);
+        ctx.endStmt = (ctx.lVal().irGroup);
     }
 
     @Override
@@ -322,7 +313,6 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterBlockStat(SysYParser.BlockStatContext ctx) {
-        ctx.block().irGroup = ctx.irGroup;
     }
 
     @Override
@@ -333,33 +323,37 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterIfStat(SysYParser.IfStatContext ctx) {
-        IRSection condSection = new IRSection("compute condition"+ctx.cond().getText());
-        ctx.irGroup.addSection(condSection);
-        ctx.cond().irSection = condSection;
-        for (SysYParser.StmtContext stmtContext : ctx.stmt()) {
-            stmtContext.irGroup = new IRGroup("if block");
-        }
+        _currentIRFunc.startSection("if cond");
+        ctx.cond().irGroup = new IRGroup("jump depending on condition: "+ctx.cond().getText());
     }
 
     @Override
     public void exitIfStat(SysYParser.IfStatContext ctx) {
         if(ctx.stmt().size()==2) //有else
         {
-            InterRepresent elseStartIr=ctx.stmt(1).irGroup.getFirstIR();
+            IRGroup elseStart=ctx.stmt(1).startStmt;
             for (GotoRepresent ir : ctx.cond().falseList) {
-                ir.setTargetIR(elseStartIr);
+                ir.setTargetIR(elseStart.getFirst());
             }
             // 需要插入一句goto，在if的代码块执行完成后跳过else代码块
             GotoRepresent skipElseStmtIR = new GotoRepresent(null);
-            IRSection skipElseStmtSection = new IRSection("skip stmts in else block");
-            ctx.stmt(0).irGroup.addSection(skipElseStmtSection);
-            skipElseStmtSection.addCode(skipElseStmtIR);
-            ctx.irGroup.bookVacancy(skipElseStmtIR.targetHolder);
+            IRGroup elseGroup = new IRGroup("skip stmts in else block");
+            elseGroup.addCode(skipElseStmtIR);
+
+            _currentIRFunc.insertGroupBefore(elseGroup,elseStart);
+            _currentIRFunc.bookVacancy(skipElseStmtIR.targetHolder);
+
         }else{
             for (GotoRepresent ir : ctx.cond().falseList) {
-                ctx.irGroup.bookVacancy(ir.targetHolder);
+                _currentIRFunc.bookVacancy(ir.targetHolder);
             }
         }
+        // 回填trueList
+        for (GotoRepresent ir : ctx.cond().trueList) {
+            ir.setTargetIR(ctx.stmt(0).startStmt.getFirst());
+        }
+
+        _currentIRFunc.endSection("if body");
 
         // 传递breakQuad和continueQuad给父级可能存在的while节点
         if(ctx.stmt().size()==2) //有else
@@ -374,28 +368,22 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterWhileStat(SysYParser.WhileStatContext ctx) {
-        IRSection condSection = new IRSection("compute while condition:"+ctx.cond().getText());
-        ctx.cond().irSection = condSection;
+        IRGroup condSection = new IRGroup("compute while condition:"+ctx.cond().getText());
+        ctx.cond().irGroup = condSection;
 
-        IRGroup whileCondGroup = new IRGroup("while cond");
-        whileCondGroup.addSection(condSection);
-        _currentIRFunc.addGroup(whileCondGroup);
-
-
-        IRGroup whileBodyGroup = new IRGroup("while body");
-        ctx.stmt().irGroup = whileBodyGroup;
-        _currentIRFunc.addGroup(whileBodyGroup);
+        _currentIRFunc.startSection("while cond");
     }
 
     @Override
     public void exitWhileStat(SysYParser.WhileStatContext ctx) {
-        InterRepresent whileStartIR = ctx.cond().irSection.getFirst();
-        GotoRepresent returnIR = new GotoRepresent(whileStartIR);
-        IRSection loopSection = new IRSection("while end");
-        loopSection.addCode(returnIR);
-        ctx.stmt().irGroup.addSection(loopSection);
+        InterRepresent whileStartIR = ctx.cond().irGroup.getFirst();
 
-        InterRepresent stmtStartIR = ctx.stmt().irGroup.getFirstIR();
+
+        //_currentIRFunc.startSection(ctx.stmt().irSection);
+        GotoRepresent gotoStart = new GotoRepresent(whileStartIR);
+        _currentIRFunc.addSingleIR(gotoStart,"while end");
+
+        InterRepresent stmtStartIR = ctx.stmt().startStmt.getFirst();
         for (GotoRepresent ir : ctx.cond().trueList) {
             ir.targetHolder.setInterRepresent(stmtStartIR);
         }
@@ -415,6 +403,8 @@ public class SysYIRListener implements SysYListener {
                 continueQuad.setInterRepresent(whileStartIR);
             }
         }
+
+        _currentIRFunc.endSection("while body");
     }
 
     @Override
@@ -427,9 +417,11 @@ public class SysYIRListener implements SysYListener {
         GotoRepresent breakGoto=new GotoRepresent(null);
         ctx.setBreakQuads(new ArrayList<>());
         ctx.getBreakQuads().add(breakGoto.targetHolder);
-        IRSection gotoSection = new IRSection("break");
-        gotoSection.addCode(breakGoto);
-        ctx.irGroup.addSection(gotoSection);
+        IRGroup gotoGroup = new IRGroup("break");
+        gotoGroup.addCode(breakGoto);
+        _currentIRFunc.addGroup(gotoGroup);
+
+        ctx.startStmt = ctx.endStmt = gotoGroup;
     }
 
     @Override
@@ -442,9 +434,12 @@ public class SysYIRListener implements SysYListener {
         GotoRepresent continueGoto=new GotoRepresent(null);
         ctx.setContinueQuads(new ArrayList<>());
         ctx.getContinueQuads().add(continueGoto.targetHolder);
-        IRSection gotoSection = new IRSection("continue");
-        gotoSection.addCode(continueGoto);
-        ctx.irGroup.addSection(gotoSection);
+        IRGroup gotoGroup = new IRGroup("continue");
+        gotoGroup.addCode(continueGoto);
+
+        _currentIRFunc.addGroup(gotoGroup);
+
+        ctx.startStmt=ctx.endStmt = gotoGroup;
     }
 
     @Override
@@ -456,21 +451,21 @@ public class SysYIRListener implements SysYListener {
     public void exitReturnStat(SysYParser.ReturnStatContext ctx) {
         ReturnRepresent returnRepresent;
         if (ctx.exp() != null) {
-            ctx.irGroup.addSection(ctx.exp().irSection);
+            _currentIRFunc.addGroup(ctx.exp().irGroup);
             returnRepresent =new ReturnRepresent(ctx.exp().result);
         }else{
             returnRepresent =new ReturnRepresent();
         }
-        IRSection retSection = new IRSection(ctx.getText());
-        retSection.addCode(returnRepresent);
+        IRGroup retGroup = new IRGroup(ctx.getText());
+        retGroup.addCode(returnRepresent);
 
-        ctx.irGroup.addSection(retSection);
+        _currentIRFunc.addGroup(retGroup);
     }
 
     @Override
     public void enterExp(SysYParser.ExpContext ctx) {
-        ctx.irSection = new IRSection("compute value of exp:"+ctx.getText());
-        ctx.addExp().irSection = ctx.irSection;
+        ctx.irGroup = new IRGroup("compute value of exp:"+ctx.getText());
+        ctx.addExp().irGroup = ctx.irGroup;
     }
 
     @Override
@@ -483,7 +478,7 @@ public class SysYIRListener implements SysYListener {
         for (ParseTree child : ctx.children) {
             if(child instanceof SysYParser.RelExpContextBase)
             {
-                ((SysYParser.RelExpContextBase) child).irSection = ctx.irSection;
+                ((SysYParser.RelExpContextBase) child).irGroup = ctx.irGroup;
             }
         }
     }
@@ -493,15 +488,18 @@ public class SysYIRListener implements SysYListener {
         ctx.trueList=ctx.lOrExp().trueList;
         ctx.falseList=ctx.lOrExp().falseList;
         for (GotoRepresent ir : ctx.trueList) {
-            ctx.irSection.bookVacancy(ir.targetHolder);
+            ctx.irGroup.bookVacancy(ir.targetHolder);
             //System.out.println("true "+ir.lineNum);
         }
+
+        _currentIRFunc.addGroup(ctx.irGroup);
+        _currentIRFunc.endSection();
     }
 
     @Override
     public void enterLVal(SysYParser.LValContext ctx) {
         for (SysYParser.ExpContext context : ctx.exp()) {
-            context.irSection = ctx.irSection;
+            context.irGroup = ctx.irGroup;
         }
     }
 
@@ -528,11 +526,11 @@ public class SysYIRListener implements SysYListener {
             if(symbolAndOffset!=null && symbolAndOffset.symbol instanceof VarSymbol)
             {
                 for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
-                    ctx.irSection.addCode(ir);
+                    ctx.irGroup.addCode(ir);
                 }
                 LoadRepresent loadRepresent = InterRepresentFactory.createLoadRepresent((VarSymbol) symbolAndOffset.symbol
                         , symbolAndOffset.offsetResult);
-                ctx.irSection.addCode(loadRepresent);
+                ctx.irGroup.addCode(loadRepresent);
                 ctx.result = loadRepresent.target;
             }
         }else{
@@ -573,7 +571,7 @@ public class SysYIRListener implements SysYListener {
         }else{
             ir = InterRepresentFactory.createFuncCallRepresent(funcSymbol);
         }
-        ctx.irSection.addCode(ir);
+        ctx.irGroup.addCode(ir);
         ctx.result = ir.returnResult;
     }
 
@@ -598,7 +596,7 @@ public class SysYIRListener implements SysYListener {
         }
 
         UnaryRepre ir = InterRepresentFactory.createUnaryRepresent(opcode, ctx.unaryExp().result);
-        ctx.irSection.addCode(ir);
+        ctx.irGroup.addCode(ir);
         ctx.result=ir.target;
     }
 
@@ -635,7 +633,7 @@ public class SysYIRListener implements SysYListener {
             }
             BinocularRepre ir= InterRepresentFactory.createBinocularRepresent(opcodes,ctx.mulExp().result,
                                                                               ctx.unaryExp().result);
-            ctx.irSection.addCode(ir);
+            ctx.irGroup.addCode(ir);
             ctx.result = ir.target;
         }
     }
@@ -661,7 +659,7 @@ public class SysYIRListener implements SysYListener {
             }
             BinocularRepre ir= InterRepresentFactory.createBinocularRepresent(opcodes, ctx.addExp().result,
                                                                               ctx.mulExp().result);
-            ctx.irSection.addCode(ir);
+            ctx.irGroup.addCode(ir);
             ctx.result = ir.target;
         }
     }
@@ -683,7 +681,7 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void enterRelExp(SysYParser.RelExpContext ctx) {
         ctx.vocancy = new InterRepresentHolder();
-        ctx.irSection.bookVacancy(ctx.vocancy);
+        ctx.irGroup.bookVacancy(ctx.vocancy);
     }
 
     private void createIfGotoPair(SysYParser.BranchContextBase ctx, IfGotoRepresent.RelOp relOp,
@@ -694,8 +692,8 @@ public class SysYIRListener implements SysYListener {
         ctx.falseList=new ArrayList<>();
         ctx.trueList.add(ifGoto);
         ctx.falseList.add(goTo);
-        ctx.irSection.addCode(ifGoto);
-        ctx.irSection.addCode(goTo);
+        ctx.irGroup.addCode(ifGoto);
+        ctx.irGroup.addCode(goTo);
     }
     @Override
     public void exitRelExp(SysYParser.RelExpContext ctx) {
@@ -735,7 +733,7 @@ public class SysYIRListener implements SysYListener {
             ctx.address=ctx.relExp().address;
         }else{
             ctx.vocancy = new InterRepresentHolder();
-            ctx.irSection.bookVacancy(ctx.vocancy);
+            ctx.irGroup.bookVacancy(ctx.vocancy);
             IfGotoRepresent.RelOp relOp= null;
             if(ctx.Equal()!=null){
                 relOp= IfGotoRepresent.RelOp.EQUAL;
@@ -830,8 +828,8 @@ public class SysYIRListener implements SysYListener {
             for (ParseTree child : parserRuleContext.children) {
                 if(child instanceof SysYParser.ExpContextBase)
                 {
-                    ((SysYParser.ExpContextBase) child).irSection =
-                            ((SysYParser.ExpContextBase) parserRuleContext).irSection;
+                    ((SysYParser.ExpContextBase) child).irGroup =
+                            ((SysYParser.ExpContextBase) parserRuleContext).irGroup;
                 }
             }
         }
@@ -840,13 +838,13 @@ public class SysYIRListener implements SysYListener {
             for (ParseTree child : parserRuleContext.children) {
                 if(child instanceof SysYParser.RelExpContextBase)
                 {
-                    ((SysYParser.RelExpContextBase) child).irSection =
-                            ((SysYParser.RelExpContextBase) parserRuleContext).irSection;
+                    ((SysYParser.RelExpContextBase) child).irGroup =
+                            ((SysYParser.RelExpContextBase) parserRuleContext).irGroup;
                 }
                 if(child instanceof SysYParser.ExpContextBase)
                 {
-                    ((SysYParser.ExpContextBase) child).irSection =
-                            ((SysYParser.RelExpContextBase) parserRuleContext).irSection;
+                    ((SysYParser.ExpContextBase) child).irGroup =
+                            ((SysYParser.RelExpContextBase) parserRuleContext).irGroup;
                 }
             }
         }
@@ -862,6 +860,32 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitEveryRule(ParserRuleContext parserRuleContext) {
+        if (parserRuleContext instanceof SysYParser.PositionableBase) {
+            SysYParser.PositionableBase ctx = (SysYParser.PositionableBase)parserRuleContext;
+            for (ParseTree child : ctx.children) {
+                if (!(child instanceof SysYParser.PositionableBase)) {
+                    continue;
+                }
+                if(((SysYParser.PositionableBase) child).startStmt==null)
+                {
+                    continue;
+                }
+                ctx.startStmt=((SysYParser.PositionableBase) child).startStmt;
+                break;
+            }
 
+            for (int i = ctx.children.size() - 1; i >= 0; i--) {
+                ParseTree child = ctx.children.get(i);
+                if (!(child instanceof SysYParser.PositionableBase)) {
+                    continue;
+                }
+                if(((SysYParser.PositionableBase) child).endStmt == null)
+                {
+                    continue;
+                }
+                ctx.endStmt=((SysYParser.PositionableBase) child).endStmt;
+                break;
+            }
+        }
     }
 }

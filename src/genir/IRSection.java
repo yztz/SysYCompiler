@@ -1,93 +1,133 @@
 package genir;
 
+import com.sun.istack.internal.Nullable;
 import genir.code.InterRepresent;
+import genir.code.InterRepresentHolder;
 
 import java.util.LinkedList;
 
-/**
- * 一个section对应一行SysY代码
- * 一个section可能有多个IR代码
- */
 public class IRSection extends AbstractIR{
-    public String description;
-    private int nextLineNum = 0;
-    private final LinkedList<InterRepresent> _irs =new LinkedList<>();
-    public IRGroup group;
-    public IRGroup getGroup()
-    {
-        return group;
-    }
+    String description;
+
     public IRSection(String description) {
         this.description = description;
     }
 
-    public InterRepresent getFirst()
-    {
-        return _irs.getFirst();
-    }
-    public InterRepresent getLast()
-    {
-        return _irs.getLast();
-    }
+    int id = 0;
+    private LinkedList<IRGroup> irGroups = new LinkedList<>();
 
-
-    public void addCode( InterRepresent ir)
+    int nextSectionID = 0;
+    public void addGroup(IRGroup irGroup)
     {
-        if(ir==null)
-            return;
-        ir.section = this;
-        ir.setLineNum(nextLineNum);
-        nextLineNum++;
-        _irs.addLast(ir);
-        fullFillVacancy(ir);
-    }
-    public void insertCode(int index,InterRepresent code)
-    {
-        _irs.stream().parallel().forEach(t->{
-            if (t.getLineNum()>=index)
-                t.setLineNum(t.getLineNum()+1);
-        });
-        code.setLineNum(index);
-        _irs.add(index,code);
-        nextLineNum++;
-        //fullFillQuad(code);
-    }
-
-    public void merge(IRSection irSection)
-    {
-        for (InterRepresent ir : irSection._irs) {
-            addCode(ir);
+        if(irGroups.size()>0)
+        {
+            irGroup.setId(irGroups.getLast().getLineOccupied());
         }
+        irGroup.section = this;
+        irGroup.setId(nextSectionID++);
+        irGroups.add(irGroup);
+        if(irGroup.getSize()>0)
+        {
+            fullFillVacancy(irGroup.getFirst());
+        }else{
+            for (InterRepresentHolder holder : vacancyHolders) {
+                irGroup.bookVacancy(holder);
+            }
+        }
+    }
+
+    public void insertAfter(IRGroup irGroup,IRGroup index)
+    {
+        int i = irGroups.indexOf(index) + 1;
+        insertInternal(irGroup, i);
+    }
+
+    public void insertBefore(IRGroup irGroup,IRGroup index)
+    {
+        int i = irGroups.indexOf(index);
+        insertInternal(irGroup, i);
+    }
+
+    private void insertInternal(IRGroup irGroup, int i) {
+        irGroup.setId(i);
+        irGroup.section = this;
+        irGroups.add(i,irGroup);
+        for (int j = i+1; j < irGroups.size(); j++) {
+            irGroups.get(j).setId(irGroups.get(j).getID()+1);
+        }
+    }
+
+    public IRSection[] split(IRGroup index,String desc1,String desc2)
+    {
+        IRSection[] irSections = new IRSection[2];
+        int i = irGroups.indexOf(index);
+        irSections[0]= new IRSection(desc1);
+        irSections[0].irGroups = (LinkedList<IRGroup>) irGroups.subList(0, i-1);
+        for (IRGroup group : irSections[0].irGroups) {
+            group.section = irSections[0];
+        }
+        irSections[1]= new IRSection(desc2);
+        irSections[1].irGroups = (LinkedList<IRGroup>) irGroups.subList(i, irGroups.size()-1);
+        for (IRGroup group : irSections[1].irGroups) {
+            group.section = irSections[1];
+        }
+        return irSections;
+    }
+
+    public void merge(IRSection another)
+    {
+        if(another==null)
+            return;
+        irGroups.addAll(another.irGroups);
+    }
+    public int getSectionSize()
+    {
+        return irGroups.size();
+    }
+
+
+    @Override
+    public int getLineOccupied() {
+        int total = 0;
+        for (IRGroup irGroup : irGroups) {
+            total += irGroup.getLineOccupied();
+        }
+        return total;
+    }
+    public IRGroup getFirst()
+    {
+        if(irGroups.size()==0)
+            return null;
+        return irGroups.getFirst();
+    }
+    public IRGroup getLast()
+    {
+        if(irGroups.size()==0)
+            return null;
+        return irGroups.getLast();
+    }
+    @Nullable
+    public InterRepresent getFirstIR()
+    {
+        if(irGroups.size()==0)
+            return null;
+        return irGroups.getFirst().getFirst();
+    }
+    @Nullable
+    public InterRepresent getLastIR()
+    {
+        if(irGroups.size()==0 || irGroups.getLast().getSize()==0)
+            return null;
+        return irGroups.getLast().getLast();
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        boolean firstLine = true;
-        for (InterRepresent ir : _irs) {
-
-            if(!firstLine)
-            {
-                sb.append(ir.toString());
-            }else{
-                sb.append(String.format("%-48s @%s",ir.toString(),description));
-                firstLine=false;
-            }
-            sb.append("\r\n");
+        sb.append("@").append(description).append("\r\n");
+        for (IRGroup section : irGroups) {
+            sb.append(section.toString());
         }
         return sb.toString();
-    }
-
-    public int getLineOccupied() {
-        int totalOccupied = 0;
-        for (InterRepresent ir : _irs) {
-            totalOccupied+=ir.getLineOccupied();
-        }
-        return totalOccupied;
-    }
-
-    public int getSize()
-    {
-        return _irs.size();
     }
 }
