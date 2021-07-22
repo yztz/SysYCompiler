@@ -5,6 +5,9 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/src/gencode" />
+      <excludeFolder url="file://$MODULE_DIR$/src/genir" />
+      <excludeFolder url="file://$MODULE_DIR$/src/symboltable" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
