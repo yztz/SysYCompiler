@@ -183,7 +183,8 @@ public class SysSymbolListener implements SysYListener {
             }
             int[] dims = getDimsFromConstExp(varDefCtx.constExp());
             // 遍历完成，记录数据
-            currentSymbolTable.addSymbol(identifier.getSymbol(),dims,initValues);
+            VarSymbol varSymbol = currentSymbolTable.addSymbol(identifier.getSymbol(), dims, initValues);
+            varSymbol.hasConstInitValue = varDefCtx.initVal().hasConstInitValue;
         }
     }
     private int getLengthFromDimensions(int[] dimensions)
@@ -225,13 +226,14 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitInitVal(SysYParser.InitValContext ctx) {
+        boolean hasConstInitVal = true;
         if(ctx.exp()!=null)
         {
             AddressOrData initResult = ctx.exp().result;
-            if (initResult.isData) {
+            if (initResult!=null && initResult.isData) {
                 ctx.initValues[ctx.symbolOffset]=initResult.item;
             }else{
-
+                hasConstInitVal = false;
                 //todo 这些咋办
                 /*VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,ctx.ident);
                 SaveRepresent ir = InterRepresentFactory.createSaveRepresent(ctx.symbol, new AddressOrData(true, ctx.symbolOffset),
@@ -239,6 +241,11 @@ public class SysSymbolListener implements SysYListener {
                 irCodes.addCode(ir);*/
             }
         }
+        // 必须每一项都有常数值
+        for (SysYParser.InitValContext initValCtx : ctx.initVal()) {
+            hasConstInitVal&=initValCtx.hasConstInitValue;
+        }
+        ctx.hasConstInitValue = hasConstInitVal;
     }
 
     @Override
@@ -486,6 +493,11 @@ public class SysSymbolListener implements SysYListener {
         if(ctx.lVal()!=null)
         {
             SysYParser.LValContext lValCtx = ctx.lVal();
+            for (SysYParser.ExpContext expCtx : lValCtx.exp()) {
+                if (expCtx.result==null) { //当前无法直接计算偏移量
+                    return;
+                }
+            }
             ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
             if(symbolAndOffset==null)
             {

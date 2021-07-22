@@ -12,7 +12,7 @@ public class UnaryRepre extends WrittenRepresent{
 
     @Override
     public String toString() {
-        return lineNumToString()+String.format("%-7s %-4s %-4s",OP.toString(),source.toString(),target.toString());
+        return String.format("%s: %-7s %-4s %-4s",lineNumToString(),OP.toString(),source.toString(),target.toString());
     }
 
     public static enum UnaryOp{

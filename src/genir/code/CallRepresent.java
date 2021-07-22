@@ -31,8 +31,8 @@ public class CallRepresent extends InterRepresent{
         if(params!=null)
             paramsStr = Arrays.stream(params).map(AddressOrData::toString).collect(Collectors.joining(","));
         if(returnResult==null)
-            return lineNumToString()+ String.format("%-7s %s(%s)","CALL",funcSymbol.funcName.getText(),paramsStr);
-        return lineNumToString()+ String.format("%-7s %s(%s) %-4s","CALL",funcSymbol.funcName.getText(),
+            return String.format("%s: %-7s %s(%s)",lineNumToString(),"CALL",funcSymbol.funcName.getText(),paramsStr);
+        return String.format("%s: %-7s %s(%s) %-4s",lineNumToString(),"CALL",funcSymbol.funcName.getText(),
                                                 paramsStr,
                                                 returnResult.toString());
     }

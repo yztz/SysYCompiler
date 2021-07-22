@@ -14,7 +14,8 @@ public class SaveRepresent extends WrittenRepresent{
 
     @Override
     public String toString() {
-        return lineNumToString()+String.format("%-7s %-4s %s[%s]","SAVE",target.toString(),varSymbol.symbolToken.getText(),
+        return String.format("%s: %-7s %-4s %s[%s]",lineNumToString(),"SAVE",target.toString(),
+                                               varSymbol.symbolToken.getText(),
                                                offset.toString());
     }
 }

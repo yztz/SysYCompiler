@@ -14,7 +14,7 @@ public class LoadRepresent extends WrittenRepresent{
 
     @Override
     public String toString() {
-        return lineNumToString()+String.format("%-7s %s[%s] %-7s","LOAD",varSymbol.symbolToken.getText(),
+        return String.format("%s: %-7s %s[%s] %-7s",lineNumToString(),"LOAD",varSymbol.symbolToken.getText(),
                                                offset.toString(),target.toString());
     }
 }

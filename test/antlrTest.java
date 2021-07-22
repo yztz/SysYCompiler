@@ -42,9 +42,7 @@ public class antlrTest {
         SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
         walker.walk(irListener, tree);
 
-        for (InterRepresent code : irListener.irCodes.codes) {
-            System.out.println(code.toString());
-        }
+        System.out.println(irListener.irUnion.toString());
 
         for (FuncSymbol funcSymbol : funcSymbolTable.funcSymbols.values()) {
             System.out.println(funcSymbol.funcName.getText()+ ":" + funcSymbol.firstStmtHolder.getInterRepresent().lineNum);
@@ -61,9 +59,8 @@ public class antlrTest {
 
         SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
         walker.walk(irListener, tree);
-        for (InterRepresent code : irListener.irCodes.codes) {
-            System.out.println(code.toString());
-        }
+
+        System.out.println(irListener.irUnion.toString());
     }
 
     @Test
@@ -77,9 +74,9 @@ public class antlrTest {
         prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
         SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
         walker.walk(irListener, tree);
-        for (InterRepresent code : irListener.irCodes.codes) {
-            System.out.println(code.toString());
-        }
+
+
+        System.out.println(irListener.irUnion.toString());
     }
 
     @Test
@@ -93,9 +90,8 @@ public class antlrTest {
         prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
         SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
         walker.walk(irListener, tree);
-        for (InterRepresent code : irListener.irCodes.codes) {
-            System.out.println(code.toString());
-        }
+
+        System.out.println(irListener.irUnion.toString());
     }
 
     @Test
@@ -109,9 +105,8 @@ public class antlrTest {
         prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
         SysYIRListener irListener = new SysYIRListener(symbolTableHost,funcSymbolTable);
         walker.walk(irListener, tree);
-        for (InterRepresent code : irListener.irCodes.codes) {
-            System.out.println(code.toString());
-        }
+
+        System.out.println(irListener.irUnion.toString());
     }
 
     private void prepareSymbol(ParseTree tree, ParseTreeWalker walker, SymbolTableHost symbolTableHost, FuncSymbolTable funcSymbolTable) {

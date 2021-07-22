@@ -28,6 +28,12 @@ public class SymbolTableHost {
         return currentDomain;
     }
 
+    /**
+     * 搜索变量符号
+     * @param startDomain 开始的作用域
+     * @param symbolToken 符号Token
+     * @return 符号，无则返回null
+     */
     @Nullable
     public VarSymbol searchVarSymbol(SymbolDomain startDomain, Token symbolToken)
     {

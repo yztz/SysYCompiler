@@ -3,6 +3,9 @@ package genir.code;
 import com.sun.istack.internal.Nullable;
 
 public class InterRepresentHolder {
+    public InterRepresentHolder(){
+
+    }
     public InterRepresentHolder(InterRepresent interRepresent) {
         this.interRepresent = interRepresent;
     }

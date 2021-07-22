@@ -2,8 +2,13 @@
 
 package antlr;
 
+import com.sun.istack.internal.Nullable;
+import genir.IRFunction;
+import genir.IRGroup;
+import genir.IRSection;
 import genir.code.AddressOrData;
 import genir.code.GotoRepresent;
+import genir.code.InterRepresent;
 import genir.code.InterRepresentHolder;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATN;
@@ -15,8 +20,9 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import symboltable.SymbolDomain;
-import symboltable.VarSymbol;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
@@ -131,23 +137,37 @@ public class SysYParser extends Parser {
 			super(parent, invokingStateNumber);
 		}
 	}
-	public static class PositionableBase extends DomainedContext{
-		public InterRepresentHolder startStmtHolder;
-		public InterRepresentHolder endStmtHolder;
-		public PositionableBase(ParserRuleContext parent, int invokingStateNumber) {
+
+	public static class HasInterRepresentBase extends DomainedContext{
+		public IRSection irSection;
+
+		public HasInterRepresentBase(ParserRuleContext parent, int invokingStateNumber) {
 			super(parent, invokingStateNumber);
 		}
 
-		public PositionableBase() {
+		public HasInterRepresentBase() {
 		}
 	}
 
-	public static class InitValContextBase extends DomainedContext{
+	public static class MulitySectionBase extends DomainedContext{
+		public IRGroup irGroup;
+
+
+		public MulitySectionBase() {
+		}
+
+		public MulitySectionBase(ParserRuleContext parent, int invokingStateNumber) {
+			super(parent, invokingStateNumber);
+		}
+	}
+
+	public static class InitValContextBase extends HasInterRepresentBase{
 		public int[] initValues;
 		public int symbolOffset;
 		public int whichDim; //第几个维度
 		public int[] dimensions;
 		public Token ident;
+		public boolean hasConstInitValue = false;
 		public InitValContextBase() {
 		}
 
@@ -233,7 +253,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class DeclContext extends DomainedContext {
+	public static class DeclContext extends MulitySectionBase {
 		public ConstDeclContext constDecl() {
 			return getRuleContext(ConstDeclContext.class,0);
 		}
@@ -603,7 +623,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class VarDeclContext extends DomainedContext {
+	public static class VarDeclContext extends MulitySectionBase {
 		public BTypeContext bType() {
 			return getRuleContext(BTypeContext.class,0);
 		}
@@ -679,7 +699,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class VarDefContext extends DomainedContext {
+	public static class VarDefContext extends HasInterRepresentBase {
 		public TerminalNode Identifier() { return getToken(SysYParser.Identifier, 0); }
 		public List<TerminalNode> LeftBracket() { return getTokens(SysYParser.LeftBracket); }
 		public TerminalNode LeftBracket(int i) {
@@ -900,6 +920,7 @@ public class SysYParser extends Parser {
 	}
 
 	public static class FuncDefContext extends DomainedContext {
+		public IRFunction irFunction = new IRFunction();
 		public FuncTypeContext funcType() {
 			return getRuleContext(FuncTypeContext.class,0);
 		}
@@ -1181,7 +1202,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class BlockContext extends PositionableBase implements IHasBreakOrContinue {
+	public static class BlockContext extends StmtContext implements IHasBreakOrContinue {
 		public TerminalNode LeftBrace() { return getToken(SysYParser.LeftBrace, 0); }
 		public TerminalNode RightBrace() { return getToken(SysYParser.RightBrace, 0); }
 		public List<BlockItemContext> blockItem() {
@@ -1269,7 +1290,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class BlockItemContext extends PositionableBase implements IHasBreakOrContinue{
+	public static class BlockItemContext extends MulitySectionBase implements IHasBreakOrContinue{
 		public DeclContext decl() {
 			return getRuleContext(DeclContext.class,0);
 		}
@@ -1371,7 +1392,8 @@ public class SysYParser extends Parser {
 		void setBreakQuads(List<InterRepresentHolder> quads);
 		void setContinueQuads(List<InterRepresentHolder> quads);
 	}
-	public static class StmtContext extends PositionableBase implements IHasBreakOrContinue {
+	public static class StmtContext extends MulitySectionBase implements IHasBreakOrContinue {
+
 		public StmtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1718,7 +1740,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ExpContextBase extends DomainedContext{
+	public static class ExpContextBase extends HasInterRepresentBase {
 		public AddressOrData result;
 
 		public ExpContextBase() {
@@ -1817,7 +1839,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class LValContext extends DomainedContext {
+	public static class LValContext extends HasInterRepresentBase {
 		public TerminalNode Identifier() { return getToken(SysYParser.Identifier, 0); }
 		public List<TerminalNode> LeftBracket() { return getTokens(SysYParser.LeftBracket); }
 		public TerminalNode LeftBracket(int i) {
@@ -2376,7 +2398,7 @@ public class SysYParser extends Parser {
 		}
 		return _localctx;
 	}
-	public static class BranchContextBase extends DomainedContext{
+	public static class BranchContextBase extends HasInterRepresentBase {
 		public BranchContextBase(ParserRuleContext parent, int invokingStateNumber) {
 			super(parent, invokingStateNumber);
 		}
@@ -2388,7 +2410,7 @@ public class SysYParser extends Parser {
 			super(parent, invokingStateNumber);
 		}
 		public AddressOrData address;
-		public int quad;
+		public InterRepresentHolder vocancy;
 	}
 
 	public static class RelExpContext extends RelExpContextBase {

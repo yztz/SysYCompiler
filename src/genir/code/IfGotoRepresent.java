@@ -16,7 +16,7 @@ public class IfGotoRepresent extends GotoRepresent {
     @Override
     public String toString() {
         InterRepresent targetIR = targetHolder.getInterRepresent();
-        return lineNumToString()+String.format("if %s %s %s goto %-7d", left, relOp, right,targetIR==null?-1:targetIR.lineNum );
+        return String.format("%s: if %s %s %s goto %-7d",lineNumToString(), left, relOp, right,targetIR==null?-1:targetIR.lineNum );
     }
 
     public enum RelOp{

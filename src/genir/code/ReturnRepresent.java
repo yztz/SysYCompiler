@@ -15,8 +15,8 @@ public class ReturnRepresent extends InterRepresent{
     public String toString() {
         if(returnData!=null)
         {
-            return lineNumToString()+String.format("%-7s %-4s","RET",returnData.toString());
+            return String.format("%s: %-7s %-4s",lineNumToString(),"RET",returnData.toString());
         }
-        return lineNumToString()+"RET";
+        return String.format("%s: %-7s",lineNumToString(),"RET");
     }
 }

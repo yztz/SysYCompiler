@@ -33,18 +33,20 @@ public class SymbolTable {
      * 向符号表中登记符号
      * @param token 符号
      */
-    public void addSymbol(Token token,int[] dimensions,int[] initValues) //类型只有一个int
+    public VarSymbol addSymbol(Token token,int[] dimensions,int[] initValues) //类型只有一个int
     {
         VarSymbol symbol = new VarSymbol(totalOffset, token, dimensions, initValues);
         symbols.put(token.getText(), symbol);
         totalOffset+=symbol.length*4;
+        return symbol;
     }
 
-    public void addSymbol(Token token,int[] initValues) //类型只有一个int
+    public VarSymbol addSymbol(Token token,int[] initValues) //类型只有一个int
     {
         VarSymbol symbol = new VarSymbol(totalOffset, token, initValues);
         symbols.put(token.getText(), symbol);
         totalOffset+=symbol.length*4;
+        return symbol;
     }
 
     public void addParam(Token token)

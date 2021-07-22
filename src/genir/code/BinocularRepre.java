@@ -16,7 +16,7 @@ public class BinocularRepre extends WrittenRepresent{
 
     @Override
     public String toString() {
-        return lineNumToString()+String.format("%-7s %-4s %-4s %-4s",OP.toString(),sourceFirst.toString(),
+        return String.format("%s: %-7s %-4s %-4s %-4s",lineNumToString(),OP.toString(),sourceFirst.toString(),
                              sourceSecond.toString(),
                              target.toString());
     }

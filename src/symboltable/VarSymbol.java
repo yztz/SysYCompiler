@@ -2,6 +2,7 @@ package symboltable;
 
 
 import com.sun.istack.internal.Nullable;
+import genir.IRSection;
 import org.antlr.v4.runtime.Token;
 
 public class VarSymbol extends ValueSymbol {
@@ -9,7 +10,10 @@ public class VarSymbol extends ValueSymbol {
     public BType bType = BType.INT; //好像只有int
     public boolean isFuncParam = false;
     @Nullable
+    public IRSection initIR = null;
+    @Nullable
     public int[] initValues;
+    public boolean hasConstInitValue = false; //如果有的话用initValues,没有的话要用InitIR计算
     public VarSymbol(int offset, Token symbolToken,@Nullable int[] initValues) {
         super(symbolToken);
         this.offset = offset;
