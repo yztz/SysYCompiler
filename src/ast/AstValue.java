@@ -1,5 +1,5 @@
 package ast;
 
-public interface Value {
+public interface AstValue {
     String getVal();
 }

@@ -1,6 +1,6 @@
 package ast;
 
-public class Temp implements Value {
+public class Temp implements AstValue {
     private static int next_id = 0;
 
     public final int id;

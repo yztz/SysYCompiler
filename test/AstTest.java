@@ -12,13 +12,19 @@ import org.junit.Test;
 import java.io.IOException;
 
 public class AstTest {
+    MyVisitor visitor = new MyVisitor();
     @Test
     public void testExp() {
         SysYParser parser = getParser("test/testExp.sys");
         ParseTree tree = parser.exp();
-        MyVisitor visitor = new MyVisitor();
         AstNode root = visitor.visit(tree);
         Utils.interpreterAst(root);
+    }
+    @Test
+    public void testConst() {
+        SysYParser parser = getParser("test/testConst.sys");
+        ParseTree tree = parser.compUnit();
+        visitor.visit(tree);
     }
 
     private SysYParser getParser(String fileName)

@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class AstNode {
-    public Value value;
+    public AstValue value;
     private List<AstNode> subTree = new ArrayList<>();
     private int idx = -1;
 
@@ -30,29 +30,37 @@ public class AstNode {
         return this.subTree.size() == 0;
     }
 
-    private AstNode(Value value){
+    public AstNode getNode(int i) {
+        return subTree.get(i);
+    }
+
+    public int getChildrenNum() {
+        return subTree.size();
+    }
+
+    private AstNode(AstValue value){
         this.value = value;
     }
 
-    public static AstNode makeBinaryNode(Value value, AstNode left, AstNode right) {
+    public static AstNode makeBinaryNode(AstValue value, AstNode left, AstNode right) {
         AstNode ret = new AstNode(value);
         ret.addNode(left);
         ret.addNode(right);
         return ret;
     }
 
-    public static AstNode makeUnaryNode(Value value, AstNode subTree) {
+    public static AstNode makeUnaryNode(AstValue value, AstNode subTree) {
         AstNode ret = new AstNode(value);
         ret.addNode(subTree);
         return ret;
     }
 
-    public static AstNode makeEmptyNode(Value value) {
+    public static AstNode makeEmptyNode(AstValue value) {
         return new AstNode(value);
     }
 
 
-    public static AstNode makeLeaf(Value value) {
+    public static AstNode makeLeaf(AstValue value) {
         return new AstNode(value);
     }
 

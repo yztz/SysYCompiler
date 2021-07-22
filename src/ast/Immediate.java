@@ -1,6 +1,6 @@
 package ast;
 
-public class Immediate implements Value{
+public class Immediate implements AstValue {
     public final int value;
 
     public Immediate(int value) {

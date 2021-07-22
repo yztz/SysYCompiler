@@ -1,0 +1,5 @@
+const int a = 3;
+const int b = 5;
+const int c = 6;
+const int d = 7;
+const int e[2][2] = {{a + b* c - 1, b},{ c * b, d % c}};
