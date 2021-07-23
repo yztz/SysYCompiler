@@ -1,17 +1,33 @@
 package ast;
 
+import ast.symbol.Variable;
+import org.antlr.v4.runtime.tree.Tree;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AstNode {
+public class AstNode implements Tree {
+    public AstNode parent;
     public AstValue value;
     private List<AstNode> subTree = new ArrayList<>();
     private int idx = -1;
 
     public void addNode(AstNode node) {
+        if (null == node) return;
+
         this.subTree.add(node);
+        node.parent = this;
         this.idx ++;
+    }
+
+    public void addNode(List<AstNode> nodes) {
+        this.subTree.addAll(nodes);
+        for (AstNode node : nodes) {
+            if (null == node) continue;
+            node.parent = this;
+        }
+        this.idx += nodes.size();
     }
 
     public AstNode getRight() {
@@ -36,6 +52,24 @@ public class AstNode {
 
     public int getChildrenNum() {
         return subTree.size();
+    }
+
+    public int getInteger() {
+        if (value instanceof Immediate) {
+            return ((Immediate) value).value;
+        } else {
+            System.err.println("expect an Immediate, but found [" + value.getClass().getSimpleName()+"]");
+            return -1;
+        }
+    }
+
+    public Variable getVariable() {
+        if (value instanceof Variable) {
+            return (Variable) value;
+        } else {
+            System.err.println("expect an Variable, but found [" + value.getClass().getSimpleName()+"]");
+            return null;
+        }
     }
 
     private AstNode(AstValue value){
@@ -75,5 +109,30 @@ public class AstNode {
     @Override
     public String toString() {
         return value.getVal();
+    }
+
+    @Override
+    public Tree getParent() {
+        return parent;
+    }
+
+    @Override
+    public Object getPayload() {
+        return value;
+    }
+
+    @Override
+    public Tree getChild(int i) {
+        return getNode(i);
+    }
+
+    @Override
+    public int getChildCount() {
+        return getChildrenNum();
+    }
+
+    @Override
+    public String toStringTree() {
+        return null;
     }
 }

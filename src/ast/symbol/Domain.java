@@ -1,16 +1,15 @@
 package ast.symbol;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 
 public class Domain {
-    public static List<Function> functions = new ArrayList<>();
+    public static Map<String, Function> functions = new HashMap<>();
     private static Deque<Domain> stack = new ArrayDeque<>();
-    private static Domain globalDomain = new Domain(null);
+    public static Domain globalDomain = new Domain(null);
     private static Function currentFunc = null;
     private static int globalOffset = 0;
+
+    private static Domain nextDomain = null;
 
     static {
         stack.push(globalDomain);
@@ -24,17 +23,29 @@ public class Domain {
     }
 
     public static void enterDomain() {
-        stack.push(new Domain(stack.peek()));
+        if (null == nextDomain){
+            stack.push(new Domain(stack.peek()));
+        } else {
+            stack.push(nextDomain);
+            nextDomain = null;
+        }
     }
 
     public static void leaveDomain() {
         stack.pop();
     }
 
-    public static void enterFunc(String name, String retType) {
+    public static Function enterFunc(String name, String retType) {
+        if (functions.containsKey(name)) {
+            System.err.println("Function [" + name + "] redeclared");
+            System.exit(-1);
+        }
         Function function = new Function(name, retType);
-        functions.add(function);
+        functions.put(name, function);
         currentFunc = function;
+        nextDomain = new Domain(stack.peek());
+
+        return function;
     }
 
     public static void leaveFunc() {
@@ -58,6 +69,7 @@ public class Domain {
     public static Variable addVariable(String name) {
         return addVariableToTable(Variable.var(name, getTotalOffset(), getDomain()));
     }
+
 
     private static Variable addVariableToTable(Variable variable) {
         if (null != getDomain().symbolTable.searchSymbol(variable.name)) {
@@ -94,6 +106,14 @@ public class Domain {
         return null;
     }
 
+    public static Function searchFunc(String name) {
+        if (functions.containsKey(name)) return functions.get(name);
+        else {
+            System.err.println("function [" + name + "] is undefined");
+            return null;
+        }
+    }
+
     private static int getTotalOffset() {
         if (null == currentFunc) {
             return globalOffset;
@@ -102,8 +122,11 @@ public class Domain {
         }
     }
 
-    private static Domain getDomain() {
-        return stack.peek();
+    public static Domain getDomain() {
+        if (null == nextDomain)
+             return stack.peek();
+        else
+            return nextDomain;
     }
 
 }

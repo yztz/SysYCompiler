@@ -15,8 +15,7 @@ public class Utils {
 
     public static int assignArray(Variable array, AstNode values, int dimension) {
         if (values.isLeaf() && values.value instanceof Immediate) {
-            array.value[array.pos] = ((Immediate) values.value).value;
-            array.pos++;
+            array.addConstVal(values.getInteger());
             return 1;
         }
         int init_num = 0;
@@ -26,6 +25,7 @@ public class Utils {
         array.pos += Math.max(getDimensionSize(array, dimension) - init_num, 0);
         return init_num;
     }
+
 
     public static int getDimensionSize(Variable array, int dimension) {
         List<Integer> dimensions = array.dimensions;
@@ -37,49 +37,148 @@ public class Utils {
         return size;
     }
 
-    public static int calc(AstNode root) {
+    public static AstNode calc(AstNode root) {
         AstValue value = root.value;
         if (root.isLeaf()) {
-            if (value instanceof Immediate) {   // 立即数则返回值
-                return ((Immediate) value).value;
+            if (value instanceof Immediate) {   // 立即数则返回
+                return root;
             } else if (value instanceof Variable) {
-                if (((Variable) value).isConst) {   // 常量值
-                    return ((Variable) value).value[0];
+                Variable variable = root.getVariable();
+                if (variable.isCollapsible()){
+                    if (((Variable) value).isArray) {
+                        return root;
+                    } else {
+                        return AstNode.makeLeaf(((Variable) value).indexConstVal(0));
+                    }
                 } else {
-                    System.err.println("A constant val expected");
-                    return -1;
+                    return root;
                 }
             }
         }
         if (value instanceof OP) {
+            AstNode left = calc(root.getLeft());
+            AstNode right = calc(root.getRight());
+            AstValue lVal = left.value;
+            AstValue rVal = right.value;
             switch ((OP) value) {
                 case ADD:
-                    return calc(root.getLeft()) + calc(root.getRight());
+                    if (lVal instanceof Immediate && rVal instanceof Immediate)
+                        return AstNode.makeLeaf(left.getInteger() + right.getInteger());
+                    else
+                        return AstNode.makeBinaryNode(value, left, right);
                 case MINUS:
-                    return -calc(root.getLeft());
+                    if (lVal instanceof Immediate)
+                        return AstNode.makeLeaf(-left.getInteger());
+                    else
+                        return AstNode.makeUnaryNode(value, left);
                 case SUB:
-                    return calc(root.getLeft()) - calc(root.getRight());
+                    if (lVal instanceof Immediate && rVal instanceof Immediate)
+                        return AstNode.makeLeaf(left.getInteger() - right.getInteger());
+                    else
+                        return AstNode.makeBinaryNode(value, left, right);
                 case MUL:
-                    return calc(root.getLeft()) * calc(root.getRight());
+                    if (lVal instanceof Immediate && rVal instanceof Immediate)
+                        return AstNode.makeLeaf(left.getInteger() * right.getInteger());
+                    else
+                        return AstNode.makeBinaryNode(value, left, right);
                 case DIV:
-                    return calc(root.getLeft()) / calc(root.getRight());
+                    if (lVal instanceof Immediate && rVal instanceof Immediate)
+                        return AstNode.makeLeaf(left.getInteger() / right.getInteger());
+                    else
+                        return AstNode.makeBinaryNode(value, left, right);
                 case MOD:
-                    return calc(root.getLeft()) % calc(root.getRight());
+                    if (lVal instanceof Immediate && rVal instanceof Immediate)
+                        return AstNode.makeLeaf(left.getInteger() % right.getInteger());
+                    else
+                        return AstNode.makeBinaryNode(value, left, right);
                 case OFFSET:
-                    AstNode left = root.getLeft();
-                    AstNode offset = root.getRight();
-                    Variable var = (Variable) left.value;
-                    return var.value[calc(offset)];
-                default:
-                    System.err.println("无法计算的表达式");
-                    return -1;
-            }
-        } else {
-            System.err.println("无法计算的表达式");
-            return -1;
-        }
+                    Variable var = (Variable) lVal;
 
+                    if (var.isCollapsible() && rVal instanceof Immediate) {
+                        int offset = right.getInteger();
+                        int val = var.indexConstVal(offset);
+                        return AstNode.makeLeaf(val);
+                    } else {
+                        return AstNode.makeBinaryNode(OP.OFFSET, left, right);
+                    }
+                case NEGATE:
+                    if (lVal instanceof Immediate) {
+                        return AstNode.makeLeaf(left.getInteger() == 0 ? 1 : 0);
+                    } else {
+                        return AstNode.makeUnaryNode(OP.NEGATE, left);
+                    }
+                case GE:
+                    if (lVal instanceof Immediate && rVal instanceof Immediate) {
+                        return AstNode.makeLeaf(left.getInteger() >= right.getInteger() ? 1 : 0);
+                    } else {
+                        return AstNode.makeBinaryNode(OP.GE, left, right);
+                    }
+                case GT:
+                    if (lVal instanceof Immediate && rVal instanceof Immediate) {
+                        return AstNode.makeLeaf(left.getInteger() > right.getInteger() ? 1 : 0);
+                    } else {
+                        return AstNode.makeBinaryNode(OP.GT, left, right);
+                    }
+                case AND:
+                    if (lVal instanceof Immediate && rVal instanceof Immediate) {
+                        return AstNode.makeLeaf(left.getInteger() == 1 && right.getInteger() == 1 ? 1 : 0);
+                    } else {
+                        return AstNode.makeBinaryNode(OP.AND, left, right);
+                    }
+                case OR:
+                    if (lVal instanceof Immediate && rVal instanceof Immediate) {
+                        return AstNode.makeLeaf(left.getInteger() == 1 || right.getInteger() == 1 ? 1 : 0);
+                    } else {
+                        return AstNode.makeBinaryNode(OP.OR, left, right);
+                    }
+                case EQ:
+                    if (lVal instanceof Immediate && rVal instanceof Immediate) {
+                        return AstNode.makeLeaf(left.getInteger() == right.getInteger() ? 1 : 0);
+                    } else {
+                        return AstNode.makeBinaryNode(OP.EQ, left, right);
+                    }
+                case NOT_EQ:
+                    if (lVal instanceof Immediate && rVal instanceof Immediate) {
+                        return AstNode.makeLeaf(left.getInteger() != right.getInteger() ? 1 : 0);
+                    } else {
+                        return AstNode.makeBinaryNode(OP.NOT_EQ, left, right);
+                    }
+                case LE:
+                    if (lVal instanceof Immediate && rVal instanceof Immediate) {
+                        return AstNode.makeLeaf(left.getInteger() <= right.getInteger() ? 1 : 0);
+                    } else {
+                        return AstNode.makeBinaryNode(OP.LE, left, right);
+                    }
+                case LT:
+                    if (lVal instanceof Immediate && rVal instanceof Immediate) {
+                        return AstNode.makeLeaf(left.getInteger() < right.getInteger() ? 1 : 0);
+                    } else {
+                        return AstNode.makeBinaryNode(OP.LT, left, right);
+                    }
+                case CALL:
+                case PARAM:
+                case RETURN:
+                case IF_ELSE:
+                case WHILE:
+                case ASSIGN:
+                case STATEMENT:
+                case VAL_GROUP:
+                case ROOT:
+                case CONST_DECL:
+                case VAR_DECL:
+                case CONTINUE:
+                case BREAK:
+                case FUNC_DECL:
+                default:
+//                    System.err.println("无法计算的表达式 [" + value + "]");
+//                    System.exit(-1);
+                    return root;
+            }
+        }
+//        System.err.println("无法计算的表达式 node class: " + value.getClass().getSimpleName());
+        return root;
     }
+
 
     public static int getOffset(int[] idx, List<Integer> base) {
         if (idx.length != base.size()) return -1;

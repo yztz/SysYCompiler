@@ -979,6 +979,8 @@ public class SysYParser extends Parser {
 	}
 
 	public static class FuncFParamsContext extends ParserRuleContext {
+		public FuncFParamContext funcFParam;
+		public List<FuncFParamContext> params = new ArrayList<FuncFParamContext>();
 		public List<FuncFParamContext> funcFParam() {
 			return getRuleContexts(FuncFParamContext.class);
 		}
@@ -1016,7 +1018,8 @@ public class SysYParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(171);
-			funcFParam();
+			((FuncFParamsContext)_localctx).funcFParam = funcFParam();
+			((FuncFParamsContext)_localctx).params.add(((FuncFParamsContext)_localctx).funcFParam);
 			setState(176);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -1026,7 +1029,8 @@ public class SysYParser extends Parser {
 				setState(172);
 				match(Comma);
 				setState(173);
-				funcFParam();
+				((FuncFParamsContext)_localctx).funcFParam = funcFParam();
+				((FuncFParamsContext)_localctx).params.add(((FuncFParamsContext)_localctx).funcFParam);
 				}
 				}
 				setState(178);

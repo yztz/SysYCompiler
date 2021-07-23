@@ -1,5 +1,27 @@
-const int a = 3;
-const int b = 5;
-const int c = 6;
-const int d = 7;
-const int e[2][2] = {{a + b* c - 1, b},{ c * b, d % c}};
+
+
+int foo(int i) {
+    if(i == 0 || i == 1) {
+        return 1;
+    }
+    else {
+        return i * foo(i - 1);
+    }
+}
+
+const int LIMIT = 10;
+
+int main() {
+    int a;
+    while(a < LIMIT) {
+        a = a + 1;
+        if(a == 6) continue;
+        if(a > 5) {
+            break;
+        }
+    }
+
+    int result = foo(a);
+
+    return 0;
+}

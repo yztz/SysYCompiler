@@ -3,7 +3,9 @@ package ast.symbol;
 import ast.AstValue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Variable implements AstValue {
     public static final int INT_WIDTH = 4;
@@ -15,7 +17,7 @@ public class Variable implements AstValue {
     public boolean isArray;
     public List<Integer> dimensions;
     public int size;
-    public int[] value;
+    public Map<Integer, Integer> constVal = new HashMap<>();
 
     public int pos = 0; //用于数组初始化赋值
 
@@ -26,7 +28,18 @@ public class Variable implements AstValue {
         this.isConst = isConst;
         this.isArray = isArray;
         this.size = size;
-        this.value = new int[size];
+    }
+
+    public void addConstVal(int val) {
+        this.constVal.put(pos++, val);
+    }
+
+    public boolean isCollapsible() {
+        return isConst && domain == Domain.globalDomain;
+    }
+
+    public int indexConstVal(int idx) {
+        return constVal.getOrDefault(idx, 0);
     }
 
     public static Variable var(String name, int offset, Domain domain) {
@@ -41,7 +54,7 @@ public class Variable implements AstValue {
         int size = 1;
         for (int num : dimensions) size *= num;
         Variable newVar = new Variable(name, offset, domain, false, true, size);
-        newVar.dimensions = new ArrayList<>(dimensions);
+        newVar.dimensions = dimensions;
         return newVar;
     }
 
@@ -49,6 +62,28 @@ public class Variable implements AstValue {
         Variable newVar = array(name, offset, domain, dimensions);
         newVar.isConst = true;
         return newVar;
+    }
+
+//    public static Variable paramVar(String name) {
+//        return new Variable(name, -1, null, false, false, 1);
+//    }
+//
+//    public static Variable paramArray(String name, List<Integer> dimensions) {
+//        return array(name, -1, null, dimensions);
+//    }
+
+    @Override
+    public String toString() {
+        String h = name + " = ";
+        if (isArray) {
+            StringBuilder sb = new StringBuilder(h).append('[').append(indexConstVal(0));
+            for (int i = 1; i < size; i++) {
+                sb.append(", ").append(indexConstVal(i));
+            }
+            return sb.append(']').toString();
+        } else {
+            return h + indexConstVal(0);
+        }
     }
 
     @Override

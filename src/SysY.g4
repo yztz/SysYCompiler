@@ -49,7 +49,7 @@ funcType
     |   'int'
     ;
 funcFParams
-    :   funcFParam (','funcFParam)*
+    :   params+=funcFParam (','params+=funcFParam)*
     ;
 funcFParam
     :   bType Identifier ('['']'('['exp']')*)?
