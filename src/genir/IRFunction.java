@@ -10,8 +10,12 @@ public class IRFunction extends AbstractIR {
     private final LinkedList<IRSection> sections = new LinkedList<>();
     int nextGroupID = 0;
     private IRSection currentSection = null;
-    public IRFunction() {
+    public FuncSymbol funcSymbol;
+
+    public IRFunction(FuncSymbol funcSymbol) {
+        this.funcSymbol = funcSymbol;
     }
+
     /**
      * 开始新的一节代码，并设置描述
      */

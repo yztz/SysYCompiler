@@ -8,7 +8,7 @@ public class FuncSymbol {
 
     public Token funcName;
     public int defineOrder = -1;
-    public IRFunction irFunction; //对应的所有IR语句
+    /*public IRFunction irFunction; //对应的所有IR语句*/
     public int paramNum = 0; // 因为只有整型，所以就不记录参数类型了
     public BType returnType;
     //重载标识

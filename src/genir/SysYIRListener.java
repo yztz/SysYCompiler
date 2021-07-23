@@ -189,8 +189,7 @@ public class SysYIRListener implements SysYListener {
     public void enterFuncDef(SysYParser.FuncDefContext ctx) {
         FuncSymbol funcSymbol = funcSymbolTable.getFuncSymbol(ctx.Identifier().getText(),
                                                               ctx.funcFParams().funcFParam().size());
-        _currentIRFunc = new IRFunction();
-        funcSymbol.irFunction = _currentIRFunc;
+        _currentIRFunc = new IRFunction(funcSymbol);
         irUnion.children.add(_currentIRFunc);
     }
 

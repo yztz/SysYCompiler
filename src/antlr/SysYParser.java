@@ -916,7 +916,7 @@ public class SysYParser extends Parser {
 	}
 
 	public static class FuncDefContext extends DomainedContext {
-		public IRFunction irFunction = new IRFunction();
+		public IRFunction irFunction;
 		public FuncTypeContext funcType() {
 			return getRuleContext(FuncTypeContext.class,0);
 		}
