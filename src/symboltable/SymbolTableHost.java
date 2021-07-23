@@ -14,6 +14,7 @@ public class SymbolTableHost {
         return symbolTableMap.getOrDefault(symbolDomain, null);
     }
 
+    private final Map<FuncSymbol,Integer> funcDomainNumMap = new HashMap<>();
     /**
      * 创建一个符号表
      * @param fatherDomain 父作用域(不是当前作用域)
@@ -23,8 +24,10 @@ public class SymbolTableHost {
     public SymbolDomain createSymbolDomain(@Nullable SymbolDomain fatherDomain,
                                            FuncSymbol func)
     {
-        SymbolDomain currentDomain = new SymbolDomain(fatherDomain,func);
+        int domainIndex = funcDomainNumMap.getOrDefault(func,0);
+        SymbolDomain currentDomain = new SymbolDomain(domainIndex,fatherDomain,func);
         symbolTableMap.put(currentDomain, currentDomain.symbolTable);
+        funcDomainNumMap.put(func,domainIndex+1);
         return currentDomain;
     }
 

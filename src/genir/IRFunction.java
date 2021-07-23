@@ -2,6 +2,7 @@ package genir;
 
 import genir.code.InterRepresent;
 import genir.code.InterRepresentHolder;
+import symboltable.FuncSymbol;
 
 import java.util.LinkedList;
 
@@ -10,7 +11,6 @@ public class IRFunction extends AbstractIR {
     int nextGroupID = 0;
     private IRSection currentSection = null;
     public IRFunction() {
-
     }
     /**
      * 开始新的一节代码，并设置描述

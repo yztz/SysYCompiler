@@ -187,15 +187,16 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterFuncDef(SysYParser.FuncDefContext ctx) {
+        FuncSymbol funcSymbol = funcSymbolTable.getFuncSymbol(ctx.Identifier().getText(),
+                                                              ctx.funcFParams().funcFParam().size());
         _currentIRFunc = new IRFunction();
+        funcSymbol.irFunction = _currentIRFunc;
         irUnion.children.add(_currentIRFunc);
     }
 
     @Override
     public void exitFuncDef(SysYParser.FuncDefContext ctx) {
-        TerminalNode identifier = ctx.Identifier();
-        FuncSymbol funcSymbol = funcSymbolTable.getFuncSymbol(identifier.getSymbol().getText());
-        // todo 生成IRFunction
+
         if(_currentIRFunc.getLineOccupied()==0||
             !(_currentIRFunc.getLast().getLastIR() instanceof ReturnRepresent))
         {
@@ -556,7 +557,8 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void exitFunctionExpr(SysYParser.FunctionExprContext ctx) {
         TerminalNode identifier = ctx.Identifier();
-        FuncSymbol funcSymbol=funcSymbolTable.getFuncSymbol(identifier.getSymbol().getText());
+        FuncSymbol funcSymbol=funcSymbolTable.getFuncSymbol(identifier.getSymbol().getText(),
+                                                            ctx.funcRParams() != null?ctx.funcRParams().exp().size():0);
         if(funcSymbol==null)
             System.out.println("Function is not defined");
 

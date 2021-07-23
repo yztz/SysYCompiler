@@ -14,6 +14,10 @@ public class VarSymbol extends ValueSymbol {
     @Nullable
     public int[] initValues;
     public boolean hasConstInitValue = false; //如果有的话用initValues,没有的话要用InitIR计算
+
+    // 初始数据在汇编的中的标签
+    public String asmDataLabel = null;
+
     public VarSymbol(int offset, Token symbolToken,@Nullable int[] initValues) {
         super(symbolToken);
         this.offset = offset;

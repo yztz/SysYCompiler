@@ -3,17 +3,16 @@ package symboltable;
 
 import org.antlr.v4.runtime.Token;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTable {
     private final SymbolDomain domain;
-    private final FuncSymbol func;
     private int totalOffset=0;
     private final Map<String,ValueSymbol> symbols = new HashMap<>();
-    public SymbolTable(SymbolDomain domain,FuncSymbol func) {
+    public SymbolTable(SymbolDomain domain) {
         this.domain = domain;
-        this.func = func;
     }
 
     public int getTotalOffset() {
@@ -33,7 +32,7 @@ public class SymbolTable {
      * 向符号表中登记符号
      * @param token 符号
      */
-    public VarSymbol addSymbol(Token token,int[] dimensions,int[] initValues) //类型只有一个int
+    public VarSymbol addVar(Token token, int[] dimensions, int[] initValues) //类型只有一个int
     {
         VarSymbol symbol = new VarSymbol(totalOffset, token, dimensions, initValues);
         symbols.put(token.getText(), symbol);
@@ -41,7 +40,7 @@ public class SymbolTable {
         return symbol;
     }
 
-    public VarSymbol addSymbol(Token token,int[] initValues) //类型只有一个int
+    public VarSymbol addVar(Token token, int[] initValues) //类型只有一个int
     {
         VarSymbol symbol = new VarSymbol(totalOffset, token, initValues);
         symbols.put(token.getText(), symbol);
@@ -51,16 +50,14 @@ public class SymbolTable {
 
     public void addParam(Token token)
     {
-        VarSymbol symbol = new VarSymbol(totalOffset, token , null);
-        symbol.isFuncParam = true;
+        ParamSymbol symbol = new ParamSymbol(token);
         symbols.put(token.getText(), symbol);
         //totalOffset+=4;
     }
 
     public void addParam(Token token,int[] dim)
     {
-        VarSymbol symbol = new VarSymbol(totalOffset, token,dim,null);
-        symbol.isFuncParam = true;
+        ParamSymbol symbol = new ParamSymbol(token,dim);
         symbols.put(token.getText(), symbol);
         //totalOffset+=4;
     }
@@ -75,7 +72,10 @@ public class SymbolTable {
         ConstSymbol symbol = new ConstSymbol(constValues, token,dim);
         symbols.put(token.getText(), symbol);
     }
-
+    public Collection<ValueSymbol> getAllSymbol()
+    {
+        return symbols.values();
+    }
     public boolean containSymbol(String ident)
     {
         return symbols.containsKey(ident);

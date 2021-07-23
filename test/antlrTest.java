@@ -11,6 +11,7 @@ import org.junit.Test;
 import symboltable.*;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class antlrTest {
 
@@ -44,8 +45,10 @@ public class antlrTest {
 
         System.out.println(irListener.irUnion.toString());
 
-        for (FuncSymbol funcSymbol : funcSymbolTable.funcSymbols.values()) {
-            System.out.println(funcSymbol.funcName.getText()+ ":" + funcSymbol.firstStmtHolder.getInterRepresent().lineNum);
+        for (Map<Integer,FuncSymbol> funcWithSameName : funcSymbolTable.funcSymbols.values()) {
+            for (FuncSymbol value : funcWithSameName.values()) {
+                System.out.println(value.funcName.getText()+ ":" + value.firstStmtHolder.getInterRepresent().lineNum);
+            }
         }
     }
 

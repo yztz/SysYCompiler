@@ -3,9 +3,7 @@ package symboltable;
 import antlr.SysYListener;
 import antlr.SysYParser;
 import genir.code.AddressOrData;
-import genir.code.InterRepresentFactory;
 import genir.code.ListenerUtil;
-import genir.code.SaveRepresent;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -183,7 +181,7 @@ public class SysSymbolListener implements SysYListener {
             }
             int[] dims = getDimsFromConstExp(varDefCtx.constExp());
             // 遍历完成，记录数据
-            VarSymbol varSymbol = currentSymbolTable.addSymbol(identifier.getSymbol(), dims, initValues);
+            VarSymbol varSymbol = currentSymbolTable.addVar(identifier.getSymbol(), dims, initValues);
             varSymbol.hasConstInitValue = varDefCtx.initVal().hasConstInitValue;
         }
     }

@@ -9,18 +9,26 @@ import java.util.Map;
 
 public class FuncSymbolTable {
     private int defineOrder = 0;
-    public final Map<String,FuncSymbol> funcSymbols=new HashMap<>();
+    public final Map<String,Map<Integer,FuncSymbol>> funcSymbols=new HashMap<>();
 
     public FuncSymbol addFunc(Token funcName,int paramNum,BType returnType)
     {
-        FuncSymbol funcSymbol = new FuncSymbol(funcName, defineOrder, paramNum, returnType);
-        funcSymbols.put(funcName.getText(),funcSymbol);
+        if (!funcSymbols.containsKey(funcName.getText())) {
+            funcSymbols.put(funcName.getText(),new HashMap<>());
+        }
+        Map<Integer, FuncSymbol> funcThisName = funcSymbols.get(funcName.getText());
+        FuncSymbol funcSymbol = new FuncSymbol(funcName, defineOrder, paramNum,funcThisName.size(), returnType);
+
+        funcThisName.put(paramNum, funcSymbol);
         defineOrder++;
         return funcSymbol;
     }
 
-    public FuncSymbol getFuncSymbol(String funcName)
+    public FuncSymbol getFuncSymbol(String funcName,int paramNum)
     {
-        return funcSymbols.get(funcName);
+        if (!funcSymbols.containsKey(funcName)) {
+            return null;
+        }
+        return funcSymbols.get(funcName).get(paramNum);
     }
 }
