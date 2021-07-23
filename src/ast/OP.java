@@ -7,19 +7,24 @@ public enum OP implements AstValue {
     MUL,
     DIV,
     MOD,
-    IF_ELSE,
-    WHILE,
     ASSIGN,
     OFFSET,
+
     STATEMENT,
     VAL_GROUP,
     ROOT,
-    CONST_DECL,
-    VAR_DECL,
+
+    CALL,
     PARAM,
-    RETURN,
+
+    IF_ELSE,
+    WHILE,
     CONTINUE,
     BREAK,
+    RETURN,
+
+    CONST_DECL,
+    VAR_DECL,
     FUNC_DECL,
 
     NEGATE,
@@ -30,8 +35,8 @@ public enum OP implements AstValue {
     EQ,
     NOT_EQ,
     AND,
-    CALL,
     OR;
+
 
 
     @Override
