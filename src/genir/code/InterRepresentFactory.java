@@ -1,6 +1,8 @@
 package genir.code;
 
 import symboltable.FuncSymbol;
+import symboltable.ParamSymbol;
+import symboltable.ValueSymbol;
 import symboltable.VarSymbol;
 
 public class InterRepresentFactory {
@@ -24,14 +26,14 @@ public class InterRepresentFactory {
     {
         return new CallRepresent(funcSymbol,params,currentAddress++);
     }
-    public static LoadRepresent createLoadRepresent(VarSymbol varSymbol,AddressOrData offset)
+    public static LoadRepresent createLoadRepresent(ValueSymbol varSymbol, AddressOrData offset)
     {
         return new LoadRepresent(varSymbol,offset,currentAddress++);
     }
 
-    public static SaveRepresent createSaveRepresent(VarSymbol varSymbol,AddressOrData offset,AddressOrData source)
+    public static SaveRepresent createSaveRepresent(ValueSymbol valueSymbol,AddressOrData offset,AddressOrData source)
     {
-        return new SaveRepresent(varSymbol,offset,source);
+        return new SaveRepresent(valueSymbol,offset,source);
     }
     /*public static UnaryRepre createCondJumpRepresent(SysYParser.RelExpContextBase ctx)
     {

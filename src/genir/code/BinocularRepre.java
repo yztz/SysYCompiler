@@ -1,5 +1,9 @@
 package genir.code;
 
+import asm.Address;
+
+import java.util.Collection;
+
 public class BinocularRepre extends WrittenRepresent{
     public BinocularRepre(Opcodes OP, AddressOrData sourceFirst, AddressOrData sourceSecond,
                           int targetAddr) {
@@ -13,6 +17,18 @@ public class BinocularRepre extends WrittenRepresent{
 
     public AddressOrData sourceFirst;
     public AddressOrData sourceSecond;
+
+    @Override
+    public Collection<Address> getAllAddress() {
+        Collection<Address> allAddress = super.getAllAddress();
+        if(!sourceFirst.isData)
+            allAddress.add(new Address(sourceFirst));
+
+        if(!sourceSecond.isData)
+            allAddress.add(new Address(sourceSecond));
+
+        return allAddress;
+    }
 
     @Override
     public String toString() {

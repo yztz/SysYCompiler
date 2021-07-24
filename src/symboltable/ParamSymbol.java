@@ -11,4 +11,9 @@ public class ParamSymbol extends ValueSymbol{
     public ParamSymbol(Token symbolToken, int[] dimensions) {
         super(symbolToken, dimensions);
     }
+
+    @Override
+    public int getOffsetByte() {
+        return offsetByte;
+    }
 }

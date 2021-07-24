@@ -43,5 +43,5 @@ public abstract class AbstractIR {
         vacancyHolders.clear();
     }
 
-    public abstract LinkedList<InterRepresent> flatIR();
+    public abstract List<InterRepresent> flatIR();
 }

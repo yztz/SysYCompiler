@@ -2,7 +2,7 @@ package symboltable;
 
 import org.antlr.v4.runtime.Token;
 
-public class ValueSymbol {
+public abstract class ValueSymbol {
     public Token symbolToken;
     public int[] dimensions;
     protected int length = 0;
@@ -37,4 +37,7 @@ public class ValueSymbol {
     public int getByteSize() {
         return byteSize;
     }
+
+
+    public abstract int getOffsetByte();
 }

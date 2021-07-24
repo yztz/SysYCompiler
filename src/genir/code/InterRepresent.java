@@ -1,9 +1,16 @@
 package genir.code;
 
+import asm.Address;
+import asm.Reference;
+import com.sun.istack.internal.Nullable;
 import genir.IRSection;
 import genir.IRGroup;
 
-public class InterRepresent{
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+public abstract class InterRepresent{
     public IRGroup section;
     public IRSection getGroup()
     {
@@ -13,6 +20,26 @@ public class InterRepresent{
     {
         return section;
     }
+
+    public Map<Address, Reference> refMap = new HashMap<>();
+
+    @Nullable
+    private String label;
+
+    public boolean hasLabel()
+    {
+        return label!=null;
+    }
+    @Nullable
+    public String getLabel()
+    {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
     public int lineNum;
 
     public int getLineNum() {
@@ -37,4 +64,6 @@ public class InterRepresent{
     {
         return String.format("%03d-%03d-%03d",getGroup().getID(),getSection().getID(),lineNum);
     }
+
+    public abstract Collection<Address> getAllAddress();
 }

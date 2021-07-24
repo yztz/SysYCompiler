@@ -1,11 +1,12 @@
 package asm.converter;
 
 import asm.AsmBuilder;
-import genir.IRFunction;
+import asm.RegGetter;
+import genir.IRBlock;
 import genir.code.InterRepresent;
+import symboltable.FuncSymbol;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class AsmConvertOrganizer {
@@ -17,18 +18,27 @@ public class AsmConvertOrganizer {
     {
         allConverter.add(new BinocularConverter());
         allConverter.add(new LoadConverter());
+        allConverter.add(new SaveConverter());
+        allConverter.add(new GotoConverter());
+        allConverter.add(new IfGotoConverter());
+        allConverter.add(new ReturnConverter());
+        allConverter.add(new CallConverter());
     }
 
-    public static void process(AsmBuilder builder,IRFunction irFunction)
+    public static void process(AsmBuilder builder, RegGetter regGetter, FuncSymbol funcSymbol, IRBlock irBlock)
     {
         int i = 0;
-        LinkedList<InterRepresent> flatIRList = irFunction.flatIR();
+        List<InterRepresent> flatIRList = irBlock.flatIR();
         for (InterRepresent ir :flatIRList) {
             for (AsmConverter converter : allConverter) {
                 if(!converter.needProcess(ir,flatIRList,i))
                     continue;
 
-                converter.process(builder,ir,flatIRList,i);
+                if(ir.hasLabel())
+                {
+                    builder.label(ir.getLabel());
+                }
+                converter.process(builder,regGetter , ir , flatIRList, i,funcSymbol );
 
                 break;
             }

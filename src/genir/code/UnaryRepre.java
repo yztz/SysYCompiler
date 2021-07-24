@@ -1,5 +1,9 @@
 package genir.code;
 
+import asm.Address;
+
+import java.util.Collection;
+
 public class UnaryRepre extends WrittenRepresent{
     public UnaryOp OP;
     public AddressOrData source;
@@ -8,6 +12,15 @@ public class UnaryRepre extends WrittenRepresent{
         this.OP = OP;
         this.source = source;
         this.target = new AddressOrData(false, targetAddr);
+    }
+
+    @Override
+    public Collection<Address> getAllAddress() {
+        Collection<Address> allAddress = super.getAllAddress();
+        if(!source.isData)
+            allAddress.add(new Address(source));
+
+        return allAddress;
     }
 
     @Override

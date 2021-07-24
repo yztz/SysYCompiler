@@ -1,5 +1,11 @@
 package genir.code;
 
+import asm.Address;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
 public class ReturnRepresent extends InterRepresent{
     public AddressOrData returnData;
 
@@ -18,5 +24,13 @@ public class ReturnRepresent extends InterRepresent{
             return String.format("%s: %-7s %-4s",lineNumToString(),"RET",returnData.toString());
         }
         return String.format("%s: %-7s",lineNumToString(),"RET");
+    }
+
+    @Override
+    public Collection<Address> getAllAddress() {
+        if(returnData==null)
+            return Collections.emptyList();
+
+        return Arrays.asList(new Address(returnData));
     }
 }

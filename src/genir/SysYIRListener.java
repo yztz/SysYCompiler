@@ -200,13 +200,14 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void exitFuncDef(SysYParser.FuncDefContext ctx) {
 
-        if(_currentIRFunc.getLineOccupied()==0||
+        // 其实根本不需要
+        /*if(_currentIRFunc.getLineOccupied()==0||
             !(_currentIRFunc.getLast().getLastIR() instanceof ReturnRepresent))
         {
             IRGroup irGroup = new IRGroup("default return");
             irGroup.addCode(new ReturnRepresent());
             _currentIRFunc.addGroup(irGroup);
-        }
+        }*/
 
     }
 
@@ -464,6 +465,7 @@ public class SysYIRListener implements SysYListener {
         retGroup.addCode(returnRepresent);
 
         _currentIRFunc.addGroup(retGroup);
+        ctx.startStmt = ctx.endStmt = retGroup;
     }
 
     @Override
@@ -527,12 +529,12 @@ public class SysYIRListener implements SysYListener {
         {
             SysYParser.LValContext lValCtx = ctx.lVal();
             ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
-            if(symbolAndOffset!=null && symbolAndOffset.symbol instanceof VarSymbol)
+            if(symbolAndOffset!=null)
             {
                 for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                     ctx.irGroup.addCode(ir);
                 }
-                LoadRepresent loadRepresent = InterRepresentFactory.createLoadRepresent((VarSymbol) symbolAndOffset.symbol
+                LoadRepresent loadRepresent = InterRepresentFactory.createLoadRepresent(symbolAndOffset.symbol
                         , symbolAndOffset.offsetResult);
                 ctx.irGroup.addCode(loadRepresent);
                 ctx.result = loadRepresent.target;

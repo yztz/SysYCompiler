@@ -182,7 +182,10 @@ public class SysSymbolListener implements SysYListener {
             int[] dims = getDimsFromConstExp(varDefCtx.constExp());
             // 遍历完成，记录数据
             VarSymbol varSymbol = currentSymbolTable.addVar(identifier.getSymbol(), dims, initValues);
-            varSymbol.hasConstInitValue = varDefCtx.initVal().hasConstInitValue;
+            if(varDefCtx.initVal()!=null)
+            {
+                varSymbol.hasConstInitValue = varDefCtx.initVal().hasConstInitValue;
+            }
         }
     }
     private int getLengthFromDimensions(int[] dimensions)

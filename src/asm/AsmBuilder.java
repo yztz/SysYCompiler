@@ -134,15 +134,15 @@ public class AsmBuilder {
     }
 
     public AsmBuilder tripleReg(TripleRegOP op, Reg rd, Reg rn, Reg rm) {
-        return addInstruction(op.name(), rd.getText(), rn.getText(), rm.getText());
+        return addInstruction(op.getText(), rd.getText(), rn.getText(), rm.getText());
     }
 
     public AsmBuilder regOperand(RegOperandOP op, Reg rd, Operand operand) {
-        return addInstruction(op.name(), rd.getText(), operand.getText());
+        return addInstruction(op.getText(), rd.getText(), operand.getText());
     }
 
     public AsmBuilder regRegOperand(RegRegOperandOP op, Reg rd, Reg rn, Operand operand) {
-        return addInstruction(op.name(), rd.getText(), rn.getText(), operand.getText());
+        return addInstruction(op.getText(), rd.getText(), rn.getText(), operand.getText());
     }
 
 /*    public AsmBuilder jumpLabel(String op,String label)
@@ -151,8 +151,23 @@ public class AsmBuilder {
     }*/
     // --------------------跳转指令-------------------------------------
 
+    public AsmBuilder cmp(Reg rd,Reg rn)
+    {
+        return regOperand(RegOperandOP.CMP,rd,new RegOperand(rn));
+    }
+
+    public AsmBuilder cmp(Reg rd,int imm8m)
+    {
+        return regOperand(RegOperandOP.CMP,rd,new ImmOperand(imm8m));
+    }
+
+    public AsmBuilder bxx(CondB cond,String label)
+    {
+        return addInstruction(cond.getText(),label);
+    }
+
     public AsmBuilder b(String label) {
-        return addInstruction("bl", label);
+        return addInstruction("b", label);
     }
 
     public AsmBuilder bl(String label) {
@@ -203,6 +218,14 @@ public class AsmBuilder {
     public AsmBuilder ldr(String label)
     {
         return addInstruction("ldr",label);
+    }
+    public AsmBuilder ldr(Reg rd,Reg rn,int offset)
+    {
+        return mem(Mem.LDR,null,rd,rn,offset,false,false);
+    }
+    public AsmBuilder str(Reg rd,Reg rn,int offset)
+    {
+        return mem(Mem.STR,null,rd,rn,offset,false,false);
     }
 
     //----------------------------------常用-----------------------------------
@@ -264,9 +287,9 @@ public class AsmBuilder {
         String regList = Arrays.stream(regs).map(Reg::getText).collect(Collectors.joining(","));
         if(pc)
         {
-            return addInstruction("push",String.format("{%s,pc}",regList));
+            return addInstruction("pop",String.format("{%s,pc}",regList));
         }
-        return addInstruction("push",String.format("{%s}",regList));
+        return addInstruction("pop",String.format("{%s}",regList));
     }
 
     public static String toImm(int imm)
@@ -318,7 +341,12 @@ public class AsmBuilder {
         UMLAL,
         UMAAL,
         SDIV,//有符号除
-        UDIV,//无符号除
+        UDIV;//无符号除
+
+        public String getText()
+        {
+            return name().toLowerCase(Locale.ROOT);
+        }
     }
 
     public enum Mem {
@@ -355,5 +383,29 @@ public class AsmBuilder {
         FD,
         EA,
         FA,
+    }
+
+    public enum CondB{
+        BEQ ,//相等
+        BNE ,//不等
+        BPL ,//非负
+        BMI ,//负
+        BCC ,//无进位
+        BCS ,//有进位
+        BLO ,//小于（无符号数）
+        BHS ,//大于等于（无符号数）
+        BHI ,//大于（无符号数）
+        BLS ,//小于等于（无符号数）
+        BVC ,//无溢出（有符号数）
+        BVS ,//有溢出（有符号数）
+        BGT ,//大于（有符号数）
+        BGE ,//大于等于（有符号数）
+        BLT ,//小于（有符号数）
+        BLE //小于等于（有符号数）
+        ;
+        public String getText()
+        {
+            return name().toLowerCase(Locale.ROOT);
+        }
     }
 }

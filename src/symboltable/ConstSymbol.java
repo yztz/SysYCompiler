@@ -14,4 +14,9 @@ public class ConstSymbol extends ValueSymbol{
         super(symbolToken, dimensions);
         constVal = val;
     }
+
+    @Override
+    public int getOffsetByte() {
+        return 0;
+    }
 }

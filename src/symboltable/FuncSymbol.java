@@ -32,7 +32,10 @@ public class FuncSymbol {
     {
         return overloadIdent==0?funcName.getText():String.format("%s.%d",funcName,overloadIdent);
     }
-
+    public String getAsmEndLabel()
+    {
+        return String.format("%s.end",getAsmLabel());
+    }
     public boolean hasReturn()
     {
         return returnType!=BType.VOID;
