@@ -11,7 +11,7 @@ import symboltable.FuncSymbolTable;
 import symboltable.SymbolScanner;
 import symboltable.SymbolTableHost;
 
-import java.io.IOException;
+import java.io.*;
 
 public class compiler {
     public static void main(String[] args)
@@ -48,12 +48,22 @@ public class compiler {
         SysYIRListener irListener = new SysYIRListener(symbolTableHost, funcSymbolTable);
         walker.walk(irListener, tree);
 
-        System.out.println(irListener.irUnion.toString());
+        //System.out.println(irListener.irUnion.toString());
 
         AsmGen asmGen = new AsmGen(symbolTableHost);
         String result = asmGen.generate(irListener.irUnion);
 
-        System.out.println(result);
+        FileWriter writer;
+        try {
+            writer = new FileWriter("E:/token.txt");
+            writer.write("");//清空原文件内容
+            writer.write(result);
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //System.out.println(result);
     }
     private static void prepareSymbol(ParseTree tree, ParseTreeWalker walker, SymbolTableHost symbolTableHost,
                                 FuncSymbolTable funcSymbolTable) {
