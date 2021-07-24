@@ -48,6 +48,8 @@ public class compiler {
         SysYIRListener irListener = new SysYIRListener(symbolTableHost, funcSymbolTable);
         walker.walk(irListener, tree);
 
+        System.out.println(irListener.irUnion.toString());
+
         AsmGen asmGen = new AsmGen(symbolTableHost);
         String result = asmGen.generate(irListener.irUnion);
 

@@ -309,6 +309,8 @@ public class AsmBuilder {
     }
 
     public enum TripleRegOP {
+        ADD,
+        SUB,
         MUL, //乘
         MLA, //乘并加
         MLS, //乘并减

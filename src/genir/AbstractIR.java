@@ -5,6 +5,8 @@ import genir.code.InterRepresent;
 import genir.code.InterRepresentHolder;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 public abstract class AbstractIR {
@@ -40,4 +42,6 @@ public abstract class AbstractIR {
         }
         vacancyHolders.clear();
     }
+
+    public abstract LinkedList<InterRepresent> flatIR();
 }

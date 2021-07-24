@@ -1,5 +1,6 @@
 package asm;
 
+import asm.converter.AsmConvertOrganizer;
 import genir.AbstractIR;
 import genir.IRFunction;
 import genir.IRUnion;
@@ -46,6 +47,8 @@ public class AsmGen {
 
         asmBuilder.mov(Regs.R0,5);
         // todo 汇编代码生成
+
+        AsmConvertOrganizer.process(asmBuilder,irFunction);
 
         genFunctionGenericEnd(asmBuilder,funcSymbol);
 

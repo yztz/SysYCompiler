@@ -86,6 +86,11 @@ public class IRGroup extends AbstractIR{
         return totalOccupied;
     }
 
+    @Override
+    public LinkedList<InterRepresent> flatIR() {
+        return _irs;
+    }
+
     public int getSize()
     {
         return _irs.size();

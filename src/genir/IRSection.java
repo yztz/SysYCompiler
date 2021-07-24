@@ -80,7 +80,7 @@ public class IRSection extends AbstractIR{
             return;
         irGroups.addAll(another.irGroups);
     }
-    public int getSectionSize()
+    public int getGroupSize()
     {
         return irGroups.size();
     }
@@ -94,6 +94,16 @@ public class IRSection extends AbstractIR{
         }
         return total;
     }
+
+    @Override
+    public LinkedList<InterRepresent> flatIR() {
+        LinkedList<InterRepresent> result = new LinkedList<>();
+        for (IRGroup irGroup : irGroups) {
+            result.addAll(irGroup.flatIR());
+        }
+        return result;
+    }
+
     public IRGroup getFirst()
     {
         if(irGroups.size()==0)
@@ -106,6 +116,12 @@ public class IRSection extends AbstractIR{
             return null;
         return irGroups.getLast();
     }
+
+    public IRGroup get(int index)
+    {
+        return irGroups.get(index);
+    }
+
     @Nullable
     public InterRepresent getFirstIR()
     {

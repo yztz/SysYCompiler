@@ -4,9 +4,11 @@ import genir.code.InterRepresent;
 import genir.code.InterRepresentHolder;
 import symboltable.FuncSymbol;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 
-public class IRFunction extends AbstractIR {
+public class IRFunction extends AbstractIR{
     private final LinkedList<IRSection> sections = new LinkedList<>();
     int nextGroupID = 0;
     private IRSection currentSection = null;
@@ -41,6 +43,8 @@ public class IRFunction extends AbstractIR {
         currentSection.vacancyHolders.clear();
         currentSection = null;
     }
+
+
 
     private void startDefaultSection()
     {
@@ -141,4 +145,16 @@ public class IRFunction extends AbstractIR {
         }
         return totalOccupied;
     }
+
+    @Override
+    public LinkedList<InterRepresent> flatIR() {
+        LinkedList<InterRepresent> irs = new LinkedList<>();
+        for (IRSection section : sections) {
+            irs.addAll(section.flatIR());
+        }
+
+        return irs;
+    }
+
+
 }

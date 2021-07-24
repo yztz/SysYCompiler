@@ -5,8 +5,10 @@ import genir.AbstractIR;
 import genir.IRFunction;
 import genir.code.InterRepresent;
 
-public abstract class AsmConverter {
-    public abstract boolean needProcess(InterRepresent ir, AbstractIR irFunction, int index);
+import java.util.Collection;
 
-    public abstract void process(AsmBuilder builder);
+public abstract class AsmConverter {
+    public abstract boolean needProcess(InterRepresent ir, Collection<InterRepresent> allIR, int index);
+
+    public abstract void process(AsmBuilder builder,InterRepresent ir,  Collection<InterRepresent> allIR, int index);
 }
