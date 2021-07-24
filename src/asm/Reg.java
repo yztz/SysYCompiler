@@ -11,7 +11,15 @@ public class Reg {
     }
 
     public String getText() {
-        return this.toString().toLowerCase(Locale.ROOT);
+        if(id==11)
+            return "fp";
+        else if(id == 13)
+            return "sp";
+        else if(id == 14)
+            return "lr";
+        else if(id ==15)
+            return "pc";
+        return String.format("r%d",id);
     }
 
     @Override

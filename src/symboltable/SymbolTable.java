@@ -47,11 +47,13 @@ public class SymbolTable {
         totalOffset+=symbol.length*4;
         return symbol;
     }
-
+    private int paramOffset = 0;
     public void addParam(Token token)
     {
         ParamSymbol symbol = new ParamSymbol(token);
         symbols.put(token.getText(), symbol);
+        symbol.offsetByte = paramOffset;
+        paramOffset+=4;
         //totalOffset+=4;
     }
 
@@ -59,7 +61,8 @@ public class SymbolTable {
     {
         ParamSymbol symbol = new ParamSymbol(token,dim);
         symbols.put(token.getText(), symbol);
-        //totalOffset+=4;
+        symbol.offsetByte = paramOffset;
+        paramOffset+=4;
     }
     public void addConst(Token token,int constValue)
     {

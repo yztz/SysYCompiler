@@ -15,4 +15,11 @@ public class AsmSection {
     {
         statements.add(line);
     }
+
+    public void getText(StringBuilder builder)
+    {
+        for (String stmt : statements) {
+            builder.append(stmt).append("\r\n");
+        }
+    }
 }

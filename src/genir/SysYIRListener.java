@@ -32,14 +32,14 @@ public class SysYIRListener implements SysYListener {
     public void enterCompUnit(SysYParser.CompUnitContext ctx) {
         if (ctx.decl()!=null && ctx.decl().size()>0) {
             IRSection declGroup = new IRSection("declare symbol");
-            irUnion.children.add(declGroup);
+            irUnion.addIR(declGroup);
             for (int i = 0; i < ctx.children.size(); i++) {
 
                 if (ctx.children.get(i)instanceof SysYParser.DeclContext) {
                     if(i!=0 && !(ctx.children.get(i-1) instanceof SysYParser.DeclContext))
                     {
                         declGroup = new IRSection("declare symbol");
-                        irUnion.children.add(declGroup);
+                        irUnion.addIR(declGroup);
                     }
                     // todo ((SysYParser.DeclContext) ctx.children.get(i)).irGroup=declGroup;
                 }
@@ -49,9 +49,9 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitCompUnit(SysYParser.CompUnitContext ctx) {
-        for (SysYParser.FuncDefContext funcCtx : ctx.funcDef()) {
-            irUnion.children.addLast(funcCtx.irFunction);
-        }
+//        for (SysYParser.FuncDefContext funcCtx : ctx.funcDef()) {
+//            irUnion.addIR(funcCtx.irFunction);
+//        }
     }
 
     @Override
@@ -187,10 +187,14 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterFuncDef(SysYParser.FuncDefContext ctx) {
-        FuncSymbol funcSymbol = funcSymbolTable.getFuncSymbol(ctx.Identifier().getText(),
-                                                              ctx.funcFParams().funcFParam().size());
+        int funSize = 0;
+        if(ctx.funcFParams()!=null)
+        {
+            funSize  = ctx.funcFParams().funcFParam().size();
+        }
+        FuncSymbol funcSymbol = funcSymbolTable.getFuncSymbol(ctx.Identifier().getText(),funSize);
         _currentIRFunc = new IRFunction(funcSymbol);
-        irUnion.children.add(_currentIRFunc);
+        irUnion.addIR(_currentIRFunc);
     }
 
     @Override
@@ -572,6 +576,9 @@ public class SysYIRListener implements SysYListener {
         }else{
             ir = InterRepresentFactory.createFuncCallRepresent(funcSymbol);
         }
+
+        _currentIRFunc.funcSymbol.setHasFuncCallInside(true);
+
         ctx.irGroup.addCode(ir);
         ctx.result = ir.returnResult;
     }

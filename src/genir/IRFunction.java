@@ -133,7 +133,6 @@ public class IRFunction extends AbstractIR {
     }
 
 
-
     @Override
     public int getLineOccupied() {
         int totalOccupied = 0;

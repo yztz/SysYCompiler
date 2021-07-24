@@ -11,6 +11,8 @@ public class SymbolDomain {
         this.fatherDomain = fatherDomain;
         symbolTable=new SymbolTable(this);
         func=funcSymbol;
+        if(funcSymbol!=null)
+            func.addDomain(this);
         this.id = id;
     }
 

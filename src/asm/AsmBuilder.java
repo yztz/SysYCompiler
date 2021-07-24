@@ -5,7 +5,10 @@ import asm.operand.Operand;
 import asm.operand.RegOperand;
 import asm.operand.ShiftOp;
 
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("UnusedReturnValue")
 public class AsmBuilder {
@@ -49,8 +52,7 @@ public class AsmBuilder {
     }
 
     public AsmBuilder label() {
-        building.add(label);
-        return this;
+        return label(label);
     }
 
     public AsmBuilder data() {
@@ -117,17 +119,17 @@ public class AsmBuilder {
     //========================汇编指令部分===================================
 
     public AsmBuilder addInstruction(String op, String r1, String r2, String r3) {
-        building.add(String.format("%s\t%s, %s, %s", op, r1, r2, r3));
+        building.add(String.format("\t%s\t%s, %s, %s", op, r1, r2, r3));
         return this;
     }
 
     public AsmBuilder addInstruction(String op, String r1, String r2) {
-        building.add(String.format("%s\t%s, %s", op, r1, r2));
+        building.add(String.format("\t%s\t%s, %s", op, r1, r2));
         return this;
     }
 
     public AsmBuilder addInstruction(String op, String r1) {
-        building.add(String.format("%s\t%s", op, r1));
+        building.add(String.format("\t%s\t%s", op, r1));
         return this;
     }
 
@@ -167,9 +169,9 @@ public class AsmBuilder {
 
         if (postOffset) //操作完成后，变址
         {
-            return addInstruction(op + s, rd.getText(), String.format("[%s], #%d", rn.getText(), offset));
+            return addInstruction(op.getText() + s, rd.getText(), String.format("[%s], #%d", rn.getText(), offset));
         } else { //操作前变址
-            return addInstruction(op + s, rd.getText(), saveOffset ? //保存变址结果到地址寄存器
+            return addInstruction(op.getText() + s, rd.getText(), saveOffset ? //保存变址结果到地址寄存器
                     String.format("[%s, #%d]!", rn.getText(), offset) : String.format("[%s, #%d]", rn.getText(),
                                                                                       offset));
         }
@@ -180,13 +182,13 @@ public class AsmBuilder {
 
         if (postOffset) //操作完成后，变址
         {
-            return addInstruction(op + s, rd.getText(),
+            return addInstruction(op.getText() + s, rd.getText(),
                                   String.format("[%s], %s%s, %s#%d", rn.getText(), rmNeg ? "-" : "", rm.getText(),
                                                 shiftOp.getText(), shift));
         } else if (shift == 0) { //操作前变址
 
 
-            return addInstruction(op + s, rd.getText(),
+            return addInstruction(op.getText() + s, rd.getText(),
                                   String.format("[%s, %s%s]%s", rn.getText(), rmNeg ? "-" : "", rm.getText(),
                                                 saveOffset ? "!" : ""));
         } else {
@@ -215,7 +217,7 @@ public class AsmBuilder {
     }
     public AsmBuilder mov(Reg rd,int imm12)
     {
-        return addInstruction(RegOperandOP.MOV.getText(),rd.getText(),String.valueOf(imm12));
+        return addInstruction(RegOperandOP.MOV.getText(),rd.getText(),String.format("#%d",imm12));
     }
 
     public AsmBuilder add(Reg rd,Reg rn,Operand operand)
@@ -246,6 +248,25 @@ public class AsmBuilder {
     public AsmBuilder sub(Reg rd,Reg rn,int imm12)
     {
         return addInstruction(RegRegOperandOP.SUB.getText(),rd.getText(),rn.getText(),toImm(imm12));
+    }
+
+    public AsmBuilder push(Reg[] regs,boolean lr)
+    {
+        String regList = Arrays.stream(regs).map(Reg::getText).collect(Collectors.joining(","));
+        if(lr)
+        {
+            return addInstruction("push",String.format("{%s,lr}",regList));
+        }
+        return addInstruction("push",String.format("{%s}",regList));
+    }
+    public AsmBuilder pop(Reg[] regs,boolean pc)
+    {
+        String regList = Arrays.stream(regs).map(Reg::getText).collect(Collectors.joining(","));
+        if(pc)
+        {
+            return addInstruction("push",String.format("{%s,pc}",regList));
+        }
+        return addInstruction("push",String.format("{%s}",regList));
     }
 
     public static String toImm(int imm)
@@ -299,7 +320,11 @@ public class AsmBuilder {
     }
 
     public enum Mem {
-        LDR, STR
+        LDR, STR;
+        public String getText()
+        {
+            return name().toLowerCase(Locale.ROOT);
+        }
     }
 
     public enum Size {

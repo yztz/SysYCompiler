@@ -1,5 +1,6 @@
 import antlr.SysYLexer;
 import antlr.SysYParser;
+import asm.AsmGen;
 import genir.SysYIRListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -46,6 +47,11 @@ public class compiler {
         prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
         SysYIRListener irListener = new SysYIRListener(symbolTableHost, funcSymbolTable);
         walker.walk(irListener, tree);
+
+        AsmGen asmGen = new AsmGen(symbolTableHost);
+        String result = asmGen.generate(irListener.irUnion);
+
+        System.out.println(result);
     }
     private static void prepareSymbol(ParseTree tree, ParseTreeWalker walker, SymbolTableHost symbolTableHost,
                                 FuncSymbolTable funcSymbolTable) {

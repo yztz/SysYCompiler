@@ -23,4 +23,6 @@ int main()
     }else {
         result = 100;
     }
+
+    return func();
 }

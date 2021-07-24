@@ -45,11 +45,11 @@ public class antlrTest {
 
         System.out.println(irListener.irUnion.toString());
 
-        for (Map<Integer,FuncSymbol> funcWithSameName : funcSymbolTable.funcSymbols.values()) {
+/*        for (Map<Integer,FuncSymbol> funcWithSameName : funcSymbolTable.funcSymbols.values()) {
             for (FuncSymbol value : funcWithSameName.values()) {
                 System.out.println(value.funcName.getText()+ ":" + value.firstStmtHolder.getInterRepresent().lineNum);
             }
-        }
+        }*/
     }
 
     @Test
