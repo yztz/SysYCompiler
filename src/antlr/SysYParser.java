@@ -2,12 +2,11 @@
 
 package antlr;
 
-import genir.IRFunction;
-import genir.IRSection;
-import genir.IRGroup;
-import genir.code.AddressOrData;
-import genir.code.GotoRepresent;
-import genir.code.InterRepresentHolder;
+import compiler.genir.IRFunction;
+import compiler.genir.IRGroup;
+import compiler.genir.code.AddressOrData;
+import compiler.genir.code.GotoRepresent;
+import compiler.genir.code.InterRepresentHolder;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.atn.ATNDeserializer;
@@ -17,7 +16,7 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import symboltable.SymbolDomain;
+import compiler.symboltable.SymbolDomain;
 
 import java.util.List;
 

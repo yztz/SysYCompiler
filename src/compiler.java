@@ -1,15 +1,15 @@
 import antlr.SysYLexer;
 import antlr.SysYParser;
-import asm.AsmGen;
-import genir.SysYIRListener;
+import compiler.asm.AsmGen;
+import compiler.genir.SysYIRListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import symboltable.FuncSymbolTable;
-import symboltable.SymbolScanner;
-import symboltable.SymbolTableHost;
+import compiler.symboltable.FuncSymbolTable;
+import compiler.symboltable.SymbolScanner;
+import compiler.symboltable.SymbolTableHost;
 
 import java.io.*;
 
@@ -31,7 +31,8 @@ public class compiler {
                     optimization = true;
                     break;
                 case "-o":
-                    outputFileStr = args[i++];
+                    outputFileStr = args[i+1];
+                    i++;
                     break;
                 default:
                     inputFileStr = arg;
@@ -48,14 +49,14 @@ public class compiler {
         SysYIRListener irListener = new SysYIRListener(symbolTableHost, funcSymbolTable);
         walker.walk(irListener, tree);
 
-        //System.out.println(irListener.irUnion.toString());
+        System.out.println(irListener.irUnion.toString());
 
         AsmGen asmGen = new AsmGen(symbolTableHost);
         String result = asmGen.generate(irListener.irUnion);
 
         FileWriter writer;
         try {
-            writer = new FileWriter("E:/token.txt");
+            writer = new FileWriter(outputFileStr);
             writer.write("");//清空原文件内容
             writer.write(result);
             writer.flush();

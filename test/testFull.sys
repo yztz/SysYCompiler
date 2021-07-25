@@ -1,3 +1,4 @@
+/*
 int a = 55;
 
 int func()
@@ -18,4 +19,21 @@ int main()
     }
     func();
     return result;
+}*/
+
+int sum(int arr[],int len)
+{
+    int i = 0;
+    int s = 0;
+    while(i<len)
+    {
+        s = s+arr[i];
+    }
+    return s;
+}
+
+int main()
+{
+    int array[5] = {1,4,7,3,10};
+    return sum(array,5);
 }
