@@ -541,14 +541,24 @@ public class SysYIRListener implements SysYListener {
             ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
             if(symbolAndOffset!=null)
             {
-
-                for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
-                    ctx.irGroup.addCode(ir);
+                //是数组，并且没有下标表达式，则取地址
+                if(symbolAndOffset.symbol.isArray() && (lValCtx.exp()==null||lValCtx.exp().size()==0))
+                {
+                    LAddrRepresent lAddrRepresent = InterRepresentFactory.createLAddrRepresent(
+                            symbolAndOffset.symbol
+                    );
+                    ctx.irGroup.addCode(lAddrRepresent);
+                    ctx.result = lAddrRepresent.target;
+                }else{ //否则则取对应值
+                    for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
+                        ctx.irGroup.addCode(ir);
+                    }
+                    LoadRepresent loadRepresent = InterRepresentFactory.createLoadRepresent(symbolAndOffset.symbol
+                            , symbolAndOffset.offsetResult);
+                    ctx.irGroup.addCode(loadRepresent);
+                    ctx.result = loadRepresent.target;
                 }
-                LoadRepresent loadRepresent = InterRepresentFactory.createLoadRepresent(symbolAndOffset.symbol
-                        , symbolAndOffset.offsetResult);
-                ctx.irGroup.addCode(loadRepresent);
-                ctx.result = loadRepresent.target;
+
             }
         }else{
             ctx.result=ctx.exp().result;

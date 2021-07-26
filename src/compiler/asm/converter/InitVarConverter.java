@@ -31,8 +31,8 @@ public class InitVarConverter extends AsmConverter{
             {
                 /*Reg src = regGetter.getTmpRegister(0);
                 Reg des = regGetter.getTmpRegister(1);*/
-                builder.ldr(Regs.R0,funcDataLabel,offsetInFuncData);
-                builder.sub(Regs.R1, Regs.FP,-Util.getSymbolOffsetFp(varSymbol));
+                builder.sub(Regs.R0, Regs.FP,-Util.getSymbolOffsetFp(varSymbol));
+                builder.ldr(Regs.R1,funcDataLabel,offsetInFuncData);
                 builder.mov(Regs.R2,varSymbol.getByteSize());
                 builder.bl("memcpy");
             }else{ //小于4个，用sdr加载

@@ -28,6 +28,10 @@ public class InterRepresentFactory {
     {
         return new LoadRepresent(varSymbol,offset,new AddressOrData(false,currentAddress++) );
     }
+    public static LAddrRepresent createLAddrRepresent(ValueSymbol varSymbol)
+    {
+        return new LAddrRepresent(new AddressOrData(false,currentAddress++),varSymbol );
+    }
 
     public static SaveRepresent createSaveRepresent(ValueSymbol valueSymbol,AddressOrData offset,AddressOrData source)
     {

@@ -53,6 +53,10 @@ public class AsmBuilder {
         return this;
     }
 
+    public AsmBuilder sectionType(String type)
+    {
+        return addDirective("section",type);
+    }
     public AsmBuilder word(int value) {
         return addDirective("word", String.valueOf(value));
     }
