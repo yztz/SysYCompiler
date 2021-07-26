@@ -1,11 +1,9 @@
-package ast.symbol;
+package common.symbol;
 
 import ast.AstValue;
+import ast.Immediate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Variable implements AstValue {
     public static final int INT_WIDTH = 4;
@@ -17,7 +15,10 @@ public class Variable implements AstValue {
     public boolean isArray;
     public List<Integer> dimensions;
     public int size;
+    public int width = INT_WIDTH;
     public Map<Integer, Integer> constVal = new HashMap<>();
+
+    public Set<AstValue> location = new HashSet<>();
 
     public int pos = 0; //用于数组初始化赋值
 
@@ -28,6 +29,8 @@ public class Variable implements AstValue {
         this.isConst = isConst;
         this.isArray = isArray;
         this.size = size;
+
+        location.add(new Immediate(offset));
     }
 
     public void addConstVal(int val) {
@@ -72,18 +75,22 @@ public class Variable implements AstValue {
 //        return array(name, -1, null, dimensions);
 //    }
 
+    public int getOffset() {
+        return -offset * width;
+    }
     @Override
     public String toString() {
-        String h = name + " = ";
-        if (isArray) {
-            StringBuilder sb = new StringBuilder(h).append('[').append(indexConstVal(0));
-            for (int i = 1; i < size; i++) {
-                sb.append(", ").append(indexConstVal(i));
-            }
-            return sb.append(']').toString();
-        } else {
-            return h + indexConstVal(0);
-        }
+        return name;
+//        String h = name + " = ";
+//        if (isArray) {
+//            StringBuilder sb = new StringBuilder(h).append('[').append(indexConstVal(0));
+//            for (int i = 1; i < size; i++) {
+//                sb.append(", ").append(indexConstVal(i));
+//            }
+//            return sb.append(']').toString();
+//        } else {
+//            return h + indexConstVal(0);
+//        }
     }
 
     @Override

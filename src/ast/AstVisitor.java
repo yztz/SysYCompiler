@@ -1,18 +1,16 @@
 package ast;
 
 import antlr.SysYBaseVisitor;
-import antlr.SysYLexer;
 import antlr.SysYParser;
-import ast.symbol.Domain;
-import ast.symbol.Function;
-import ast.symbol.Variable;
+import common.symbol.Domain;
+import common.symbol.Function;
+import common.symbol.Variable;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class MyVisitor extends SysYBaseVisitor<AstNode> {
+public class AstVisitor extends SysYBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitCompUnit(SysYParser.CompUnitContext ctx) {
@@ -49,7 +47,7 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
         AstNode right = visit(ctx.block());
         // 离开
         Domain.leaveFunc();
-        if (!OP.RETURN.getVal().equals(right.getRight().value.getVal())) {
+        if (right.isLeaf() || right.getRight().op != OP.RETURN) {
             right.addNode(AstNode.makeLeaf(OP.RETURN));
         }
         return AstNode.makeBinaryNode(OP.FUNC_DECL, AstNode.makeLeaf(function), right);
@@ -82,17 +80,26 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
     @Override
     public AstNode visitIfStat(SysYParser.IfStatContext ctx) {
         AstNode ret = AstNode.makeEmptyNode(OP.IF_ELSE);
-        for (ParseTree child : ctx.children) {
-            ret.addNode(visit(child));
+        ret.addNode(visit(ctx.cond()));
+//        ret.addNode(AstNode.makeLeaf(Label.newLabel()));
+        ret.addNode(visit(ctx.stmt(0)));
+//        ret.addNode(AstNode.makeLeaf(Label.newLabel()));
+        if (null != ctx.stmt(1)) {
+            ret.addNode(visit(ctx.stmt(1)));
+        } else {    // 添加完整的if-else
+            ret.addNode(AstNode.makeEmptyNode(OP.STATEMENT));
         }
         return ret;
     }
 
     @Override
     public AstNode visitWhileStat(SysYParser.WhileStatContext ctx) {
-        AstNode left = visit(ctx.cond());
-        AstNode right = visit(ctx.stmt());
-        return AstNode.makeBinaryNode(OP.WHILE, left, right);
+        AstNode ret = AstNode.makeEmptyNode(OP.WHILE);
+        ret.addNode(visit(ctx.cond()));
+//        ret.addNode(AstNode.makeLeaf(Label.newLabel()));
+        ret.addNode(visit(ctx.stmt()));
+//        ret.addNode(AstNode.makeLeaf(Label.newLabel()));
+        return ret;
     }
 
     @Override
@@ -102,6 +109,10 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
         } else {
             AstNode left = visit(ctx.lOrExp());
             AstNode right = visit(ctx.lAndExp());
+
+            if (left.isLeaf()) left = AstNode.makeBinaryNode(OP.EQ, left, AstNode.makeLeaf(1));
+            if (right.isLeaf()) right = AstNode.makeBinaryNode(OP.EQ, right, AstNode.makeLeaf(1));
+
             return AstNode.makeBinaryNode(OP.OR, left, right);
         }
     }
@@ -113,6 +124,10 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
         } else {
             AstNode left = visit(ctx.lAndExp());
             AstNode right = visit(ctx.eqExp());
+
+            if (left.isLeaf()) left = AstNode.makeBinaryNode(OP.EQ, left, AstNode.makeLeaf(1));
+            if (right.isLeaf()) right = AstNode.makeBinaryNode(OP.EQ, right, AstNode.makeLeaf(1));
+
             return AstNode.makeBinaryNode(OP.AND, left, right);
         }
     }
@@ -136,6 +151,7 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
     public AstNode visitRelExp(SysYParser.RelExpContext ctx) {
         if (null == ctx.op) {
             return visit(ctx.addExp());
+//            return AstNode.makeBinaryNode(OP.EQ, visit(ctx.addExp()), AstNode.makeLeaf(1));
         } else {
             AstNode left = visit(ctx.relExp());
             AstNode right = visit(ctx.addExp());
@@ -175,7 +191,7 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitVarDecl(SysYParser.VarDeclContext ctx) {
-        AstNode ret = AstNode.makeEmptyNode(OP.VAR_DECL);
+        AstNode ret = AstNode.makeEmptyNode(OP.ASSIGN_GROUP);
         for (SysYParser.VarDefContext defCtx : ctx.varDef()) {
             ret.addNode(visit(defCtx));
         }
@@ -204,13 +220,16 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
             }
             AstNode initVal = visit(ctx.initVal());    // 获取初始化值
 
-            return AstNode.makeBinaryNode(OP.ASSIGN, AstNode.makeLeaf(variable), initVal);
+            variable.pos = 0;
+            AstNode ret = AstNode.makeEmptyNode(OP.ASSIGN_GROUP);
+            Utils.assignArray(variable, initVal, variable.dimensions.size() - 1, ret);
+            return ret;
         }
     }
 
     @Override
     public AstNode visitConstDecl(SysYParser.ConstDeclContext ctx) {
-        AstNode ret = AstNode.makeEmptyNode(OP.CONST_DECL);
+        AstNode ret = AstNode.makeEmptyNode(OP.ASSIGN_GROUP);
         for (SysYParser.ConstDefContext defCtx : ctx.constDef()) {
             ret.addNode(visit(defCtx));
         }
@@ -226,7 +245,6 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
             Variable variable = Domain.addConstVar(ctx.Identifier().getText());
             if (variable.isCollapsible()) {    // 可折叠的
                 variable.addConstVal(((Immediate) rVal.value).value);
-                System.out.println(variable);
             }
             return AstNode.makeBinaryNode(OP.ASSIGN, AstNode.makeLeaf(variable), rVal);
         } else {    // 数组常量
@@ -237,11 +255,12 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
             Variable variable = Domain.addConstArray(ctx.Identifier().getText(), dimensions);
             AstNode initVal = visit(ctx.constInitVal());    // 获取初始化值
             if (variable.isCollapsible()) {    // 可折叠的
-                Utils.assignArray(variable, initVal, variable.dimensions.size() - 1);
-                System.out.println(variable);
+                Utils.assignConstArray(variable, initVal, variable.dimensions.size() - 1);
             }
-
-            return AstNode.makeBinaryNode(OP.ASSIGN, AstNode.makeLeaf(variable), initVal);
+            variable.pos = 0;
+            AstNode ret = AstNode.makeEmptyNode(OP.ASSIGN_GROUP);
+            Utils.assignArray(variable, initVal, variable.dimensions.size() - 1, ret);
+            return ret;
         }
 
     }
@@ -299,9 +318,10 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
     @Override
     public AstNode visitFunctionExpr(SysYParser.FunctionExprContext ctx) {
         AstNode left = AstNode.makeEmptyNode(OP.PARAM);
-        for (SysYParser.ExpContext param : ctx.funcRParams().params) {
-            left.addNode(visit(param));
-        }
+        if (null != ctx.funcRParams())
+            for (SysYParser.ExpContext param : ctx.funcRParams().params) {
+                left.addNode(visit(param));
+            }
         AstNode right = AstNode.makeLeaf(Domain.searchFunc(ctx.Identifier().getText()));
         return AstNode.makeBinaryNode(OP.CALL, left, right);
     }
@@ -364,7 +384,7 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
             }
             AstNode offset = Utils.getOffset(idx, base);
 
-            return AstNode.makeBinaryNode(OP.OFFSET, AstNode.makeLeaf(var), offset);
+            return AstNode.makeLeaf(new OffsetVar(var, offset));
         } else {    // 非数组
             if (var.isCollapsible())
                 return AstNode.makeLeaf(var.indexConstVal(0));
@@ -389,6 +409,8 @@ public class MyVisitor extends SysYBaseVisitor<AstNode> {
     @Override
     public AstNode visitCond(SysYParser.CondContext ctx) {
         AstNode ret = visit(ctx.lOrExp());
-        return Utils.calc(ret);
+        ret = Utils.calc(ret);
+        if (ret.isLeaf()) ret =  AstNode.makeBinaryNode(OP.EQ, ret, AstNode.makeLeaf(1));
+        return ret;
     }
 }

@@ -1,4 +1,4 @@
-package ast.symbol;
+package common.symbol;
 
 import java.util.*;
 
@@ -81,9 +81,9 @@ public class Domain {
         getDomain().symbolTable.addVariable(variable);
         // 增加总偏移量
         if (null == currentFunc)
-            globalOffset += variable.size * Variable.INT_WIDTH;
+            globalOffset += variable.size * variable.width;
         else
-            currentFunc.totalOffset += variable.size * Variable.INT_WIDTH;
+            currentFunc.totalOffset += variable.size * variable.width;
 
         return variable;
     }

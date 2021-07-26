@@ -1,10 +1,12 @@
-package ast;
+package ir;
+
+import ast.AstValue;
 
 public class Temp implements AstValue {
     private static int next_id = 0;
 
-    public final int id;
 
+    public final int id;
     private Temp(int id) {
         this.id = id;
     }
@@ -14,7 +16,12 @@ public class Temp implements AstValue {
     }
 
     @Override
-    public String getVal() {
+    public String toString() {
         return "$" + id;
+    }
+
+    @Override
+    public String getVal() {
+        return toString();
     }
 }

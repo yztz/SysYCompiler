@@ -1,6 +1,6 @@
 package ast;
 
-public enum OP implements AstValue {
+public enum OP  {
     ADD,
     MINUS,
     SUB,
@@ -8,7 +8,7 @@ public enum OP implements AstValue {
     DIV,
     MOD,
     ASSIGN,
-    OFFSET,
+    ASSIGN_GROUP,
 
     STATEMENT,
     VAL_GROUP,
@@ -16,6 +16,7 @@ public enum OP implements AstValue {
 
     CALL,
     PARAM,
+    GOTO,
 
     IF_ELSE,
     WHILE,
@@ -26,6 +27,11 @@ public enum OP implements AstValue {
     CONST_DECL,
     VAR_DECL,
     FUNC_DECL,
+
+    FUNCTION,
+    IMMEDIATE,
+    VARIABLE,
+    VAR_OFFSET,
 
     NEGATE,
     LE,
@@ -39,8 +45,8 @@ public enum OP implements AstValue {
 
 
 
-    @Override
-    public String getVal() {
-        return this.name();
-    }
+//    @Override
+//    public String getVal() {
+//        return this.name();
+//    }
 }

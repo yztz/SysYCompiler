@@ -1,8 +1,7 @@
-package ast.symbol;
+package common.symbol;
 
 import ast.AstValue;
 
-import java.util.List;
 import java.util.Map;
 
 public class Function implements AstValue {

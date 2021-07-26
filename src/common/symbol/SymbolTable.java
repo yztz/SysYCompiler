@@ -1,4 +1,4 @@
-package ast.symbol;
+package common.symbol;
 
 import java.util.HashMap;
 import java.util.Map;
