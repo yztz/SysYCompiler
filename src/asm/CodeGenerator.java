@@ -1,16 +1,7 @@
 package asm;
 
 import ast.AstNode;
-import ast.AstValue;
 import ast.OP;
-import common.symbol.Variable;
-
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class CodeGenerator {
     RegGetter regGetter = new RegGetterImpl();
@@ -87,12 +78,6 @@ public class CodeGenerator {
             case BREAK:
                 break;
             case RETURN:
-                break;
-            case CONST_DECL:
-                break;
-            case VAR_DECL:
-                break;
-            case FUNC_DECL:
                 break;
             case FUNCTION:
                 break;

@@ -1,13 +1,14 @@
 package common.symbol;
 
-import ast.AstValue;
+import ast.IAstValue;
 import ast.Immediate;
 
 import java.util.*;
 
-public class Variable implements AstValue {
+public class Variable implements IAstValue {
     public static final int INT_WIDTH = 4;
 
+    public Type type = Type.INT;
     public String name;
     public int offset;
     public Domain domain;
@@ -18,7 +19,7 @@ public class Variable implements AstValue {
     public int width = INT_WIDTH;
     public Map<Integer, Integer> constVal = new HashMap<>();
 
-    public Set<AstValue> location = new HashSet<>();
+    public Set<IAstValue> location = new HashSet<>();
 
     public int pos = 0; //用于数组初始化赋值
 
@@ -93,8 +94,4 @@ public class Variable implements AstValue {
 //        }
     }
 
-    @Override
-    public String getVal() {
-        return name;
-    }
 }

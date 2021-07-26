@@ -1,17 +1,14 @@
 package ast;
 
+import common.ILabel;
 import common.symbol.Variable;
+import common.Label;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class Utils {
-    public static void interpreterAst(AstNode root) {
-        for (AstNode child : root.getSubTrees()) {
-            interpreterAst(child);
-        }
-        System.out.println(root.value.getVal());
-    }
 
     public static int assignConstArray(Variable array, AstNode values, int dimension) {
         if (values.isLeaf() && values.op == OP.IMMEDIATE) {
@@ -72,8 +69,8 @@ public class Utils {
 
         AstNode left = calc(root.getLeft());
         AstNode right = calc(root.getRight());
-        AstValue lVal = left.value;
-        AstValue rVal = right.value;
+        IAstValue lVal = left.value;
+        IAstValue rVal = right.value;
         switch (op) {
             case ADD:
                 if (lVal instanceof Immediate && rVal instanceof Immediate)
@@ -168,11 +165,10 @@ public class Utils {
             case STATEMENT:
             case VAL_GROUP:
             case ROOT:
-            case CONST_DECL:
-            case VAR_DECL:
+
             case CONTINUE:
             case BREAK:
-            case FUNC_DECL:
+
             default:
                 return root;
         }
@@ -212,11 +208,41 @@ public class Utils {
     /**
      * 先序遍历
      */
-    public static void traverse(AstNode root, Consumer<AstNode> handler) {
+    public static void preTraverse(AstNode root, Consumer<AstNode> handler) {
         handler.accept(root);
         for (AstNode child : root.getSubTrees()) {
-            traverse(child, handler);
+            preTraverse(child, handler);
         }
     }
+
+    /**
+     * 后序遍历
+     */
+    public static void postTraverse(AstNode root, Consumer<AstNode> handler) {
+        for (AstNode child : root.getSubTrees()) {
+            postTraverse(child, handler);
+        }
+        handler.accept(root);
+    }
+
+
+    public static List<AstNode> searchNode(AstNode root, OP op) {
+        List<AstNode> ret = new ArrayList<>();
+        Utils.postTraverse(root, node -> {
+            if (node.op == op) ret.add(node);
+        });
+        return ret;
+    }
+
+    public static AstNode findNextStat(AstNode currStat) {
+//        if (currStat.parent.getRight() != currStat) return currStat.parent.getRight(currStat);
+
+        while (currStat.parent.op != OP.STATEMENT   // 当父节点不为statement或者当前节点为最右节点
+                || currStat == currStat.parent.getRight())
+            currStat = currStat.parent;
+        return currStat.parent.getRight(currStat);
+    }
+
+
 
 }

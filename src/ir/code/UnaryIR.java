@@ -1,13 +1,13 @@
 package ir.code;
 
-import ast.AstValue;
+import ast.IAstValue;
 import ast.OP;
 
 public class UnaryIR extends IR {
     public OP op;
-    public AstValue operand;
+    public IAstValue operand;
 
-    public UnaryIR(OP op, AstValue operand) {
+    public UnaryIR(OP op, IAstValue operand) {
         this.op = op;
         this.operand = operand;
     }

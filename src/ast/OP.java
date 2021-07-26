@@ -17,6 +17,7 @@ public enum OP  {
     CALL,
     PARAM,
     GOTO,
+    LABEL,
 
     IF_ELSE,
     WHILE,
@@ -24,9 +25,9 @@ public enum OP  {
     BREAK,
     RETURN,
 
-    CONST_DECL,
-    VAR_DECL,
-    FUNC_DECL,
+//    CONST_DECL,
+//    VAR_DECL,
+//    FUNC_DECL,
 
     FUNCTION,
     IMMEDIATE,
@@ -43,7 +44,8 @@ public enum OP  {
     AND,
     OR;
 
-
+    public static final OP[] STATEMENTS = {ASSIGN, IF_ELSE, WHILE, CALL, RETURN, GOTO};
+//    public static final OP[] JUMPS = {GOTO, }
 
 //    @Override
 //    public String getVal() {

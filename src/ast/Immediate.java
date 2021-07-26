@@ -1,6 +1,6 @@
 package ast;
 
-public class Immediate implements AstValue {
+public class Immediate implements IAstValue {
     public final int value;
 
     public Immediate(int value) {
@@ -9,11 +9,6 @@ public class Immediate implements AstValue {
 
     public Immediate(String value) {
         this.value = Integer.parseInt(value);
-    }
-
-    @Override
-    public String getVal() {
-        return value + "";
     }
 
     @Override

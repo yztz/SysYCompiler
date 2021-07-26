@@ -19,7 +19,7 @@ public class Utils {
         JPanel panel = new JPanel();
         TreeViewer viewer = new TreeViewer(Arrays.asList(
                 parser.getRuleNames()),tree);
-//        viewer.setScale(1.5); // Scale a little
+        viewer.setScale(1.2); // Scale a little
         panel.add(viewer);
         frame.add(panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

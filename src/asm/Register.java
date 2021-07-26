@@ -1,8 +1,8 @@
 package asm;
 
-import ast.AstValue;
+import ast.IAstValue;
 
-public enum Register implements AstValue {
+public enum Register implements IAstValue {
     r1,
     r2,
     r3,
@@ -25,8 +25,4 @@ public enum Register implements AstValue {
     public static final Register LR = lr;
     public static final Register PC = pc;
 
-    @Override
-    public String getVal() {
-        return name();
-    }
 }

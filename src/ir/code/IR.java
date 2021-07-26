@@ -1,5 +1,7 @@
 package ir.code;
 
+import common.Label;
+
 public class IR {
     public Label label;
 

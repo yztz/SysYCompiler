@@ -1,8 +1,8 @@
 package ir;
 
-import ast.AstValue;
+import ast.IAstValue;
 
-public class Temp implements AstValue {
+public class Temp implements IAstValue {
     private static int next_id = 0;
 
 
@@ -20,8 +20,4 @@ public class Temp implements AstValue {
         return "$" + id;
     }
 
-    @Override
-    public String getVal() {
-        return toString();
-    }
 }

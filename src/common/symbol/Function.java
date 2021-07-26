@@ -1,31 +1,46 @@
 package common.symbol;
 
-import ast.AstValue;
+import ast.IAstValue;
+import common.ILabel;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public class Function implements AstValue {
+public class Function implements ILabel {
     public String name;
     public int totalOffset = 0;
-    public String retType;
-    public Map<String, Variable> params;
+    public Type retType;
+    private List<Variable> params = new ArrayList<>();
 
     public Function(String name, String retType) {
         this.name = name;
-        this.retType = retType;
+        this.retType = Type.valueOf(retType.toUpperCase());
     }
 
     public void addParam(Variable param) {
-        params.put(param.name, param);
+        params.add(param);
     }
 
-    @Override
-    public String getVal() {
-        return name;
+    public List<Variable> getParams() {
+        return Collections.unmodifiableList(params);
+    }
+
+    public Variable getParam(int i) {
+        return params.get(i);
     }
 
     @Override
     public String toString() {
+        return name;
+    }
+
+    public boolean hasReturn() {
+        return Type.INT == retType;
+    }
+
+    @Override
+    public String getLabelName() {
         return name;
     }
 }

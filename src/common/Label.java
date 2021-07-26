@@ -1,11 +1,12 @@
-package ir.code;
+package common;
 
-public class Label{
+import ir.code.IR;
+
+public class Label implements ILabel {
     private static int next_id = 0;
 
     public final String name;
     public IR bindIR;
-//    public IRHolder irHolder = new IRHolder();
 
     public void bindIR(IR ir) {
         this.bindIR = ir;
@@ -35,6 +36,12 @@ public class Label{
 
     @Override
     public String toString() {
+        return name;
+    }
+
+
+    @Override
+    public String getLabelName() {
         return name;
     }
 }

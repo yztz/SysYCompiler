@@ -1,13 +1,13 @@
 package ir.code;
 
-import ast.AstValue;
+import ast.IAstValue;
 import ast.OP;
 
 public class TernaryIR extends IR{
     public OP op;
-    public AstValue rd, rn, rm;
+    public IAstValue rd, rn, rm;
 
-    public TernaryIR(OP op, AstValue rd, AstValue rn, AstValue rm) {
+    public TernaryIR(OP op, IAstValue rd, IAstValue rn, IAstValue rm) {
         this.op = op;
         this.rd = rd;
         this.rn = rn;

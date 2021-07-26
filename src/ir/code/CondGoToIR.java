@@ -1,13 +1,13 @@
 package ir.code;
 
-import ast.AstValue;
-import ast.OP;
+import ast.IAstValue;
+import common.Label;
 
 public class CondGoToIR extends GoToIR{
-    public AstValue cond;
+    public IAstValue cond;
 
 
-    public CondGoToIR(Label target, AstValue cond) {
+    public CondGoToIR(Label target, IAstValue cond) {
         super(target);
         this.cond = cond;
     }

@@ -11,10 +11,12 @@ int foo(int i) {
 const int LIMIT = 10;
 
 int main() {
-    int a = 1;
+    int a = 1, aa = 2, aaa = 3;
     while(a < LIMIT || a == 9) {
         a = a + 1;
-        if(a || 1) continue;
+        if(a || 1) {
+            continue;
+        }
         if(a > 5) {
             break;
         }

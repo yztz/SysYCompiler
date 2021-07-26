@@ -1,9 +1,9 @@
 package ir;
 
 import ast.AstNode;
-import ast.AstValue;
+import ast.IAstValue;
 import ast.OffsetVar;
-import common.symbol.Domain;
+import common.Label;
 import common.symbol.Function;
 import common.symbol.Variable;
 import ir.code.*;
@@ -39,11 +39,11 @@ public class AstParser {
     }
 
 
-    public AstValue parseAst(AstNode root) {
+    public IAstValue parseAst(AstNode root) {
         if (null == root) return null;
 
         Temp tmp;
-        AstValue left, right, cond;
+        IAstValue left, right, cond;
         Label trueLabel, falseLabel;
         OP op = root.op;
 
@@ -105,7 +105,7 @@ public class AstParser {
             case MINUS:
             case NEGATE:
                 tmp = newTmp();
-                AstValue sub = parseAst(root.getLeft());
+                IAstValue sub = parseAst(root.getLeft());
                 addIR(new BinaryIR(op, tmp, sub));
                 return tmp;
             case ASSIGN:
@@ -125,7 +125,7 @@ public class AstParser {
                 break;
             case PARAM:
                 for (AstNode child : root.getSubTrees()) {
-                    AstValue res = parseAst(child);
+                    IAstValue res = parseAst(child);
                     addIR(new UnaryIR(op, res));
                 }
                 break;
@@ -162,13 +162,6 @@ public class AstParser {
             case RETURN:
                 left = parseAst(root.getLeft());
                 addIR(new UnaryIR(OP.RETURN, left));
-                break;
-            case CONST_DECL:
-            case VAR_DECL:
-                return parseAst(root.getLeft());
-            case FUNC_DECL:
-                setNextLabel(Label.newLabel(root.getLeft().value.getVal()));
-                parseAst(root.getRight());
                 break;
         }
         return null;

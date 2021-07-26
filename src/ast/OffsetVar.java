@@ -2,7 +2,7 @@ package ast;
 
 import common.symbol.Variable;
 
-public class OffsetVar implements AstValue {
+public class OffsetVar implements IAstValue {
     public Variable variable;
     public AstNode offset;
 
@@ -18,14 +18,11 @@ public class OffsetVar implements AstValue {
 
     @Override
     public String toString() {
-        return getVal();
-    }
-
-    @Override
-    public String getVal() {
         if (null == offset.value)
             return variable.name + "[exp]";
         else
             return variable.name + '[' + offset.value + ']';
     }
+
+
 }

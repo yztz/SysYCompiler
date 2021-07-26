@@ -1,15 +1,15 @@
 package ir.code;
 
 
-import ast.AstValue;
+import ast.IAstValue;
 import ast.OP;
 
 public class BinaryIR extends IR {
     public OP op;
-    public AstValue rd;
-    public AstValue rn;
+    public IAstValue rd;
+    public IAstValue rn;
 
-    public BinaryIR(OP op, AstValue rd, AstValue rn) {
+    public BinaryIR(OP op, IAstValue rd, IAstValue rn) {
         this.op = op;
         this.rd = rd;
         this.rn = rn;

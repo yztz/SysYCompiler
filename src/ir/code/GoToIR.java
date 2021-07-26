@@ -1,5 +1,7 @@
 package ir.code;
 
+import common.Label;
+
 public class GoToIR extends IR{
     public Label target;
     public GoToIR(Label target) {

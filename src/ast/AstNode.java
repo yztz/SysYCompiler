@@ -1,22 +1,24 @@
 package ast;
 
+import common.ILabel;
 import common.symbol.Function;
 import common.symbol.Variable;
-import ir.code.Label;
+import common.Label;
 import org.antlr.v4.runtime.tree.Tree;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class AstNode implements Tree {
     public AstNode parent;
     public OP op;
-    public AstValue value;
+    public IAstValue value;
+    public ILabel label;
 
-    private List<AstNode> subTree = new LinkedList<>();
-    private int idx = -1;
+    private final List<AstNode> subTree = new LinkedList<>();
 
     public void setNode(int idx, AstNode node) {
         if (null == node) return;
@@ -24,9 +26,18 @@ public class AstNode implements Tree {
         subTree.set(idx, node);
     }
 
+    public void replaceNode(AstNode old, AstNode niu) {
+        int idx = subTree.indexOf(old);
+        subTree.set(idx, niu);
+        niu.parent = this;
+        old.parent = null;
+    }
+
     public void removeNode(AstNode node) {
-        boolean exist = subTree.remove(node);
-        if (exist) idx--;
+        if (null == node) return;
+
+        subTree.remove(node);
+        node.parent = null;
     }
 
     public void addNode(AstNode node) {
@@ -34,7 +45,6 @@ public class AstNode implements Tree {
 
         this.subTree.add(node);
         node.parent = this;
-        this.idx++;
     }
 
     public void addNode(List<AstNode> nodes) {
@@ -43,11 +53,30 @@ public class AstNode implements Tree {
             if (null == node) continue;
             node.parent = this;
         }
-        this.idx += nodes.size();
+    }
+
+    public void insertAfter(AstNode refNode, AstNode newNode) {
+        int idx = subTree.indexOf(refNode);
+        insert(idx + 1, newNode);
+    }
+
+    public void insertBefore(AstNode refNode, AstNode newNode) {
+        int idx = subTree.indexOf(refNode);
+        insert(idx, newNode);
+    }
+
+    public void insert(int idx, AstNode newNode) {
+        subTree.add(idx, newNode);
+        newNode.parent = this;
     }
 
     public AstNode getRight() {
-        return subTree.get(idx);
+        return subTree.get(subTree.size() - 1);
+    }
+
+    public AstNode getRight(AstNode node) {
+        int idx = subTree.indexOf(node);
+        return subTree.get(idx + 1);
     }
 
     public AstNode getLeft() {
@@ -79,6 +108,13 @@ public class AstNode implements Tree {
         return ret;
     }
 
+    public ILabel putLabelIfAbsent(Supplier<ILabel> supplier) {
+        if (label == null) {
+            label = supplier.get();
+        }
+        return label;
+    }
+
     public int getInteger() {
         if (value instanceof Immediate) {
             return ((Immediate) value).value;
@@ -97,11 +133,15 @@ public class AstNode implements Tree {
         }
     }
 
+    private String getLabelName() {
+        return null == label ? "" : label.getLabelName() + ":";
+    }
+
     private AstNode(OP op) {
         this.op = op;
     }
 
-    private AstNode(OP op, AstValue value) {
+    private AstNode(OP op, IAstValue value) {
         this.op = op;
         this.value = value;
     }
@@ -118,6 +158,7 @@ public class AstNode implements Tree {
         ret.addNode(subTree);
         return ret;
     }
+
 
     public static AstNode makeEmptyNode(OP op) {
         return new AstNode(op);
@@ -139,6 +180,10 @@ public class AstNode implements Tree {
         return new AstNode(OP.FUNCTION, value);
     }
 
+    public static AstNode makeGoTo(ILabel value) {
+        return new AstNode(OP.GOTO, value);
+    }
+
     public static AstNode makeLeaf(OP op) {
         return new AstNode(op);
     }
@@ -152,11 +197,10 @@ public class AstNode implements Tree {
     }
 
 
-
     @Override
     public String toString() {
         if (value != null)
-            return value.getVal();
+            return value.toString();
         else
             return op.name();
     }
@@ -168,11 +212,18 @@ public class AstNode implements Tree {
 
     @Override
     public Object getPayload() {
+        switch (op) {
+            case IMMEDIATE:
+            case VARIABLE:
+            case VAR_OFFSET:
+                return value;
+        }
         if (null == value)
-            return op;
+            return String.format("%s%s", getLabelName(), op);
         else
-            return value;
+            return String.format("%s%s[%s]", getLabelName(),op, value);
     }
+
 
     @Override
     public Tree getChild(int i) {
