@@ -1,6 +1,8 @@
 package compiler.genir.code;
 
-import compiler.asm.Address;
+import compiler.asm.AddressRWInfo;
+import compiler.asm.Reg;
+import compiler.asm.Regs;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,10 +29,18 @@ public class ReturnRepresent extends InterRepresent{
     }
 
     @Override
-    public Collection<Address> getAllAddress() {
+    public Collection<AddressRWInfo> getAllAddressRWInfo() {
         if(returnData==null)
             return Collections.emptyList();
 
-        return Arrays.asList(new Address(returnData));
+        return Arrays.asList(new AddressRWInfo(returnData));
+    }
+
+    @Override
+    public Reg addressMapRule(AddressOrData address) {
+        if(address==returnData)
+            return Regs.R0;
+
+        return super.addressMapRule(address);
     }
 }

@@ -1,6 +1,6 @@
 package compiler.genir.code;
 
-import compiler.asm.Address;
+import compiler.asm.AddressRWInfo;
 
 import java.util.Collection;
 
@@ -24,15 +24,15 @@ public class IfGotoRepresent extends GotoRepresent {
     }
 
     @Override
-    public Collection<Address> getAllAddress() {
-        Collection<Address> allAddress = super.getAllAddress();
+    public Collection<AddressRWInfo> getAllAddressRWInfo() {
+        Collection<AddressRWInfo> allAddressRWInfos = super.getAllAddressRWInfo();
         if(!left.isData)
-            allAddress.add(new Address(left));
+            allAddressRWInfos.add(new AddressRWInfo(left));
 
         if(!right.isData)
-            allAddress.add(new Address(right));
+            allAddressRWInfos.add(new AddressRWInfo(right));
 
-        return allAddress;
+        return allAddressRWInfos;
     }
 
     public enum RelOp{

@@ -1,6 +1,6 @@
 package compiler.genir.code;
 
-import compiler.asm.Address;
+import compiler.asm.AddressRWInfo;
 import compiler.symboltable.VarSymbol;
 
 import java.util.Collection;
@@ -14,7 +14,7 @@ public class InitVarRepresent extends InterRepresent{
     }
 
     @Override
-    public Collection<Address> getAllAddress() {
+    public Collection<AddressRWInfo> getAllAddressRWInfo() {
         return Collections.emptyList();
     }
 

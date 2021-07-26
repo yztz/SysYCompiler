@@ -1,6 +1,6 @@
 package compiler.genir.code;
 
-import compiler.asm.Address;
+import compiler.asm.AddressRWInfo;
 import compiler.symboltable.ValueSymbol;
 
 import java.util.Collection;
@@ -17,11 +17,11 @@ public class LSRepresent extends WrittenRepresent {
 
 
     @Override
-    public Collection<Address> getAllAddress() {
-        Collection<Address> allAddress = super.getAllAddress();
+    public Collection<AddressRWInfo> getAllAddressRWInfo() {
+        Collection<AddressRWInfo> allAddressRWInfos = super.getAllAddressRWInfo();
         if(!offset.isData)
-            allAddress.add(new Address(offset));
+            allAddressRWInfos.add(new AddressRWInfo(offset));
 
-        return allAddress;
+        return allAddressRWInfos;
     }
 }

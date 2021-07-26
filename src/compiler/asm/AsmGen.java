@@ -45,9 +45,8 @@ public class AsmGen {
         AsmBuilder asmBuilder = new AsmBuilder(funcSymbol.getAsmLabel());
 
         List<IRBlock> irBlocks = divideIntoBlock(irFunction);
-        calNextRef(irBlocks);
 
-        RegGetter regGetter = new RegGetterImpl();
+        RegGetter regGetter = new RegGetterImpl(irBlocks);
         // todo 汇编代码生成
 
         for (IRBlock irBlock : irBlocks) {
@@ -227,45 +226,5 @@ public class AsmGen {
         }
 
         return result;
-    }
-
-    /**
-     * 计算变量的下次引用与活跃度
-     */
-    public void calNextRef(List<IRBlock> irBlocks) {
-        for (IRBlock block : irBlocks) {
-            Map<Address, Reference> refTable = new HashMap<>();
-            for (int i = block.irs.size() - 1; i >= 0; i--) {
-
-                InterRepresent ir = block.irs.get(i);
-
-                ir.getAllAddress().forEach(var -> {
-                    Reference ref = refTable.getOrDefault(var, new Reference(null, true));
-                    // a & c
-                    ir.refMap.put(var, ref);
-                    if (var.isLVal) {
-                        // b
-                        refTable.put(var, new Reference(null, false));
-                    } else {
-                        // d
-                        refTable.put(var, new Reference(ir, true));
-                    }
-                });
-
-
-                /*Util.traverseAddress(ir, var -> {
-                    Reference ref = refTable.getOrDefault(var, new Reference(null, true));
-                    // a & c
-                    ir.refMap.put(var, ref);
-                    if (var.isLVal) {
-                        // b
-                        refTable.put(var, new Reference(null, false));
-                    } else {
-                        // d
-                        refTable.put(var, new Reference(ir, true));
-                    }
-                });*/
-            }
-        }
     }
 }

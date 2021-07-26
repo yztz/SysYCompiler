@@ -1,6 +1,8 @@
 package compiler.genir.code;
 
-import compiler.asm.Address;
+import compiler.asm.AddressRWInfo;
+import compiler.asm.Reg;
+import compiler.asm.Regs;
 import compiler.symboltable.FuncSymbol;
 
 import java.util.*;
@@ -38,15 +40,27 @@ public class CallRepresent extends InterRepresent{
     }
 
     @Override
-    public Collection<Address> getAllAddress() {
-        List<Address> address = new ArrayList<>();
+    public Collection<AddressRWInfo> getAllAddressRWInfo() {
+        List<AddressRWInfo> addressRWInfos = new ArrayList<>();
         if(funcSymbol.hasReturn())
-            address.add(new Address(returnResult,true));
+            addressRWInfos.add(new AddressRWInfo(returnResult, true));
 
         for(int i=0;i<Math.min(4,params.length);i++)
         {
-            address.add(new Address(params[i],false));
+            addressRWInfos.add(new AddressRWInfo(params[i], false));
         }
-        return address;
+        return addressRWInfos;
+    }
+
+    @Override
+    public Reg addressMapRule(AddressOrData address) {
+        if(address==returnResult)
+            return Regs.R0;
+
+        for (int i = 0; i < Math.min(params.length,4); i++) {
+            if(params[i]==address)
+                return Regs.REGS[i];
+        }
+        return super.addressMapRule(address);
     }
 }

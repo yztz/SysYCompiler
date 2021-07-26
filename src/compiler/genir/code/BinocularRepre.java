@@ -1,6 +1,6 @@
 package compiler.genir.code;
 
-import compiler.asm.Address;
+import compiler.asm.AddressRWInfo;
 
 import java.util.Collection;
 
@@ -19,15 +19,15 @@ public class BinocularRepre extends WrittenRepresent{
     public AddressOrData sourceSecond;
 
     @Override
-    public Collection<Address> getAllAddress() {
-        Collection<Address> allAddress = super.getAllAddress();
+    public Collection<AddressRWInfo> getAllAddressRWInfo() {
+        Collection<AddressRWInfo> allAddressRWInfos = super.getAllAddressRWInfo();
         if(!sourceFirst.isData)
-            allAddress.add(new Address(sourceFirst));
+            allAddressRWInfos.add(new AddressRWInfo(sourceFirst));
 
         if(!sourceSecond.isData)
-            allAddress.add(new Address(sourceSecond));
+            allAddressRWInfos.add(new AddressRWInfo(sourceSecond));
 
-        return allAddress;
+        return allAddressRWInfos;
     }
 
     @Override

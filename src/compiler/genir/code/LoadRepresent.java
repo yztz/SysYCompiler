@@ -1,9 +1,6 @@
 package compiler.genir.code;
 
-import compiler.asm.Address;
 import compiler.symboltable.ValueSymbol;
-
-import java.util.Collection;
 
 public class LoadRepresent extends LSRepresent {
 

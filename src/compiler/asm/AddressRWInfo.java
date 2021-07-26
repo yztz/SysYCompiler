@@ -4,21 +4,24 @@ import compiler.genir.code.AddressOrData;
 
 import java.util.Objects;
 
-public class Address {
+/**
+ * 记录某一条IR对某一三地址变量是读还是写
+ */
+public class AddressRWInfo {
     public AddressOrData address;
-    public boolean isLVal = false;
+    public boolean isWrite = false;
 
     /*public Address(int address) {
         this.address = address;
     }*/
 
-    public Address(AddressOrData address) {
+    public AddressRWInfo(AddressOrData address) {
         this.address = address;
     }
 
-    public Address(AddressOrData address, boolean isLVal) {
+    public AddressRWInfo(AddressOrData address, boolean isWrite) {
         this.address = address;
-        this.isLVal = isLVal;
+        this.isWrite = isWrite;
     }
 
     @Override
@@ -30,8 +33,8 @@ public class Address {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Address address1 = (Address) o;
-        return address == address1.address;
+        AddressRWInfo addressRWInfo1 = (AddressRWInfo) o;
+        return address == addressRWInfo1.address;
     }
 
     @Override

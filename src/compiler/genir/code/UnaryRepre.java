@@ -1,6 +1,6 @@
 package compiler.genir.code;
 
-import compiler.asm.Address;
+import compiler.asm.AddressRWInfo;
 
 import java.util.Collection;
 
@@ -15,12 +15,12 @@ public class UnaryRepre extends WrittenRepresent{
     }
 
     @Override
-    public Collection<Address> getAllAddress() {
-        Collection<Address> allAddress = super.getAllAddress();
+    public Collection<AddressRWInfo> getAllAddressRWInfo() {
+        Collection<AddressRWInfo> allAddressRWInfos = super.getAllAddressRWInfo();
         if(!source.isData)
-            allAddress.add(new Address(source));
+            allAddressRWInfos.add(new AddressRWInfo(source));
 
-        return allAddress;
+        return allAddressRWInfos;
     }
 
     @Override

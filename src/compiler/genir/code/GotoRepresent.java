@@ -1,6 +1,6 @@
 package compiler.genir.code;
 
-import compiler.asm.Address;
+import compiler.asm.AddressRWInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +26,7 @@ public class GotoRepresent extends InterRepresent{
     }
 
     @Override
-    public Collection<Address> getAllAddress() {
+    public Collection<AddressRWInfo> getAllAddressRWInfo() {
         return new ArrayList<>();
     }
 }

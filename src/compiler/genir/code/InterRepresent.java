@@ -1,8 +1,9 @@
 package compiler.genir.code;
 
-import compiler.asm.Address;
+import compiler.asm.AddressRWInfo;
 import compiler.asm.Reference;
 import com.sun.istack.internal.Nullable;
+import compiler.asm.Reg;
 import compiler.genir.IRSection;
 import compiler.genir.IRGroup;
 
@@ -21,7 +22,7 @@ public abstract class InterRepresent{
         return section;
     }
 
-    public Map<Address, Reference> refMap = new HashMap<>();
+    public Map<AddressRWInfo, Reference> refMap = new HashMap<>();
 
     @Nullable
     private String label;
@@ -69,5 +70,10 @@ public abstract class InterRepresent{
                              getSection().getID(),lineNum);
     }
 
-    public abstract Collection<Address> getAllAddress();
+    public abstract Collection<AddressRWInfo> getAllAddressRWInfo();
+
+    public Reg addressMapRule(AddressOrData address)
+    {
+        return null;
+    }
 }
