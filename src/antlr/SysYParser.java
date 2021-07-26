@@ -144,15 +144,42 @@ public class SysYParser extends Parser {
 		}
 	}
 
-	public static class PositionableBase extends DomainedContext{
-		public IRGroup startStmt;
-		public IRGroup endStmt;
+	public static interface IPositionable {
+		public InterRepresentHolder getStartStmt();
+		public InterRepresentHolder getEndStmt();
 
-		public PositionableBase() {
+		public void setStartStmt( InterRepresentHolder irGroup);
+		public void setEndStmt(InterRepresentHolder irGroup);
+	}
+
+	public static class PositionalbleBase extends DomainedContext implements  IPositionable{
+		public PositionalbleBase() {
 		}
 
-		public PositionableBase(ParserRuleContext parent, int invokingStateNumber) {
+		public PositionalbleBase(ParserRuleContext parent, int invokingStateNumber) {
 			super(parent, invokingStateNumber);
+		}
+
+		private InterRepresentHolder startStmt;
+		private InterRepresentHolder endStmt;
+		@Override
+		public InterRepresentHolder getStartStmt() {
+			return startStmt;
+		}
+
+		@Override
+		public InterRepresentHolder getEndStmt() {
+			return endStmt;
+		}
+
+		@Override
+		public void setStartStmt(InterRepresentHolder irGroup) {
+			startStmt = irGroup;
+		}
+
+		@Override
+		public void setEndStmt(InterRepresentHolder irGroup) {
+			endStmt = irGroup;
 		}
 	}
 
@@ -1285,7 +1312,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class BlockItemContext extends PositionableBase implements IHasBreakOrContinue{
+	public static class BlockItemContext extends PositionalbleBase implements IHasBreakOrContinue{
 		public DeclContext decl() {
 			return getRuleContext(DeclContext.class,0);
 		}
@@ -1330,6 +1357,8 @@ public class SysYParser extends Parser {
 		public void setContinueQuads(List<InterRepresentHolder> quads) {
 			continueQuads=quads;
 		}
+
+
 	}
 
 	public final BlockItemContext blockItem() throws RecognitionException {
@@ -1387,7 +1416,7 @@ public class SysYParser extends Parser {
 		void setBreakQuads(List<InterRepresentHolder> quads);
 		void setContinueQuads(List<InterRepresentHolder> quads);
 	}
-	public static class StmtContext extends PositionableBase implements IHasBreakOrContinue {
+	public static class StmtContext extends PositionalbleBase implements IHasBreakOrContinue {
 
 		public StmtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1420,6 +1449,7 @@ public class SysYParser extends Parser {
 		public void setContinueQuads(List<InterRepresentHolder> quads) {
 			this.continueQuads=quads;
 		}
+
 	}
 	public static class IfStatContext extends StmtContext {
 		public TerminalNode LeftParen() { return getToken(SysYParser.LeftParen, 0); }
@@ -1735,7 +1765,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ExpContextBase extends HasInterRepresentBase {
+	public static class ExpContextBase extends HasInterRepresentBase{
 		public AddressOrData result;
 
 		public ExpContextBase() {
@@ -1744,6 +1774,28 @@ public class SysYParser extends Parser {
 		public ExpContextBase(ParserRuleContext parent, int invokingStateNumber) {
 			super(parent, invokingStateNumber);
 		}
+
+		/*public IRGroup startStmt;
+		public IRGroup endStmt;
+		@Override
+		public IRGroup getStartStmt() {
+			return startStmt;
+		}
+
+		@Override
+		public IRGroup getEndStmt() {
+			return endStmt;
+		}
+
+		@Override
+		public void setStartStmt(IRGroup irGroup) {
+			startStmt = irGroup;
+		}
+
+		@Override
+		public void setEndStmt(IRGroup irGroup) {
+			endStmt = irGroup;
+		}*/
 	}
 
 	public static class ExpContext extends ExpContextBase {

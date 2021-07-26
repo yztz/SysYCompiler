@@ -27,7 +27,8 @@ int sum(int arr[],int len)
     int s = 0;
     while(i<len)
     {
-        s = s+arr[i];
+        s = arr[i]+s;
+        i=i+1;
     }
     return s;
 }
@@ -35,5 +36,6 @@ int sum(int arr[],int len)
 int main()
 {
     int array[5] = {1,4,7,3,10};
+
     return sum(array,5);
 }

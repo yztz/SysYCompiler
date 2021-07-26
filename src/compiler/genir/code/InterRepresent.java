@@ -13,11 +13,11 @@ import java.util.Map;
 
 public abstract class InterRepresent{
     public IRGroup section;
-    public IRSection getGroup()
+    public IRSection getSection()
     {
         return section.getSection();
     }
-    public IRGroup getSection()
+    public IRGroup getGroup()
     {
         return section;
     }
@@ -64,10 +64,10 @@ public abstract class InterRepresent{
     public String getPath()
     {
         return String.format("%03d-%03d-%03d",
-                             getGroup()==null?999:
-                             getGroup().getID(),
                              getSection()==null?999:
-                             getSection().getID(),lineNum);
+                             getSection().getID(),
+                             getGroup()==null?999:
+                             getGroup().getID(), lineNum);
     }
 
     public abstract Collection<AddressRWInfo> getAllAddressRWInfo();

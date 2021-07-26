@@ -20,7 +20,8 @@ public class IfGotoRepresent extends GotoRepresent {
     @Override
     public String toString() {
         InterRepresent targetIR = targetHolder.getInterRepresent();
-        return String.format("%s: if %s %s %s goto %-7d",lineNumToString(), left, relOp, right,targetIR==null?-1:targetIR.lineNum );
+        return String.format("%s: if %s %s %s goto %s",lineNumToString(), left, relOp, right,targetIR==null?-1:
+                targetIR.lineNumToString() );
     }
 
     @Override

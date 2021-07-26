@@ -260,6 +260,13 @@ public class SysYIRListener implements SysYListener {
 
         ctx.setBreakQuads(breakQuads);
         ctx.setContinueQuads(continueQuads);
+
+        for (SysYParser.BlockItemContext blockItemContext : ctx.blockItem()) {
+            if (blockItemContext.getStartStmt()!=null) {
+                ctx.setStartStmt(blockItemContext.getStartStmt());
+                break;
+            }
+        }
     }
 
     @Override
@@ -273,6 +280,7 @@ public class SysYIRListener implements SysYListener {
         {
             ctx.setBreakQuads(ctx.stmt().getBreakQuads());
             ctx.setContinueQuads(ctx.stmt().getContinueQuads());
+            ctx.setStartStmt(ctx.stmt().getStartStmt());
         }
     }
 
@@ -303,8 +311,6 @@ public class SysYIRListener implements SysYListener {
                     , symbolAndOffset.offsetResult,sourceResult);
             lValCtx.irGroup.addCode(saveRepresent);
         }
-        ctx.startStmt=(ctx.exp().irGroup.getLineOccupied()>0?ctx.exp().irGroup:ctx.lVal().irGroup);
-        ctx.endStmt = (ctx.lVal().irGroup);
     }
 
     @Override
@@ -325,6 +331,8 @@ public class SysYIRListener implements SysYListener {
     public void exitBlockStat(SysYParser.BlockStatContext ctx) {
         ctx.setBreakQuads(ctx.block().getBreakQuads());
         ctx.setContinueQuads(ctx.block().getContinueQuads());
+
+
     }
 
     @Override
@@ -337,16 +345,16 @@ public class SysYIRListener implements SysYListener {
     public void exitIfStat(SysYParser.IfStatContext ctx) {
         if(ctx.stmt().size()==2) //有else
         {
-            IRGroup elseStart=ctx.stmt(1).startStmt;
+            InterRepresent elseStart=ctx.stmt(1).getStartStmt().getInterRepresent();
             for (GotoRepresent ir : ctx.cond().falseList) {
-                ir.setTargetIR(elseStart.getFirst());
+                ir.setTargetIR(elseStart);
             }
             // 需要插入一句goto，在if的代码块执行完成后跳过else代码块
             GotoRepresent skipElseStmtIR = new GotoRepresent(null);
             IRGroup elseGroup = new IRGroup("skip stmts in else block");
             elseGroup.addCode(skipElseStmtIR);
 
-            _currentIRFunc.insertGroupBefore(elseGroup,elseStart);
+            _currentIRFunc.insertGroupBefore(elseGroup,elseStart.getGroup());
             _currentIRFunc.bookVacancy(skipElseStmtIR.targetHolder);
 
         }else{
@@ -356,7 +364,7 @@ public class SysYIRListener implements SysYListener {
         }
         // 回填trueList
         for (GotoRepresent ir : ctx.cond().trueList) {
-            ir.setTargetIR(ctx.stmt(0).startStmt.getFirst());
+            ir.setTargetIR(ctx.stmt(0).getStartStmt().getInterRepresent());
         }
 
         _currentIRFunc.endSection("if body");
@@ -389,7 +397,7 @@ public class SysYIRListener implements SysYListener {
         GotoRepresent gotoStart = new GotoRepresent(whileStartIR);
         _currentIRFunc.addSingleIR(gotoStart,"while end");
 
-        InterRepresent stmtStartIR = ctx.stmt().startStmt.getFirst();
+        InterRepresent stmtStartIR = ctx.stmt().getStartStmt().getInterRepresent();
         for (GotoRepresent ir : ctx.cond().trueList) {
             ir.targetHolder.setInterRepresent(stmtStartIR);
         }
@@ -427,7 +435,6 @@ public class SysYIRListener implements SysYListener {
         gotoGroup.addCode(breakGoto);
         _currentIRFunc.addGroup(gotoGroup);
 
-        ctx.startStmt = ctx.endStmt = gotoGroup;
     }
 
     @Override
@@ -445,7 +452,6 @@ public class SysYIRListener implements SysYListener {
 
         _currentIRFunc.addGroup(gotoGroup);
 
-        ctx.startStmt=ctx.endStmt = gotoGroup;
     }
 
     @Override
@@ -466,7 +472,6 @@ public class SysYIRListener implements SysYListener {
         retGroup.addCode(returnRepresent);
 
         _currentIRFunc.addGroup(retGroup);
-        ctx.startStmt = ctx.endStmt = retGroup;
     }
 
     @Override
@@ -519,7 +524,6 @@ public class SysYIRListener implements SysYListener {
         for (SysYParser.ExpContext expCtx : ctx.exp()) {
             _currentIRFunc.addGroup(expCtx.irGroup);
         }
-
     }
 
     @Override
@@ -557,6 +561,7 @@ public class SysYIRListener implements SysYListener {
                             , symbolAndOffset.offsetResult);
                     ctx.irGroup.addCode(loadRepresent);
                     ctx.result = loadRepresent.target;
+
                 }
 
             }
@@ -855,6 +860,13 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterEveryRule(ParserRuleContext parserRuleContext) {
+        if(parserRuleContext instanceof SysYParser.StmtContext)
+        {
+            SysYParser.StmtContext stmtContext=(SysYParser.StmtContext) parserRuleContext;
+            stmtContext.setStartStmt(new InterRepresentHolder(null));
+            _currentIRFunc.bookVacancy(stmtContext.getStartStmt());
+        }
+
         // 每个表达式一个section, 由父节点向子节点传递，子节点在其中添加IR语句
         if(parserRuleContext instanceof SysYParser.ExpContextBase)
         {
@@ -893,30 +905,30 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitEveryRule(ParserRuleContext parserRuleContext) {
-        if (parserRuleContext instanceof SysYParser.PositionableBase) {
-            SysYParser.PositionableBase ctx = (SysYParser.PositionableBase)parserRuleContext;
+        if (parserRuleContext instanceof SysYParser.PositionalbleBase) {
+            SysYParser.PositionalbleBase ctx = (SysYParser.PositionalbleBase)parserRuleContext;
             for (ParseTree child : ctx.children) {
-                if (!(child instanceof SysYParser.PositionableBase)) {
+                if (!(child instanceof SysYParser.PositionalbleBase)) {
                     continue;
                 }
-                if(((SysYParser.PositionableBase) child).startStmt==null)
+                if(((SysYParser.PositionalbleBase) child).getStartStmt() ==null)
                 {
                     continue;
                 }
-                ctx.startStmt=((SysYParser.PositionableBase) child).startStmt;
+                ctx.setStartStmt(((SysYParser.PositionalbleBase) child).getStartStmt());
                 break;
             }
 
             for (int i = ctx.children.size() - 1; i >= 0; i--) {
                 ParseTree child = ctx.children.get(i);
-                if (!(child instanceof SysYParser.PositionableBase)) {
+                if (!(child instanceof SysYParser.IPositionable)) {
                     continue;
                 }
-                if(((SysYParser.PositionableBase) child).endStmt == null)
+                if(((SysYParser.IPositionable) child).getEndStmt() == null)
                 {
                     continue;
                 }
-                ctx.endStmt=((SysYParser.PositionableBase) child).endStmt;
+                ctx.setEndStmt(((SysYParser.IPositionable) child).getEndStmt());
                 break;
             }
         }
