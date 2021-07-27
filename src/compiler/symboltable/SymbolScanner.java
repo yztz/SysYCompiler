@@ -15,10 +15,15 @@ public class SymbolScanner {
     public void scanSymbol(ParseTree parseTree)
     {
         ParseTreeWalker walker = new ParseTreeWalker();
-        SysConstExpListener expListener = new SysConstExpListener();
+        SysConstExpListener expListener = new SysConstExpListener(symbolTableHost);
         walker.walk(expListener,parseTree);
 
-        SysSymbolListener symbolListener = new SysSymbolListener(symbolTableHost,funcSymbolTable);
+        SysFuncConstListener constSymbolListener = new SysFuncConstListener(symbolTableHost, funcSymbolTable);
+        walker.walk(constSymbolListener,parseTree);
+
+        walker.walk(expListener,parseTree); //把常量考虑进来，再算一遍
+
+        SysVarListener symbolListener = new SysVarListener(symbolTableHost, funcSymbolTable);
         walker.walk(symbolListener,parseTree);
     }
 }

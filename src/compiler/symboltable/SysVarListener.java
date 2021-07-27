@@ -13,18 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-public class SysSymbolListener implements SysYListener {
-    private Stack<SymbolDomain> blockStack = new Stack<>();
-    private SymbolTable currentSymbolTable;
-    private FuncSymbol currentFunc = null;
+public class SysVarListener implements SysYListener {
+
+
     public FuncSymbolTable funcSymbolTable;
     public SymbolTableHost symbolTableHost;
 
-    public SysSymbolListener(SymbolTableHost symbolTableHost,FuncSymbolTable funcSymbolTable) {
+    public SysVarListener(SymbolTableHost symbolTableHost, FuncSymbolTable funcSymbolTable) {
         this.funcSymbolTable = funcSymbolTable;
         this.symbolTableHost = symbolTableHost;
-        blockStack.push(SymbolDomain.globalDomain);
-        currentSymbolTable = SymbolDomain.globalDomain.symbolTable;
     }
 
     @Override
@@ -49,37 +46,12 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void enterConstDecl(SysYParser.ConstDeclContext ctx) {
-        for (SysYParser.ConstDefContext defCtx : ctx.constDef()) {
-            TerminalNode identifier = defCtx.Identifier();
-            if(defCtx.constExp()==null || defCtx.constExp().isEmpty()) //不是数组
-            {
-                defCtx.constInitVal().initValues = new int[1];
-                defCtx.constInitVal().dimensions= new int[]{1};
-            }
-            else{ //是数组
-                defCtx.constInitVal().dimensions = getDimsFromConstExp(defCtx.constExp());
-                int length = getLengthFromDimensions(defCtx.constInitVal().dimensions);
-                defCtx.constInitVal().initValues = new int[length];
-            }
-            defCtx.constInitVal().whichDim = 1;
-            defCtx.constInitVal().ident = identifier.getSymbol();
-            defCtx.constInitVal().symbolOffset=0;
-        }
+
     }
 
     @Override
     public void exitConstDecl(SysYParser.ConstDeclContext ctx) {
-        for (SysYParser.ConstDefContext defCtx : ctx.constDef()) {
-            TerminalNode identifier = defCtx.Identifier();
-            if(defCtx.constExp()==null) //不是数组
-            {
-                currentSymbolTable.addConst(identifier.getSymbol(),defCtx.constInitVal().initValues[0]);
-            }
-            else{ //是数组
-                currentSymbolTable.addConstArray(identifier.getSymbol(),defCtx.constInitVal().dimensions,
-                                            defCtx.constInitVal().initValues);
-            }
-        }
+
     }
 
     @Override
@@ -101,46 +73,15 @@ public class SysSymbolListener implements SysYListener {
     public void exitConstDef(SysYParser.ConstDefContext ctx) {
 
     }
-    private void enterInitValBase(SysYParser.InitValContextBase ctx,
-                                  List<? extends SysYParser.InitValContextBase> children)
-    {
 
-        int dimSize = 1;
-        for(int i=ctx.whichDim;i<ctx.dimensions.length;i++)
-        {
-            dimSize*=ctx.dimensions[i];
-        }
-        int symbolOffset = 0;
-        for (int i = 0; i < children.size(); i++) {
-            SysYParser.InitValContextBase childInitVal = children.get(i);
-            childInitVal.ident = ctx.ident;
-            childInitVal.dimensions = ctx.dimensions;
-            childInitVal.initValues = ctx.initValues;
-            childInitVal.whichDim = ctx.whichDim + 1;
-            childInitVal.symbolOffset=ctx.symbolOffset+i*dimSize;
-        }
-    }
     @Override
     public void enterConstInitVal(SysYParser.ConstInitValContext ctx) {
-        enterInitValBase(ctx,ctx.constInitVal());
+
     }
 
     @Override
     public void exitConstInitVal(SysYParser.ConstInitValContext ctx) {
-        if(ctx.constExp()!=null)
-        {
-            AddressOrData initResult = ctx.constExp().result;
-            if (initResult.isData) {
-                ctx.initValues[ctx.symbolOffset]=initResult.item;
-            }else{
 
-                //todo 这些咋办
-                /*VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,ctx.ident);
-                SaveRepresent ir = InterRepresentFactory.createSaveRepresent(ctx.symbol, new AddressOrData(true, ctx.symbolOffset),
-                                                                             initResult);
-                irCodes.addCode(ir);*/
-            }
-        }
     }
 
     @Override
@@ -171,6 +112,7 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitVarDecl(SysYParser.VarDeclContext ctx) {
+        SymbolTable currentSymbolTable = ctx.domain.symbolTable;
         List<SysYParser.VarDefContext> varDefs = ctx.varDef();
         for (SysYParser.VarDefContext varDefCtx : varDefs) {
             TerminalNode identifier = varDefCtx.Identifier();
@@ -282,21 +224,7 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void enterFuncDef(SysYParser.FuncDefContext ctx) {
-        String returnTypeStr = ctx.funcType().getText();
-        BType returnType = BType.VOID;
-        if(returnTypeStr.equals("int"))
-        {
-            returnType=BType.INT;
-        }
 
-        int paramNum = 0;
-        if(ctx.funcFParams()!=null)
-        {
-            paramNum = ctx.funcFParams().funcFParam().size();
-        }
-        Token funcName = ctx.Identifier().getSymbol();
-
-        currentFunc = funcSymbolTable.addFunc(funcName, paramNum, returnType);
     }
 
     @Override
@@ -336,52 +264,12 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void enterBlock(SysYParser.BlockContext ctx) {
-        SymbolDomain domain;
-        if (blockStack.empty()) {
-            domain = symbolTableHost.createSymbolDomain(null, currentFunc);
-        }else{
-            SymbolDomain topDomain = blockStack.peek();
-            domain = symbolTableHost.createSymbolDomain(topDomain, currentFunc);
-        }
-        blockStack.push(domain);
-        currentSymbolTable = domain.symbolTable;
 
-        if(ctx.getParent() instanceof SysYParser.FuncDefContext)
-        {
-            SysYParser.FuncDefContext parentIfCtx = (SysYParser.FuncDefContext)ctx.getParent();
-            if(parentIfCtx.funcFParams()==null)
-                return;
-            // 如果父节点是函数定义，那么把函数参数添加到符号表
-            // 不在enterFuncDef中进行这项操作是因为新的symboltable和domain还没生成
-            for (int i = 0; i < parentIfCtx.funcFParams().funcFParam().size(); i++) {
-                SysYParser.FuncFParamContext paramCtx = parentIfCtx.funcFParams().funcFParam().get(i);
-
-                TerminalNode identifier = paramCtx.Identifier();
-                if(paramCtx.LeftBracket().size()==0 || paramCtx.RightBracket().size()==0) //没有[], 不是数组型参数
-                    currentSymbolTable.addParam(identifier.getSymbol());
-                else{ //是数组
-                    int[] dims= new int[paramCtx.exp().size()+1];
-                    dims[0] = -1; //-1表示未知, 第一个方括号内没有参数
-                    for (int expIndex = 0; expIndex < paramCtx.exp().size(); expIndex++) {
-                        if (paramCtx.exp(expIndex).result!=null&&
-                                paramCtx.exp(expIndex).result.isData) {
-                            dims[i+1] = paramCtx.exp(expIndex).result.item;
-                        }else{
-                            dims[i+1] = 1;
-                            System.err.println("Array size must be constant");
-                        }
-                    }
-                    currentSymbolTable.addParamArray(identifier.getSymbol(), dims);
-                }
-            }
-        }
     }
 
     @Override
     public void exitBlock(SysYParser.BlockContext ctx) {
-        blockStack.pop();
-        SymbolDomain domain = blockStack.peek();
-        currentSymbolTable = domain.symbolTable;
+
     }
 
     @Override
@@ -496,18 +384,6 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void enterLVal(SysYParser.LValContext ctx) {
-        boolean defined=false;
-        Token symbol = ctx.Identifier().getSymbol();
-        for (SymbolDomain domain : blockStack) {
-            if (domain.symbolTable.containSymbol(symbol.getText())) {
-                defined=true;
-                break;
-            }
-        }
-
-        if(!defined){
-            //todo 符号未定义错误
-        }
     }
 
     @Override
@@ -522,30 +398,7 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitPrimaryExp(SysYParser.PrimaryExpContext ctx) {
-        if(ctx.lVal()!=null)
-        {
-            SysYParser.LValContext lValCtx = ctx.lVal();
-            for (SysYParser.ExpContext expCtx : lValCtx.exp()) {
-                if (expCtx.result==null) { //当前无法直接计算偏移量
-                    return;
-                }
-            }
-            ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
-            if(symbolAndOffset==null)
-            {
-                System.err.println("Can't find symbol:"+ctx.lVal().Identifier().getSymbol().getText());
-                return;
-            }
 
-
-            if(symbolAndOffset.symbol instanceof ConstSymbol
-                    && symbolAndOffset.offsetResult.isData)
-            {
-                ctx.result =
-                        new AddressOrData (true,
-                                           ((ConstSymbol) symbolAndOffset.symbol).constVal[symbolAndOffset.offsetResult.item]);
-            }
-        }
     }
 
     @Override
@@ -595,8 +448,9 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitMulExp(SysYParser.MulExpContext ctx) {
-        if(ctx.op == null)
-            ctx.result = ctx.unaryExp().result;
+
+        if(ctx.op==null)
+            ctx.result=ctx.unaryExp().result;
     }
 
     @Override
@@ -677,9 +531,6 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void exitEveryRule(ParserRuleContext parserRuleContext) {
-        if(parserRuleContext instanceof SysYParser.DomainedContext)
-        {
-            ((SysYParser.DomainedContext)parserRuleContext).domain =blockStack.peek();
-        }
+
     }
 }
