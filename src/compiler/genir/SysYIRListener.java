@@ -135,24 +135,31 @@ public class SysYIRListener implements SysYListener {
         if(ctx.initVal()!=null)
         {
             VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,ctx.Identifier().getSymbol());
-            if(ctx.initVal().initValues!=null && ctx.initVal().initValues.length==1)
+
+            if(_currentIRFunc!=null)
+                _currentIRFunc.addSingleIR(new InitVarRepresent(symbol), "Init var:"+symbol.symbolToken.getText());
+            if(ctx.initVal().initValues!=null && ctx.initVal().initValues.size()==1)
             {
-                if(symbol!=null)
+                /*if(symbol!=null)
                 {
-                    /* todo 当只有一个数据时，直接生成一条中间表示
-                    */
+                    *//* todo 当只有一个数据时，直接生成一条中间表示
+                    *//*
                     symbol.initIR = ctx.initVal().irGroup;
 
                     SaveRepresent ir = InterRepresentFactory.createSaveRepresent(symbol,
                                                                                  new AddressOrData(true, 0),
                                                                                  new AddressOrData(true,
-                                                                                                   ctx.initVal().initValues[0]));
+                                                                                                   ctx.initVal().initValues.get(0)));
 
                     symbol.initIR.addCode(ir);
-                }
+                }*/
             }
-            if(_currentIRFunc!=null)
-                _currentIRFunc.addSingleIR(new InitVarRepresent(symbol), "Init var:"+symbol.symbolToken.getText());
+
+            if(!symbol.hasConstInitValue)
+            {
+                if(_currentIRFunc!=null)
+                    _currentIRFunc.addGroup(ctx.irGroup); //计算初始值的IR
+            }
         }
     }
 

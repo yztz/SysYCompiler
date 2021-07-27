@@ -8,8 +8,8 @@ public class ParamSymbol extends ValueSymbol{
         super(symbolToken);
     }
 
-    public ParamSymbol(Token symbolToken, int[] dimensions) {
-        super(symbolToken, dimensions);
+    public ParamSymbol(Token symbolToken, int[] dimensions,boolean isArray) {
+        super(symbolToken, dimensions,isArray);
         array = true;
     }
 

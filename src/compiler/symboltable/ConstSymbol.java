@@ -10,8 +10,8 @@ public class ConstSymbol extends ValueSymbol{
         constVal = new int[]{val};
     }
 
-    public ConstSymbol(int[] val,Token symbolToken, int[] dimensions) {
-        super(symbolToken, dimensions);
+    public ConstSymbol(int[] val,Token symbolToken, int[] dimensions,boolean isArray) {
+        super(symbolToken, dimensions,isArray);
         constVal = val;
     }
 

@@ -23,7 +23,8 @@ public class LoadConverter extends LSConverter {
 
     @Override
     public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
-        return super.process(AsmBuilder.Mem.LDR, builder, regGetter, (LSRepresent) ir);
+        return super.process(AsmBuilder.Mem.LDR, builder, regGetter, (LSRepresent) ir,funcSymbol,
+                             regGetter.getReg(ir, ((LSRepresent) ir).target));
     }
 
 }

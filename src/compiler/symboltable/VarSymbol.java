@@ -17,7 +17,6 @@ public class VarSymbol extends ValueSymbol {
 
     // 初始数据在汇编的中的标签
     public String asmDataLabel = null;
-    public int indexInFuncData = -1;
 
     public VarSymbol(int offsetByte, Token symbolToken,  int[] initValues) {
         super(symbolToken);
@@ -25,15 +24,10 @@ public class VarSymbol extends ValueSymbol {
         this.initValues = initValues;
     }
 
-    public VarSymbol(int offsetByte, Token symbolToken, int[] dimensions,  int[] initValues) {
-        super(symbolToken,dimensions);
+    public VarSymbol(int offsetByte, Token symbolToken, int[] dimensions,  int[] initValues,boolean isArray) {
+        super(symbolToken,dimensions,isArray);
         this.offsetByte = offsetByte;
         this.initValues = initValues;
-    }
-
-    @Override
-    public boolean isArray() {
-        return length>1;
     }
 
     @Override

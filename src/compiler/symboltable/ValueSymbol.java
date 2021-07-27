@@ -2,19 +2,24 @@ package compiler.symboltable;
 
 import org.antlr.v4.runtime.Token;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class ValueSymbol {
     public Token symbolToken;
     public int[] dimensions;
     protected int length = 0;
     protected int byteSize = 0;
+    public boolean isGlobal = false;
 
+    private Map<FuncSymbol,Integer> indexInFuncDataMap = new HashMap<>();
     public ValueSymbol(Token symbolToken) {
         this.symbolToken = symbolToken;
         dimensions=new int[]{1};
         length = 1;
     }
 
-    public ValueSymbol(Token symbolToken, int[] dimensions) {
+    public ValueSymbol(Token symbolToken, int[] dimensions,boolean isArray) {
         this.symbolToken = symbolToken;
         this.dimensions = dimensions;
         length = 1;
@@ -22,6 +27,17 @@ public abstract class ValueSymbol {
             length *=dimSize;
         }
         byteSize=length*4;
+        this.isArray = isArray;
+    }
+
+    public void setIndexInFunctionData(int index,FuncSymbol funcSymbol)
+    {
+        indexInFuncDataMap.put(funcSymbol,index);
+    }
+
+    public int getIndexInFunctionData(FuncSymbol funcSymbol)
+    {
+        return indexInFuncDataMap.get(funcSymbol);
     }
 
     /**
@@ -38,6 +54,19 @@ public abstract class ValueSymbol {
         return byteSize;
     }
 
-    public abstract boolean isArray();
+    private boolean isArray = false;
+    public boolean isArray(){
+        return isArray;
+    }
+
+    public void setArray(boolean array) {
+        isArray = array;
+    }
+
     public abstract int getOffsetByte();
+
+    public boolean isGlobalSymbol()
+    {
+        return this.isGlobal;
+    }
 }

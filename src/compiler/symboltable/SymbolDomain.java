@@ -26,4 +26,23 @@ public class SymbolDomain {
     public int getId() {
         return id;
     }
+
+    int totalOffset = 0;
+    public int getTotalOffset()
+    {
+        if(getFunc()==null)
+            return totalOffset;
+
+        return getFunc().totalSymbolOffset;
+    }
+
+    public void appendTotalOffset(int offset)
+    {
+        if(getFunc()==null)
+        {
+            totalOffset+=offset;
+        }else{
+            getFunc().totalSymbolOffset+=offset;
+        }
+    }
 }

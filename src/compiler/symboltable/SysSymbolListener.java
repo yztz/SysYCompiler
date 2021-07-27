@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -75,7 +76,7 @@ public class SysSymbolListener implements SysYListener {
                 currentSymbolTable.addConst(identifier.getSymbol(),defCtx.constInitVal().initValues[0]);
             }
             else{ //是数组
-                currentSymbolTable.addConst(identifier.getSymbol(),defCtx.constInitVal().dimensions,
+                currentSymbolTable.addConstArray(identifier.getSymbol(),defCtx.constInitVal().dimensions,
                                             defCtx.constInitVal().initValues);
             }
         }
@@ -179,9 +180,19 @@ public class SysSymbolListener implements SysYListener {
             {
                 initValues = varDefCtx.initVal().initValues;
             }
-            int[] dims = getDimsFromConstExp(varDefCtx.constExp());
-            // 遍历完成，记录数据
-            VarSymbol varSymbol = currentSymbolTable.addVar(identifier.getSymbol(), dims, initValues);
+            VarSymbol varSymbol;
+            if(varDefCtx.constExp()==null || varDefCtx.constExp().size()==0) //不是数组
+            {
+                // 遍历完成，记录数据
+                varSymbol = currentSymbolTable.addVar(identifier.getSymbol(), initValues);
+            }else{
+                int[] dims = getDimsFromConstExp(varDefCtx.constExp());
+                // 遍历完成，记录数据
+                varSymbol = currentSymbolTable.addVarArray(identifier.getSymbol(), dims, initValues);
+            }
+            if (currentSymbolTable.getDomain()== SymbolDomain.globalDomain) {
+                varSymbol.isGlobal = true;
+            }
             if(varDefCtx.initVal()!=null)
             {
                 varSymbol.hasConstInitValue = varDefCtx.initVal().hasConstInitValue;
@@ -340,7 +351,7 @@ public class SysSymbolListener implements SysYListener {
                             System.err.println("Array size must be constant");
                         }
                     }
-                    currentSymbolTable.addParam(identifier.getSymbol(),dims);
+                    currentSymbolTable.addParamArray(identifier.getSymbol(), dims);
                 }
             }
         }

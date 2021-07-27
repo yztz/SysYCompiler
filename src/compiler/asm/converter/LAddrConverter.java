@@ -20,7 +20,7 @@ public class LAddrConverter extends AsmConverter{
         LAddrRepresent retIr = (LAddrRepresent) ir;
         Reg rd = regGetter.getReg(retIr, retIr.target);
         ValueSymbol symbol = retIr.valueSymbol;
-        int symbolOffsetFp = Util.getSymbolOffsetFp(symbol);
+        int symbolOffsetFp = AsmUtil.getSymbolOffsetFp(symbol);
         builder.add(rd,Regs.FP,symbolOffsetFp);
         return 1;
     }

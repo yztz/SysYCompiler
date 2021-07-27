@@ -21,17 +21,17 @@ public class InitVarConverter extends AsmConverter{
         InitVarRepresent initIR = (InitVarRepresent) ir;
         VarSymbol varSymbol = initIR.varSymbol;
 
-        int offsetInFuncData = varSymbol.indexInFuncData* ConstDef.WORD_SIZE;
-        String funcDataLabel = Util.getFuncDataLabel(funcSymbol);
+        int offsetInFuncData = varSymbol.getIndexInFunctionData(funcSymbol)* ConstDef.WORD_SIZE;
+        String funcDataLabel = AsmUtil.getFuncDataLabel(funcSymbol);
 
-        if(Util.isNeedInitInDataSection(varSymbol))//数据在数据区,funcData里保存的是地址
+        if(AsmUtil.isNeedInitInDataSection(varSymbol))//数据在数据区,funcData里保存的是地址
         {
 
             if(varSymbol.initValues.length>4) //大于4个，用memcpy
             {
                 /*Reg src = regGetter.getTmpRegister(0);
                 Reg des = regGetter.getTmpRegister(1);*/
-                builder.sub(Regs.R0, Regs.FP,-Util.getSymbolOffsetFp(varSymbol));
+                builder.sub(Regs.R0, Regs.FP,-AsmUtil.getSymbolOffsetFp(varSymbol));
                 builder.ldr(Regs.R1,funcDataLabel,offsetInFuncData);
                 builder.mov(Regs.R2,varSymbol.getByteSize());
                 builder.bl("memcpy");
@@ -45,13 +45,13 @@ public class InitVarConverter extends AsmConverter{
                     regs[i] = regGetter.getTmpRegister(i+1);
                 }
                 builder.ldm(AsmBuilder.LSAddressMode.NONE, addr, regs);
-                builder.sub(addr, Regs.FP, -Util.getSymbolOffsetFp(varSymbol));
+                builder.sub(addr, Regs.FP, -AsmUtil.getSymbolOffsetFp(varSymbol));
                 builder.sdm(AsmBuilder.LSAddressMode.NONE,addr ,regs);
             }
         }else{ //不是数组
             Reg tmp = regGetter.getTmpRegister();
             builder.ldr(tmp,funcDataLabel,offsetInFuncData);
-            builder.sdr(tmp,Regs.FP,Util.getSymbolOffsetFp(varSymbol));
+            builder.sdr(tmp, Regs.FP, AsmUtil.getSymbolOffsetFp(varSymbol));
         }
 
         return 1;

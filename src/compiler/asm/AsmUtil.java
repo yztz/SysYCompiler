@@ -6,7 +6,7 @@ import compiler.symboltable.*;
 
 import java.util.function.Consumer;
 
-public class Util {
+public class AsmUtil {
 
     /**
      * 遍历IR中的每个临时变量
@@ -63,13 +63,29 @@ public class Util {
     {
         return String.format(".%s.data",funcSymbol.funcName.getText());
     }
+
+    public static int getSymbolArrayIndexOffset(int arrayIndex)
+    {
+        return arrayIndex*ConstDef.WORD_SIZE;
+    }
+
+    public static int getSymbolOffset(ValueSymbol symbol)
+    {
+        return -symbol.getOffsetByte() - symbol.getByteSize();
+    }
+
+    public static int getSymbolOffset(ValueSymbol symbol, int arrayIndex)
+    {
+        return getSymbolOffset(symbol) + getSymbolArrayIndexOffset(arrayIndex);
+    }
+
     public static int getSymbolOffsetFp(ValueSymbol symbol)
     {
-        return -symbol.getOffsetByte()-2* ConstDef.WORD_SIZE - symbol.getByteSize();
+        return getSymbolOffset(symbol)-2* ConstDef.WORD_SIZE;
     }
     public static int getSymbolOffsetFp(ValueSymbol symbol, int arrayIndex)
     {
-        return getSymbolOffsetFp(symbol) + arrayIndex*ConstDef.WORD_SIZE;
+        return getSymbolOffset(symbol,arrayIndex) -2* ConstDef.WORD_SIZE;
     }
 
     public static int getParamOffsetCalledFp(int index)

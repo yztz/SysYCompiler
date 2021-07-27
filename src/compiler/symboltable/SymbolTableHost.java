@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTableHost {
+    public SymbolTable getGlobalSymbolTable()
+    {
+        return SymbolDomain.globalDomain.symbolTable;
+    }
     public Map<SymbolDomain,SymbolTable> symbolTableMap=new HashMap<>();
     public SymbolTable getSymbolTable(SymbolDomain symbolDomain)
     {

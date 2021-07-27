@@ -10,15 +10,12 @@ import java.util.Map;
 
 public class SymbolTable {
     private final SymbolDomain domain;
-    private int totalOffset=0;
+
     private final Map<String,ValueSymbol> symbols = new HashMap<>();
     public SymbolTable(SymbolDomain domain) {
         this.domain = domain;
     }
 
-    public int getTotalOffset() {
-        return totalOffset;
-    }
 
     /**
      * 获取该符号表的作用域
@@ -33,37 +30,43 @@ public class SymbolTable {
      * 向符号表中登记符号
      * @param token 符号
      */
-    public VarSymbol addVar(Token token, int[] dimensions, int[] initValues) //类型只有一个int
+    public VarSymbol addVarArray(Token token, int[] dimensions, int[] initValues) //类型只有一个int
     {
-        VarSymbol symbol = new VarSymbol(getOffset(), token, dimensions, initValues);
+        VarSymbol symbol = new VarSymbol(getCurrentOffset(), token, dimensions, initValues,true);
         symbols.put(token.getText(), symbol);
-        forwardOffset(symbol.length*ConstDef.INT_SIZE);
+        appendOffset(symbol.length*ConstDef.INT_SIZE);
         return symbol;
     }
 
     public VarSymbol addVar(Token token, int[] initValues) //类型只有一个int
     {
-        VarSymbol symbol = new VarSymbol(getOffset(), token, initValues);
+        VarSymbol symbol = new VarSymbol(getCurrentOffset(), token, initValues);
         symbols.put(token.getText(), symbol);
-        forwardOffset(symbol.length*ConstDef.INT_SIZE);
+        appendOffset(symbol.length*ConstDef.INT_SIZE);
         return symbol;
     }
     public void addParam(Token token)
     {
+        if(domain.getFunc()==null)
+            return;
+
         ParamSymbol symbol = new ParamSymbol(token);
         symbols.put(token.getText(), symbol);
-        symbol.offsetByte = getOffset();
-        forwardOffset(ConstDef.INT_SIZE); //参数都是4字节的（数组是指针）
+        symbol.offsetByte = getCurrentOffset();
+        appendOffset(ConstDef.INT_SIZE); //参数都是4字节的（数组是指针）
 
         domain.getFunc().paramSymbols.add(symbol);
     }
 
-    public void addParam(Token token,int[] dim)
+    public void addParamArray(Token token, int[] dim)
     {
-        ParamSymbol symbol = new ParamSymbol(token,dim);
+        if(domain.getFunc()==null)
+            return;
+
+        ParamSymbol symbol = new ParamSymbol(token,dim,true);
         symbols.put(token.getText(), symbol);
-        symbol.offsetByte = getOffset();
-        forwardOffset(ConstDef.INT_SIZE);
+        symbol.offsetByte = getCurrentOffset();
+        appendOffset(ConstDef.INT_SIZE);
 
         domain.getFunc().paramSymbols.add(symbol);
     }
@@ -73,18 +76,18 @@ public class SymbolTable {
         symbols.put(token.getText(), symbol);
     }
 
-    public void addConst(Token token,int[] dim,int[] constValues)
+    public void addConstArray(Token token, int[] dim, int[] constValues)
     {
-        ConstSymbol symbol = new ConstSymbol(constValues, token,dim);
+        ConstSymbol symbol = new ConstSymbol(constValues, token,dim,true);
         symbols.put(token.getText(), symbol);
     }
-    private int getOffset()
+    private int getCurrentOffset()
     {
-        return domain.getFunc().totalSymbolOffset;
+        return domain.getTotalOffset();
     }
-    private void forwardOffset(int byteSize)
+    private void appendOffset(int byteSize)
     {
-        domain.getFunc().totalSymbolOffset +=byteSize;
+        domain.appendTotalOffset(byteSize);
     }
     public Collection<ValueSymbol> getAllSymbol()
     {

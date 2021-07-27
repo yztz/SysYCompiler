@@ -7,6 +7,8 @@ import compiler.genir.IRFunction;
 import compiler.genir.IRUnion;
 import compiler.genir.code.GotoRepresent;
 import compiler.genir.code.InterRepresent;
+import compiler.genir.code.LAddrRepresent;
+import compiler.genir.code.LSRepresent;
 import compiler.symboltable.*;
 
 import java.util.*;
@@ -25,7 +27,7 @@ public class AsmGen {
         for (AbstractIR ir : irUnion.getAll()) {
             if (ir instanceof IRFunction) {
 
-                AsmSection dataSection = genFunctionData(((IRFunction) ir).funcSymbol);
+                AsmSection dataSection = genFunctionData(((IRFunction) ir).funcSymbol, (IRFunction) ir);
                 AsmSection funcSection = genFunction((IRFunction) ir);
 
                 funcSection.getText(builder);
@@ -84,13 +86,13 @@ public class AsmGen {
         }
 
         for (int i = 0; i < Math.min(4,funcSymbol.getParamNum()); i++) {
-            asmBuilder.str(Regs.REGS[i],Regs.FP,Util.getSymbolOffsetFp(funcSymbol.paramSymbols.get(i)));
+            asmBuilder.str(Regs.REGS[i], Regs.FP, AsmUtil.getSymbolOffsetFp(funcSymbol.paramSymbols.get(i)));
         }
         for(int i = funcSymbol.getParamNum()-1;i>=4;i--)
         {
             Reg tmp = regGetter.getTmpRegister();
-            asmBuilder.ldr(tmp,Regs.FP,Util.getParamOffsetCalledFp(i));
-            asmBuilder.str(tmp,Regs.FP,Util.getSymbolOffsetFp(funcSymbol.paramSymbols.get(i)));
+            asmBuilder.ldr(tmp, Regs.FP, AsmUtil.getParamOffsetCalledFp(i));
+            asmBuilder.str(tmp, Regs.FP, AsmUtil.getSymbolOffsetFp(funcSymbol.paramSymbols.get(i)));
         }
     }
 
@@ -107,28 +109,52 @@ public class AsmGen {
         }
     }
 
-    public AsmSection genFunctionData(FuncSymbol funcSymbol)
+    public AsmSection genFunctionData(FuncSymbol funcSymbol,IRFunction irFunction)
     {
-        AsmBuilder builder = new AsmBuilder(Util.getFuncDataLabel(funcSymbol));
+        AsmBuilder builder = new AsmBuilder(AsmUtil.getFuncDataLabel(funcSymbol));
         builder.align(2);
         builder.label();
+        int indexInFunc = 0;
+        HashSet<ValueSymbol> usedSymbol = new HashSet<>();
+        for (InterRepresent ir : irFunction.flatIR()) {
+            if(ir instanceof LSRepresent)
+            {
+                usedSymbol.add(((LSRepresent) ir).valueSymbol);
+            }else if(ir instanceof LAddrRepresent)
+            {
+                usedSymbol.add(((LAddrRepresent) ir).valueSymbol);
+            }
+        }
+
+        for (ValueSymbol symbol : symbolTableHost.getGlobalSymbolTable().getAllSymbol()) {
+            if(!usedSymbol.contains(symbol))
+                continue;
+
+            if(symbol instanceof VarSymbol)
+            {
+                VarSymbol varSymbol = (VarSymbol) symbol;
+
+                builder.word(varSymbol.asmDataLabel);
+                varSymbol.setIndexInFunctionData(indexInFunc++,funcSymbol);
+            }
+        }
 
         for (SymbolTable table : symbolTableHost.symbolTableMap.values()) {
             SymbolDomain domain = table.getDomain();
 
             if(funcSymbol!=domain.getFunc())
                 continue;
-            int indexInFunc = 0;
+
             for (ValueSymbol symbol : table.getAllSymbol()) {
                 if (symbol instanceof VarSymbol) {
                     VarSymbol varSymbol = (VarSymbol) symbol;
-                    if(Util.isNeedInitInDataSection(varSymbol))
+                    if(AsmUtil.isNeedInitInDataSection(varSymbol))
                     {
-                        builder.word(Util.getVarLabel(funcSymbol,domain,varSymbol));
-                        varSymbol.indexInFuncData = indexInFunc++;
+                        builder.word(AsmUtil.getVarLabel(funcSymbol, domain, varSymbol));
+                        varSymbol.setIndexInFunctionData(indexInFunc++,funcSymbol);
                     }else if(varSymbol.initValues!=null && varSymbol.initValues.length>0){
                         builder.word(varSymbol.initValues[0]);
-                        varSymbol.indexInFuncData = indexInFunc++;
+                        varSymbol.setIndexInFunctionData(indexInFunc++,funcSymbol);
                     }
 
                 } else if (symbol instanceof ConstSymbol) {
@@ -142,6 +168,32 @@ public class AsmGen {
 
     public List<AsmSection> genStaticData() {
         List<AsmSection> sections = new ArrayList<>();
+
+        for (ValueSymbol symbol : symbolTableHost.getGlobalSymbolTable().getAllSymbol()) {
+            if (symbol instanceof VarSymbol) {
+                VarSymbol varSymbol = (VarSymbol) symbol;
+                if (!varSymbol.hasConstInitValue) {
+                    continue;
+                }
+
+                AsmBuilder builder = new AsmBuilder();
+                String label = varSymbol.symbolToken.getText();
+
+                varSymbol.asmDataLabel = label;
+
+                builder.type(label, AsmBuilder.Type.Object).data().global(label).align(2).label(label);
+
+                for (int initValue : varSymbol.initValues) {
+                    builder.word(initValue);
+                }
+                builder.size(label, varSymbol.getByteSize());
+
+                sections.add(builder.getSection());
+            } else if (symbol instanceof ConstSymbol) {
+
+            }
+        }
+
         for (SymbolTable table : symbolTableHost.symbolTableMap.values()) {
             SymbolDomain domain = table.getDomain();
             FuncSymbol funcSymbol = domain.getFunc();
@@ -154,7 +206,7 @@ public class AsmGen {
                     }
 
                     AsmBuilder builder = new AsmBuilder();
-                    String label = Util.getVarLabel(funcSymbol,domain,varSymbol);
+                    String label = AsmUtil.getVarLabel(funcSymbol, domain, varSymbol);
 
                     varSymbol.asmDataLabel = label;
 
