@@ -1,7 +1,10 @@
 package ir;
 
+import common.ILabel;
+import common.OP;
 import ir.code.GoToIR;
 import ir.code.IR;
+import ir.code.UnaryIR;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,7 +18,14 @@ public class RegisterAllocator {
         enterPoints.add(irs.getIR(0));
         for (int i = 1; i < irs.size(); i++) {
             IR ir = irs.getIR(i);
-//            if (ir)
+            if (ir.op == OP.GOTO) {
+                enterPoints.add(irs.getIR(i + 1));
+                IR target = irs.getIR(((GoToIR)ir).target);
+                enterPoints.add(target);
+            } else if (ir.op == OP.CALL){
+                enterPoints.add(irs.getIR(i + 1));
+
+            }
         }
     }
 }
