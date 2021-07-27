@@ -1,8 +1,7 @@
 package ast;
 
-import common.ILabel;
+import common.OP;
 import common.symbol.Variable;
-import common.Label;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ public class Utils {
     }
 
     public static int assignArray(Variable array, AstNode values, int dimension, AstNode group) {
-        if (values.op != OP.VAL_GROUP){
+        if (values.op != OP.VAL_GROUP) {
             AstNode left = AstNode.makeLeaf(new OffsetVar(array, array.pos));
             group.addNode(AstNode.makeBinaryNode(OP.ASSIGN, left, values));
             array.pos++;
@@ -162,7 +161,7 @@ public class Utils {
             case IF_ELSE:
             case WHILE:
             case ASSIGN:
-            case STATEMENT:
+            case STATEMENTS:
             case VAL_GROUP:
             case ROOT:
 
@@ -234,14 +233,41 @@ public class Utils {
         return ret;
     }
 
+    public static AstNode findFirstStat(AstNode currStat) {
+        while (!OP.isStatement(currStat)) {
+            currStat = currStat.getLeft();
+        }
+
+        return currStat;
+    }
+
     public static AstNode findNextStat(AstNode currStat) {
 //        if (currStat.parent.getRight() != currStat) return currStat.parent.getRight(currStat);
-
-        while (currStat.parent.op != OP.STATEMENT   // 当父节点不为statement或者当前节点为最右节点
+        // 当父节点不为statement或者当前节点为最右节点
+        while (currStat.parent.op != OP.STATEMENTS
                 || currStat == currStat.parent.getRight())
             currStat = currStat.parent;
-        return currStat.parent.getRight(currStat);
+        currStat = currStat.parent.getRight(currStat);
+        // 当前节点不是语句
+        while (!OP.isStatement(currStat)) {
+            // 当前节点是叶节点，右移寻找非叶节点
+            if (currStat.isLeaf()) {
+                while (currStat.isLeaf()) {
+                    AstNode right = currStat.parent.getRight(currStat);
+                    if (null == right) {
+                        System.err.println("不存在下条可用的语句");
+                        return null;
+                    } else {
+                        currStat = right;
+                    }
+                }
+                continue;
+            }
+            currStat = currStat.getLeft();
+        }
+        return currStat;
     }
+
 
 
 

@@ -1,7 +1,7 @@
 package asm;
 
 import ast.AstNode;
-import ast.OP;
+import common.OP;
 
 public class CodeGenerator {
     RegGetter regGetter = new RegGetterImpl();
@@ -19,7 +19,7 @@ public class CodeGenerator {
 
                 case PARAM:
                     break;
-                case STATEMENT:
+                case STATEMENTS:
                     break;
 
                 case CONTINUE:
@@ -59,7 +59,7 @@ public class CodeGenerator {
                 break;
             case ASSIGN:
                 break;
-            case STATEMENT:
+            case STATEMENTS:
                 break;
             case VAL_GROUP:
                 break;

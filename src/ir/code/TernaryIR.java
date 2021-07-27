@@ -1,7 +1,7 @@
 package ir.code;
 
 import ast.IAstValue;
-import ast.OP;
+import common.OP;
 
 public class TernaryIR extends IR{
     public OP op;
@@ -16,6 +16,6 @@ public class TernaryIR extends IR{
 
     @Override
     public String toString() {
-        return String.format("%-4s\t%-7s%-5s%-5s%-5s", getLabelName(),op, rd, rn, rm);
+        return String.format("%-4s\t%-10s%-10s%-10s%-10s", getLabelName(),op, rd, rn, rm);
     }
 }

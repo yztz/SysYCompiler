@@ -1,7 +1,6 @@
 import antlr.SysYParser;
 import ast.AstNode;
 import ast.AstVisitor;
-import ast.Optimizer;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 

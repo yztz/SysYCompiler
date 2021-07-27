@@ -19,7 +19,7 @@ public class Utils {
         JPanel panel = new JPanel();
         TreeViewer viewer = new TreeViewer(Arrays.asList(
                 parser.getRuleNames()),tree);
-        viewer.setScale(1.2); // Scale a little
+//        viewer.setScale(0.8); // Scale a little
         panel.add(viewer);
         frame.add(panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -27,7 +27,7 @@ public class Utils {
         frame.setVisible(true);
         while(frame.isVisible()) {
             try {
-                Thread.sleep(1000);//死循环中降低CPU占用
+                Thread.sleep(1000);
             } catch (Exception e) {
                 e.printStackTrace();
             }

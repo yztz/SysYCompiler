@@ -1,18 +1,18 @@
 
 int foo(int i) {
-    if(i == 0 || i == 1) {
-        return 1;
-    }
-    else {
-        return i * foo(i - 1);
-    }
+//    if(i == 0 || i == 1) {
+//        return 1;
+//    }
+//    else {
+//        return i * foo(i - 1);
+//    }
 }
 
 const int LIMIT = 10;
 
 int main() {
     int a = 1, aa = 2, aaa = 3;
-    while(a < LIMIT || a == 9) {
+    while(a < LIMIT && a > 1 || a == 9) {
         a = a + 1;
         if(a || 1) {
             continue;
@@ -21,8 +21,10 @@ int main() {
             break;
         }
     }
+    {
+        int result = foo(a);
+    }
 
-    int result = foo(a);
 
     return 0;
 }

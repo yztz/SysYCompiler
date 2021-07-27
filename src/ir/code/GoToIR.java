@@ -1,15 +1,15 @@
 package ir.code;
 
-import common.Label;
+import common.ILabel;
 
 public class GoToIR extends IR{
-    public Label target;
-    public GoToIR(Label target) {
+    public ILabel target;
+    public GoToIR(ILabel target) {
         this.target = target;
     }
 
     @Override
     public String toString() {
-        return String.format("%-4s\t%-7s%-5s", getLabelName(), "goto", target);
+        return String.format("%-4s\t%-10s%-5s", getLabelName(), "goto", target);
     }
 }

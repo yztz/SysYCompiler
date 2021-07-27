@@ -1,15 +1,14 @@
 package ast;
 
 import common.ILabel;
+import common.OP;
 import common.symbol.Function;
 import common.symbol.Variable;
-import common.Label;
 import org.antlr.v4.runtime.tree.Tree;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class AstNode implements Tree {
@@ -76,7 +75,10 @@ public class AstNode implements Tree {
 
     public AstNode getRight(AstNode node) {
         int idx = subTree.indexOf(node);
-        return subTree.get(idx + 1);
+        if (idx == subTree.size() - 1)
+            return null;
+        else
+            return subTree.get(idx + 1);
     }
 
     public AstNode getLeft() {

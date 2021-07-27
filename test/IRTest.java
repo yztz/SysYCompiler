@@ -1,22 +1,18 @@
-import antlr.SysYLexer;
 import antlr.SysYParser;
 import ast.AstNode;
 import ast.AstVisitor;
-import ast.OP;
-import ast.Optimizer;
-import ir.AstParser;
+import ir.IRs;
+import ir.PreProcessor;
+import ir.IRParser;
 import ir.code.IR;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.util.List;
 
 public class IRTest {
     AstVisitor visitor = new AstVisitor();
-    AstParser irParser = new AstParser();
+    IRParser irParser = new IRParser();
 
 
     @Test
@@ -24,9 +20,9 @@ public class IRTest {
         SysYParser parser = Utils.getParser("test/testFull.sys");
         ParseTree tree = parser.compUnit();
         AstNode root = visitor.visit(tree);
-        irParser.parseAst(root);
+        IRs irs = irParser.flatAst(root);
 
-        for (IR ir : irParser.getIRCode()) {
+        for (IR ir : irs) {
             System.out.println(ir);
         }
         Utils.makeVisible(parser, root);
@@ -34,10 +30,13 @@ public class IRTest {
 
     @Test
     public void testIF() {
-        SysYParser parser = Utils.getParser("test/testWhileIf.sys");
+        SysYParser parser = Utils.getParser("test/testIf.sys");
         ParseTree tree = parser.compUnit();
         AstNode root = visitor.visit(tree);
-        Optimizer.processIF(root);
+        IRs irs = irParser.flatAst(root);
+        for (IR ir : irs) {
+            System.out.println(ir);
+        }
         Utils.makeVisible(parser, root);
     }
 
@@ -46,18 +45,22 @@ public class IRTest {
         SysYParser parser = Utils.getParser("test/testWhile.sys");
         ParseTree tree = parser.compUnit();
         AstNode root = visitor.visit(tree);
-        Optimizer.processWhile(root);
+        IRs irs = irParser.flatAst(root);
+        for (IR ir : irs) {
+            System.out.println(ir);
+        }
         Utils.makeVisible(parser, root);
     }
 
     @Test
     public void testIFWhile() {
-        SysYParser parser = Utils.getParser("test/testWhile.sys");
+        SysYParser parser = Utils.getParser("test/testWhileIf.sys");
         ParseTree tree = parser.compUnit();
         AstNode root = visitor.visit(tree);
-
-        Optimizer.processWhile(root);
-        Optimizer.processIF(root);
+        IRs irs = irParser.flatAst(root);
+        for (IR ir : irs) {
+            System.out.println(ir);
+        }
         Utils.makeVisible(parser, root);
     }
 }

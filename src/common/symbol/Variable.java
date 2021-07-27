@@ -39,6 +39,7 @@ public class Variable implements IAstValue {
     }
 
     public boolean isCollapsible() {
+        // todo 常量数组待商榷
         return isConst && domain == Domain.globalDomain;
     }
 

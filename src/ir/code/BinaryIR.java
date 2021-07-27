@@ -2,7 +2,7 @@ package ir.code;
 
 
 import ast.IAstValue;
-import ast.OP;
+import common.OP;
 
 public class BinaryIR extends IR {
     public OP op;
@@ -17,6 +17,6 @@ public class BinaryIR extends IR {
 
     @Override
     public String toString() {
-        return String.format("%-4s\t%-10s%-5s%-5s", getLabelName(),op, rd, rn);
+        return String.format("%-4s\t%-10s%-10s%-10s", getLabelName(),op, rd, rn);
     }
 }

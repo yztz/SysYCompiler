@@ -1,7 +1,7 @@
 package ir.code;
 
 import ast.IAstValue;
-import ast.OP;
+import common.OP;
 
 public class UnaryIR extends IR {
     public OP op;

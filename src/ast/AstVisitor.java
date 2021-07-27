@@ -2,6 +2,7 @@ package ast;
 
 import antlr.SysYBaseVisitor;
 import antlr.SysYParser;
+import common.OP;
 import common.symbol.Domain;
 import common.symbol.Function;
 import common.symbol.Variable;
@@ -47,12 +48,13 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
                 function.addParam(variable);
             }
         AstNode ret = visit(ctx.block());
-        ret.value = function;   // 将函数定义存储在statement节点值中
         // 离开
         Domain.leaveFunc();
         if (ret.isLeaf() || ret.getRight().op != OP.RETURN) {
             ret.addNode(AstNode.makeLeaf(OP.RETURN));
         }
+//        Utils.findFirstStat(ret).label = function;
+        ret.label = function;
 
         return ret;
     }
@@ -61,7 +63,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
     @Override
     public AstNode visitBlock(SysYParser.BlockContext ctx) {
         Domain.enterDomain();
-        AstNode ret = AstNode.makeEmptyNode(OP.STATEMENT);
+        AstNode ret = AstNode.makeEmptyNode(OP.STATEMENTS);
         for (SysYParser.BlockItemContext blockItemCtx : ctx.blockItem()) {
             ret.addNode(visit(blockItemCtx));
         }
@@ -95,7 +97,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
         if (null != ctx.stmt(1)) {
             ret.addNode(visit(ctx.stmt(1)));
         } else {
-            ret.addNode(AstNode.makeEmptyNode(OP.STATEMENT));
+            ret.addNode(AstNode.makeEmptyNode(OP.STATEMENTS));
         }
         return ret;
     }
@@ -429,20 +431,20 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
     @Override
     public AstNode visitConstExp(SysYParser.ConstExpContext ctx) {
         AstNode ret = visit(ctx.addExp());
-        return Utils.calc(ret);
+        return Utils.calc(ret); // todo 考虑在单一pass做折叠
     }
 
     @Override
     public AstNode visitExp(SysYParser.ExpContext ctx) {
         AstNode ret = visit(ctx.addExp());
-        return Utils.calc(ret);
+        return Utils.calc(ret); // todo 考虑在单一pass做折叠
     }
 
     @Override
     public AstNode visitCond(SysYParser.CondContext ctx) {
         AstNode ret = visit(ctx.lOrExp());
-        ret = Utils.calc(ret);
-        if (ret.isLeaf()) ret = AstNode.makeBinaryNode(OP.EQ, ret, AstNode.makeLeaf(1));
+        ret = Utils.calc(ret);  // todo 考虑在单一pass做折叠
+//        if (ret.isLeaf()) ret = AstNode.makeBinaryNode(OP.EQ, ret, AstNode.makeLeaf(1));
         return ret;
     }
 }

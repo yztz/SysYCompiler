@@ -1,17 +1,21 @@
 
 int main() {
 
-    int a = 2;
-    int b = 3;
-    if(a > 2 || a < 0 && a > -1) {
-        if (b > 3 && b < 4) {
-
-        } else {
-            return 0;
+    int a[2][2] = {1,2,3,4};
+    int k = 0;
+    int i = 0, j = 0;
+    while(i < 2) {
+        while(j < 2) {
+            k = k + a[i][j];
+            if(k >= 5) {
+                continue;
+            }
+            j = j + 1;
         }
-        a = 1;
-    } else {
-        a = 4;
+        i = i + 1;
+        if(i == 1) {
+            break;
+        }
     }
 
     return 1;
