@@ -2,6 +2,7 @@ package compiler.genir;
 
 import antlr.SysYListener;
 import antlr.SysYParser;
+import compiler.Util;
 import compiler.genir.code.*;
 import compiler.symboltable.function.AbstractFuncSymbol;
 import compiler.symboltable.function.ExternalFuncSymbol;
@@ -550,7 +551,7 @@ public class SysYIRListener implements SysYListener {
         if(numTerminal!=null)
         {
             // 在ConstExpListener里已经完成了
-            //ctx.result = new AddressOrData(true, Util.getIntFromStr(numTerminal.getSymbol().getText()));
+            ctx.result = new AddressOrData(true, Util.getIntFromStr(numTerminal.getSymbol().getText()));
         }else if(ctx.lVal()!=null) //左值，变量
         {
             SysYParser.LValContext lValCtx = ctx.lVal();
@@ -578,7 +579,7 @@ public class SysYIRListener implements SysYListener {
 
             }
         }else{
-            //ctx.result=ctx.exp().result;
+            ctx.result=ctx.exp().result;
         }
     }
 
