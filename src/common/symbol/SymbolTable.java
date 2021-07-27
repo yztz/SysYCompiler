@@ -1,11 +1,15 @@
 package common.symbol;
 
+import ir.Reference;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTable {
     public Domain domain;
     public Map<String, Variable> varTable = new HashMap<>();
+
+    public Map<Variable, Reference> varRefMap = new HashMap<>();
 
     public SymbolTable(Domain domain) {
         this.domain = domain;

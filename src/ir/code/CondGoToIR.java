@@ -4,6 +4,10 @@ import ast.IAstValue;
 import common.ILabel;
 import common.Label;
 import common.OP;
+import common.symbol.Variable;
+import ir.IName;
+
+import java.util.function.Consumer;
 
 public class CondGoToIR extends GoToIR{
     public IAstValue left;
@@ -19,9 +23,13 @@ public class CondGoToIR extends GoToIR{
     }
 
     @Override
-    public String toString() {
-        System.out.println("print goto");
+    public void traverseRVal(Consumer<IName> handler) {
+        if (left instanceof IName) handler.accept((IName) left);
+        if (right instanceof IName) handler.accept((IName) right);
+    }
 
+    @Override
+    public String toString() {
         return String.format("%-4s\tif %s %s %s goto %-5s", getLabelName(), left, relOP, right, target);
     }
 }

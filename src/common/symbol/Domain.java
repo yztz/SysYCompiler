@@ -16,7 +16,7 @@ public class Domain {
     }
 
     private Domain father;
-    private SymbolTable symbolTable = new SymbolTable(this);
+    public SymbolTable symbolTable = new SymbolTable(this);
 
     private Domain(Domain father) {
         this.father = father;

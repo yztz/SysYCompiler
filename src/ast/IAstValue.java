@@ -1,5 +1,7 @@
 package ast;
 
 public interface IAstValue {
-//    Object getVal();
+    default Object getVal(){
+        return this;
+    }
 }

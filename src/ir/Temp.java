@@ -2,7 +2,7 @@ package ir;
 
 import ast.IAstValue;
 
-public class Temp implements IAstValue {
+public class Temp implements IName {
     private static int next_id = 0;
 
 

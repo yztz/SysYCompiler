@@ -2,10 +2,11 @@ package common.symbol;
 
 import ast.IAstValue;
 import ast.Immediate;
+import ir.IName;
 
 import java.util.*;
 
-public class Variable implements IAstValue {
+public class Variable implements IName {
     public static final int INT_WIDTH = 4;
 
     public Type type = Type.INT;
@@ -32,6 +33,10 @@ public class Variable implements IAstValue {
         this.size = size;
 
         location.add(new Immediate(offset));
+    }
+
+    public SymbolTable getSymbolTable() {
+        return this.domain.symbolTable;
     }
 
     public void addConstVal(int val) {

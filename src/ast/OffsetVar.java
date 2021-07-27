@@ -1,8 +1,9 @@
 package ast;
 
 import common.symbol.Variable;
+import ir.IName;
 
-public class OffsetVar implements IAstValue {
+public class OffsetVar implements IName {
     public Variable variable;
     public AstNode offset;
 
@@ -24,5 +25,8 @@ public class OffsetVar implements IAstValue {
             return variable.name + '[' + offset.value + ']';
     }
 
-
+    @Override
+    public Object getVal() {
+        return variable;
+    }
 }
