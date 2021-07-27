@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 public abstract class RegGetter {
-     public abstract Reg getRegOfAddress(InterRepresent ir, AddressOrData address);
+     public abstract Reg getReg(InterRepresent ir, AddressOrData address);
+     public abstract void setReg(InterRepresent ir,AddressOrData address,Reg register);
      public abstract Map<AddressRWInfo, Reg> getMapOfIR(InterRepresent ir);
      protected abstract boolean isFreeReg(Reg reg);
 
@@ -39,10 +40,7 @@ public abstract class RegGetter {
              Regs.R8,
              Regs.R9,
              Regs.R10,
-             Regs.R11,
              Regs.R12,
-             Regs.R13,
-             Regs.R14,
      };
 
      /**

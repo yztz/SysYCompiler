@@ -43,16 +43,14 @@ public class BinocularConverter extends AsmConverter{
                     result = s1%s2;
                     break;
             }
-            Reg reg = regGetter.getRegOfAddress(ir,bIR.target);
+            Reg reg = regGetter.getReg(ir, bIR.target);
             builder.mov(reg,result);
-            bIR.target.reg = reg;
             //todo 分配哪个寄存器保存到AddressOrData里面了，有点乱，其实也可以不保存每一次都用getRegOfAddress获取
             return 1;
         }
 
 
-        Reg reg = regGetter.getRegOfAddress(ir, bIR.target);
-        bIR.target.reg = reg;
+        Reg reg = regGetter.getReg(ir, bIR.target);
 
         if(bIR.OP== BinocularRepre.Opcodes.ADD || bIR.OP== BinocularRepre.Opcodes.MINUS)
         {
@@ -60,36 +58,39 @@ public class BinocularConverter extends AsmConverter{
             {
                 AsmBuilder.RegRegOperandOP op = bIR.OP == BinocularRepre.Opcodes.ADD ? AsmBuilder.RegRegOperandOP.ADD : AsmBuilder.RegRegOperandOP.SUB;
 
-                builder.regRegOperand(op, reg, bIR.sourceFirst.reg, new RegOperand(bIR.sourceSecond.reg));
+                builder.regRegOperand(op, reg, regGetter.getReg(ir,bIR.sourceFirst),
+                                      new RegOperand(regGetter.getReg(ir,bIR.sourceSecond)));
             }else if(!bIR.sourceFirst.isData){
+                Reg rn = regGetter.getReg(ir,bIR.sourceFirst);
                 if (bIR.OP== BinocularRepre.Opcodes.ADD) {
-                    builder.add(reg, bIR.sourceFirst.reg, bIR.sourceSecond.item);
+                    builder.add(reg, rn, bIR.sourceSecond.item);
                 }else{
-                    builder.sub(reg, bIR.sourceFirst.reg, bIR.sourceSecond.item);
+                    builder.sub(reg, rn, bIR.sourceSecond.item);
                 }
             }else{
+                Reg rn = regGetter.getReg(ir,bIR.sourceSecond);
                 if (bIR.OP== BinocularRepre.Opcodes.ADD) {
-                    builder.add(reg, bIR.sourceFirst.reg, bIR.sourceSecond.item);
+                    builder.add(reg, rn, bIR.sourceFirst.item);
                 }else{
                     builder.regRegOperand(AsmBuilder.RegRegOperandOP.RSB,
                                           reg,
-                                          bIR.sourceFirst.reg,
-                                          new ImmOperand(bIR.sourceSecond.item));
+                                          rn,
+                                          new ImmOperand(bIR.sourceFirst.item));
                 }
             }
         }else{
             Reg rd,rn;
             if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData) //都不是立即数
             {
-                rd = bIR.sourceFirst.reg;
-                rn = bIR.sourceSecond.reg;
+                rd = regGetter.getReg(bIR, bIR.sourceFirst);
+                rn = regGetter.getReg(bIR, bIR.sourceSecond);
             }else if(!bIR.sourceFirst.isData) { //右边的是立即数
-                rd = bIR.sourceFirst.reg;
+                rd = regGetter.getReg(bIR, bIR.sourceFirst);
                 rn = regGetter.getTmpRegister();
                 builder.mov(rn, bIR.sourceSecond.item);
             }else{
                 rd = regGetter.getTmpRegister();
-                rn = bIR.sourceSecond.reg;
+                rn = regGetter.getReg(bIR, bIR.sourceSecond);
                 builder.mov(rd,bIR.sourceFirst.item);
             }
 

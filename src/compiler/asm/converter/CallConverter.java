@@ -33,31 +33,31 @@ public class CallConverter extends AsmConverter{
                     rd = regGetter.getTmpRegister();
                     builder.mov(rd,param.item);
                 }else{
-                    rd = param.reg;
+                    rd = regGetter.getReg(ir,param);
                 }
                 builder.str(rd,Regs.SP,(paramStackLen - stackOffset - 1) *4);
                 stackOffset++;
             }
 
-            Map<Reg,Reg> regRemap = new HashMap<>();
+            /*Map<Reg,Reg> regRemap = new HashMap<>();
             for (int i = 0; i < Math.min(callIr.params.length,4); i++) {
                 AddressOrData param = callIr.params[i];
                 if (!param.isData) {
                     regRemap.put(param.reg,param.reg);
                 }
-            }
+            }*/
 
 
             // 通过寄存器传参
             for (int i = 0; i < Math.min(callIr.params.length,4); i++) {
                 AddressOrData param = callIr.params[i];
                 if (param.isData) {
-                    if(!regRemap.containsKey(Regs.REGS[i])){ //如果被其他参数占用
+                    /*if(!regRemap.containsKey(Regs.REGS[i])){ //如果被其他参数占用
                         // todo 如果r0,r1,r2,r3之后还会用到，怎么办
-                    }
+                    }*/
                     builder.mov(Regs.REGS[i],param.item);
                 }else{
-                    builder.mov(Regs.REGS[i],param.reg);
+                    builder.mov(Regs.REGS[i],regGetter.getReg(ir,param));
                 }
             }
         }
@@ -66,7 +66,7 @@ public class CallConverter extends AsmConverter{
 
         builder.bl(targetFun.getAsmLabel());
         if (callIr.returnResult != null) {
-            callIr.returnResult.reg = Regs.R0;
+            regGetter.setReg(callIr,callIr.returnResult,Regs.R0);
         }
 
         return 1;

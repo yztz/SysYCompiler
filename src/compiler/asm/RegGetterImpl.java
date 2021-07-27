@@ -44,7 +44,7 @@ public class RegGetterImpl extends RegGetter {
 /*    private static final String[] GENERAL_REG = {"R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12",};
     private static final String[] SPECIAL_REG = {"R13", "R14", "R15",};*/
 
-    public Reg getRegOfAddress(InterRepresent ir, AddressOrData address)
+    public Reg getReg(InterRepresent ir, AddressOrData address)
     {
         Map<AddressRWInfo, Reference> refMap = ir.refMap;
         for (AddressRWInfo key : refMap.keySet()) {
@@ -76,6 +76,27 @@ public class RegGetterImpl extends RegGetter {
         }
 
         return null;
+    }
+
+    @Override
+    public void setReg(InterRepresent ir, AddressOrData address,Reg register) {
+        Map<AddressRWInfo, Reference> refMap = ir.refMap;
+        for (AddressRWInfo key : refMap.keySet()) {
+            if(key.address!=address)
+                continue;
+            Reference ref = refMap.get(key);
+
+
+            regDesc.put(register, key);
+            varDesc.put(key, register);
+
+            if (null == ref.nextRef) {  // 不存在引用则释放reg
+                Reg reg = varDesc.getOrDefault(key, null);
+                if (null != reg) {
+                    regDesc.put(reg, null);
+                }
+            }
+        }
     }
 
     @Override

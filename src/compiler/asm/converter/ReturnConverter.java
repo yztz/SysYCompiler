@@ -23,7 +23,7 @@ public class ReturnConverter extends AsmConverter{
             if (retIr.returnData.isData) {
                 builder.mov(Regs.R0, retIr.returnData.item);
             } else {
-                builder.mov(Regs.R0, retIr.returnData.reg);
+                builder.mov(Regs.R0, regGetter.getReg(ir,retIr.returnData));
             }
         }
         builder.b(funcSymbol.getAsmEndLabel());

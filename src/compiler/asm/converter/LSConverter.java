@@ -3,15 +3,9 @@ package compiler.asm.converter;
 import compiler.ConstDef;
 import compiler.asm.*;
 import compiler.asm.operand.ShiftOp;
-import compiler.genir.code.InterRepresent;
 import compiler.genir.code.LSRepresent;
-import compiler.genir.code.LoadRepresent;
-import compiler.symboltable.FuncSymbol;
 import compiler.symboltable.ParamSymbol;
 import compiler.symboltable.ValueSymbol;
-
-import java.util.Collection;
-import java.util.List;
 
 public abstract class LSConverter extends AsmConverter {
 
@@ -19,7 +13,7 @@ public abstract class LSConverter extends AsmConverter {
     public int process(AsmBuilder.Mem op,AsmBuilder builder, RegGetter regGetter, LSRepresent ir) {
         ValueSymbol valueSymbol = ir.valueSymbol;
 
-        ir.target.reg = regGetter.getRegOfAddress(ir, ir.target);
+        Reg targetReg = regGetter.getReg(ir, ir.target);
 
         if(!(valueSymbol instanceof ParamSymbol) || !valueSymbol.isArray())
         {
@@ -31,14 +25,14 @@ public abstract class LSConverter extends AsmConverter {
                 else
                     offsetFP =Util.getSymbolOffsetFp(valueSymbol, ir.offset.item);
 
-                builder.mem(op, null, ir.target.reg, Regs.FP,
+                builder.mem(op, null, targetReg, Regs.FP,
                             offsetFP, false, false);
             }else{
 
                 int offsetFPWord = Util.getSymbolOffsetFp(valueSymbol)/ ConstDef.WORD_SIZE;
-                Reg rm = ir.offset.reg;
+                Reg rm = regGetter.getReg(ir,ir.offset);
                 builder.add(rm,rm,offsetFPWord);
-                builder.mem(op, null, ir.target.reg, Regs.FP,
+                builder.mem(op, null, targetReg, Regs.FP,
                             rm, false, ShiftOp.LSL, 2, false, false);
             }
         }else{//是函数参数，并且是数组，此时栈里保存的是地址
@@ -55,16 +49,16 @@ public abstract class LSConverter extends AsmConverter {
                 {
                     offsetArray = ir.offset.item*ConstDef.WORD_SIZE;
                 }
-                builder.mem(op, null, ir.target.reg, tmp,
+                builder.mem(op, null, targetReg, tmp,
                             offsetArray, false, false);
             }else{
                 int offsetFP = Util.getSymbolOffsetFp(valueSymbol);
                 Reg tmp = regGetter.getTmpRegister();
                 builder.ldr(tmp,Regs.FP,offsetFP); // 先读取地址
 
-                Reg rm = ir.offset.reg;
+                Reg rm = regGetter.getReg(ir,ir.offset);
 
-                builder.mem(op, null, ir.target.reg, tmp,
+                builder.mem(op, null, targetReg, tmp,
                             rm, false, ShiftOp.LSL, 2, false, false);
             }
         }

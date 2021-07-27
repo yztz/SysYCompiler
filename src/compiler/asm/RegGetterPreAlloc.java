@@ -9,8 +9,13 @@ import java.util.function.Function;
 public class RegGetterPreAlloc extends RegGetter{
 
     @Override
-    public Reg getRegOfAddress(InterRepresent ir, AddressOrData address) {
+    public Reg getReg(InterRepresent ir, AddressOrData address) {
         return null;
+    }
+
+    @Override
+    public void setReg(InterRepresent ir, AddressOrData address, Reg register) {
+
     }
 
     @Override

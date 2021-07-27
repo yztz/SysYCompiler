@@ -10,7 +10,7 @@ public class AddressOrData {
 
     public boolean isData;
     public int item;
-    public Reg reg;
+    //public Reg reg;
     @Override
     public String toString() {
         return isData ? String.valueOf(item) :"$"+ item;
