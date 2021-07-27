@@ -138,7 +138,7 @@ public class SysYIRListener implements SysYListener {
 
             if(_currentIRFunc!=null)
                 _currentIRFunc.addSingleIR(new InitVarRepresent(symbol), "Init var:"+symbol.symbolToken.getText());
-            if(ctx.initVal().initValues!=null && ctx.initVal().initValues.size()==1)
+            if(ctx.initVal().initValues!=null && ctx.initVal().initValues.length==1)
             {
                 /*if(symbol!=null)
                 {
@@ -181,15 +181,12 @@ public class SysYIRListener implements SysYListener {
             AddressOrData initResult = ctx.exp().result;
             VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,ctx.ident);
 
-            if (initResult!=null && initResult.isData) {
-                SaveRepresent ir = InterRepresentFactory.createSaveRepresent(symbol, new AddressOrData(true, ctx.symbolOffset),
-                                                                             initResult);
-                ctx.irGroup.addCode(ir);
-            }else{
+            if (initResult == null || !initResult.isData) {
                 ctx.irGroup.merge(ctx.exp().irGroup);
-                SaveRepresent ir = InterRepresentFactory.createSaveRepresent(symbol, ctx.exp().result, initResult);
-                ctx.irGroup.addCode(ir);
             }
+            SaveRepresent ir = InterRepresentFactory.createSaveRepresent(symbol, new AddressOrData(true, ctx.symbolOffset),
+                                                                         initResult);
+            ctx.irGroup.addCode(ir);
         }
     }
 

@@ -110,6 +110,7 @@ public class SysSymbolListener implements SysYListener {
         {
             dimSize*=ctx.dimensions[i];
         }
+        int symbolOffset = 0;
         for (int i = 0; i < children.size(); i++) {
             SysYParser.InitValContextBase childInitVal = children.get(i);
             childInitVal.ident = ctx.ident;
@@ -233,7 +234,26 @@ public class SysSymbolListener implements SysYListener {
 
     @Override
     public void enterInitVal(SysYParser.InitValContext ctx) {
-        enterInitValBase(ctx,ctx.initVal());
+        int dimSize = 1;
+        for(int i=ctx.whichDim;i<ctx.dimensions.length;i++)
+        {
+            dimSize*=ctx.dimensions[i];
+        }
+        int symbolOffset = ctx.symbolOffset;
+        for (int i = 0; i < ctx.initVal().size(); i++) {
+            SysYParser.InitValContext childInitVal = ctx.initVal().get(i);
+            childInitVal.ident = ctx.ident;
+            childInitVal.dimensions = ctx.dimensions;
+            childInitVal.initValues = ctx.initValues;
+            childInitVal.whichDim = ctx.whichDim + 1;
+            childInitVal.symbolOffset=symbolOffset;
+            if(childInitVal.exp()!=null)
+            {
+                symbolOffset+=1;
+            }else{
+                symbolOffset+=dimSize;
+            }
+        }
     }
 
     @Override
