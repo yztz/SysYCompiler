@@ -3,6 +3,7 @@ package compiler.asm.converter;
 import compiler.asm.AsmBuilder;
 import compiler.asm.Reg;
 import compiler.asm.RegGetter;
+import compiler.asm.Regs;
 import compiler.asm.operand.ImmOperand;
 import compiler.asm.operand.RegOperand;
 import compiler.genir.code.BinocularRepre;
@@ -78,7 +79,30 @@ public class BinocularConverter extends AsmConverter{
                                           new ImmOperand(bIR.sourceFirst.item));
                 }
             }
+        }else if(bIR.OP== BinocularRepre.Opcodes.DIV)
+        {
+            //除法用__aeabi_idiv
+            if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData) //都不是立即数
+            {
+                Reg rd = regGetter.getReg(bIR, bIR.sourceFirst);
+                Reg rn = regGetter.getReg(bIR, bIR.sourceSecond);
+                builder.mov(Regs.R0,rd);
+                builder.mov(Regs.R1,rn);
+            }else if(!bIR.sourceFirst.isData) { //右边的是立即数
+                Reg rd = regGetter.getReg(bIR, bIR.sourceFirst);
+                builder.mov(Regs.R0,rd);
+                builder.mov(Regs.R1,bIR.sourceSecond.item);
+            }else{
+
+                Reg rn = regGetter.getReg(bIR, bIR.sourceSecond);
+                builder.mov(Regs.R0,bIR.sourceFirst.item);
+                builder.mov(Regs.R1,rn);
+            }
+            builder.bl("__aeabi_idiv");
+            regGetter.setReg(ir, bIR.target, Regs.R0);
         }else{
+
+
             Reg rd,rn;
             if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData) //都不是立即数
             {

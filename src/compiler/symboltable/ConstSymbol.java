@@ -2,22 +2,14 @@ package compiler.symboltable;
 
 import org.antlr.v4.runtime.Token;
 
-public class ConstSymbol extends ValueSymbol{
-    public int[] constVal;
+public class ConstSymbol extends HasInitSymbol{
 
     public ConstSymbol(int val,Token symbolToken) {
-        super(symbolToken);
-        constVal = new int[]{val};
+        super(symbolToken,new int[]{val});
     }
 
     public ConstSymbol(int[] val,Token symbolToken, int[] dimensions,boolean isArray) {
-        super(symbolToken, dimensions,isArray);
-        constVal = val;
-    }
-
-    @Override
-    public boolean isArray() {
-        return constVal.length>1;
+        super(symbolToken, dimensions,isArray,val);
     }
 
     @Override

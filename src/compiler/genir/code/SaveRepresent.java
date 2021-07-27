@@ -1,6 +1,11 @@
 package compiler.genir.code;
 
+import compiler.asm.AddressRWInfo;
 import compiler.symboltable.ValueSymbol;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class SaveRepresent extends LSRepresent{
 
@@ -14,5 +19,15 @@ public class SaveRepresent extends LSRepresent{
         return String.format("%s: %-7s %-4s %s[%s]",lineNumToString(),"SAVE",target.toString(),
                              valueSymbol.symbolToken.getText(),
                                                offset.toString());
+    }
+
+    @Override
+    public Collection<AddressRWInfo> getAllAddressRWInfo() {
+        List<AddressRWInfo> allAddressRWInfos = new ArrayList<>();
+        allAddressRWInfos.add(new AddressRWInfo(target,false));
+        if(!offset.isData)
+            allAddressRWInfos.add(new AddressRWInfo(offset));
+
+        return allAddressRWInfos;
     }
 }

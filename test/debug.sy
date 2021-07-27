@@ -1,6 +1,5 @@
-//test global var define
-const int a = 10;
-
 int main(){
-    return a;
+    int a;
+    a = 10;
+    return a % 3;
 }

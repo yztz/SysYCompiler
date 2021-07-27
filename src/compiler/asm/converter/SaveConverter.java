@@ -27,7 +27,7 @@ public class SaveConverter extends LSConverter {
         Reg rd;
         if(saveIR.target.isData)
         {
-            rd = regGetter.getTmpRegister();
+            rd = regGetter.getTmpRegister(1);
             builder.mov(rd,saveIR.target.item);
         }else{
             rd = regGetter.getReg(ir, saveIR.target);

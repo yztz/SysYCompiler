@@ -45,7 +45,7 @@ public class CallRepresent extends InterRepresent{
         if(funcSymbol.hasReturn())
             addressRWInfos.add(new AddressRWInfo(returnResult, true));
 
-        for(int i=0;i<Math.min(4,params.length);i++)
+        for(int i=0;i<Math.min(4,params==null?0:params.length);i++)
         {
             addressRWInfos.add(new AddressRWInfo(params[i], false));
         }

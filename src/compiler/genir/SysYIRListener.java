@@ -306,13 +306,13 @@ public class SysYIRListener implements SysYListener {
 
         SysYParser.LValContext lValCtx = ctx.lVal();
         ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
-        if(symbolAndOffset!=null && symbolAndOffset.symbol instanceof VarSymbol)
+        if(symbolAndOffset!=null)
         {
             for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                 lValCtx.irGroup.addCode(ir);
             }
-            SaveRepresent saveRepresent = InterRepresentFactory.createSaveRepresent((VarSymbol)symbolAndOffset.symbol
-                    , symbolAndOffset.offsetResult,sourceResult);
+            SaveRepresent saveRepresent = InterRepresentFactory.createSaveRepresent(symbolAndOffset.symbol
+                    , symbolAndOffset.offsetResult, sourceResult);
             lValCtx.irGroup.addCode(saveRepresent);
         }
     }

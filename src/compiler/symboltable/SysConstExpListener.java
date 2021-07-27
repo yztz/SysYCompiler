@@ -317,7 +317,7 @@ public class SysConstExpListener implements SysYListener {
             {
                 ctx.result =
                         new AddressOrData (true,
-                                           ((ConstSymbol) symbolAndOffset.symbol).constVal[symbolAndOffset.offsetResult.item]);
+                                           ((ConstSymbol) symbolAndOffset.symbol).initValues[symbolAndOffset.offsetResult.item]);
             }
         }
     }

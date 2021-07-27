@@ -130,12 +130,12 @@ public class AsmGen {
             if(!usedSymbol.contains(symbol))
                 continue;
 
-            if(symbol instanceof VarSymbol)
+            if(symbol instanceof HasInitSymbol)
             {
-                VarSymbol varSymbol = (VarSymbol) symbol;
+                HasInitSymbol init = (HasInitSymbol) symbol;
 
-                builder.word(varSymbol.asmDataLabel);
-                varSymbol.setIndexInFunctionData(indexInFunc++,funcSymbol);
+                builder.word(init.asmDataLabel);
+                init.setIndexInFunctionData(indexInFunc++,funcSymbol);
             }
         }
 
@@ -170,27 +170,17 @@ public class AsmGen {
         List<AsmSection> sections = new ArrayList<>();
 
         for (ValueSymbol symbol : symbolTableHost.getGlobalSymbolTable().getAllSymbol()) {
-            if (symbol instanceof VarSymbol) {
-                VarSymbol varSymbol = (VarSymbol) symbol;
-                if (!varSymbol.hasConstInitValue) {
+            if (symbol instanceof HasInitSymbol) {
+                HasInitSymbol varSymbol = (HasInitSymbol) symbol;
+
+                /*if (varSymbol instanceof VarSymbol && !((VarSymbol) varSymbol).hasConstInitValue) {
                     continue;
-                }
+                }*/
 
                 AsmBuilder builder = new AsmBuilder();
                 String label = varSymbol.symbolToken.getText();
 
-                varSymbol.asmDataLabel = label;
-
-                builder.type(label, AsmBuilder.Type.Object).data().global(label).align(2).label(label);
-
-                for (int initValue : varSymbol.initValues) {
-                    builder.word(initValue);
-                }
-                builder.size(label, varSymbol.getByteSize());
-
-                sections.add(builder.getSection());
-            } else if (symbol instanceof ConstSymbol) {
-
+                buildInitValues(sections, varSymbol, builder, label);
             }
         }
 
@@ -199,32 +189,43 @@ public class AsmGen {
             FuncSymbol funcSymbol = domain.getFunc();
 
             for (ValueSymbol symbol : table.getAllSymbol()) {
-                if (symbol instanceof VarSymbol) {
-                    VarSymbol varSymbol = (VarSymbol) symbol;
-                    if (!varSymbol.hasConstInitValue) {
+                if (symbol instanceof HasInitSymbol) {
+                    HasInitSymbol varSymbol = (HasInitSymbol) symbol;
+
+                    if (varSymbol instanceof VarSymbol && !((VarSymbol) varSymbol).hasConstInitValue) {
                         continue;
                     }
 
                     AsmBuilder builder = new AsmBuilder();
                     String label = AsmUtil.getVarLabel(funcSymbol, domain, varSymbol);
 
-                    varSymbol.asmDataLabel = label;
-
-                    builder.type(label, AsmBuilder.Type.Object).data().global(label).align(2).label(label);
-
-                    for (int initValue : varSymbol.initValues) {
-                        builder.word(initValue);
-                    }
-                    builder.size(label, varSymbol.getByteSize());
-
-                    sections.add(builder.getSection());
-                } else if (symbol instanceof ConstSymbol) {
-
+                    buildInitValues(sections, varSymbol, builder, label);
                 }
             }
         }
 
         return sections;
+    }
+
+    private void buildInitValues(List<AsmSection> sections, HasInitSymbol varSymbol, AsmBuilder builder, String label) {
+        varSymbol.asmDataLabel = label;
+
+        builder.type(label, AsmBuilder.Type.Object).data().global(label).align(2).label(label);
+
+        if(varSymbol.initValues!=null)
+        {
+            for (int initValue : varSymbol.initValues) {
+                builder.word(initValue);
+            }
+        }else{
+            for (int i = 0; i < varSymbol.getLength(); i++) {
+                builder.word(0);
+            }
+        }
+
+        builder.size(label, varSymbol.getByteSize());
+
+        sections.add(builder.getSection());
     }
 
     /**

@@ -7,10 +7,7 @@ import compiler.asm.operand.ShiftOp;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.LSRepresent;
 import compiler.genir.code.LoadRepresent;
-import compiler.symboltable.FuncSymbol;
-import compiler.symboltable.ParamSymbol;
-import compiler.symboltable.ValueSymbol;
-import compiler.symboltable.VarSymbol;
+import compiler.symboltable.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,8 +20,24 @@ public class LoadConverter extends LSConverter {
 
     @Override
     public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
-        return super.process(AsmBuilder.Mem.LDR, builder, regGetter, (LSRepresent) ir,funcSymbol,
+        LoadRepresent loadIr = (LoadRepresent) ir;
+        boolean flag = false;
+        if (loadIr.valueSymbol instanceof ConstSymbol) {
+            ConstSymbol symbol = (ConstSymbol) loadIr.valueSymbol;
+            if(loadIr.offset==null)
+            {
+                builder.mov(regGetter.getReg(ir,loadIr.target),symbol.initValues[0]);
+                flag = true;
+            }else if(loadIr.offset.isData){
+                builder.mov(regGetter.getReg(ir,loadIr.target),symbol.initValues[loadIr.offset.item]);
+                flag = true;
+            }
+        }
+        if(!flag)
+            return super.process(AsmBuilder.Mem.LDR, builder, regGetter, (LSRepresent) ir,funcSymbol,
                              regGetter.getReg(ir, ((LSRepresent) ir).target));
+        else
+            return 1;
     }
 
 }

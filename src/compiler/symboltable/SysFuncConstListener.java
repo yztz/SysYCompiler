@@ -69,7 +69,7 @@ public class SysFuncConstListener implements SysYListener {
     public void exitConstDecl(SysYParser.ConstDeclContext ctx) {
         for (SysYParser.ConstDefContext defCtx : ctx.constDef()) {
             TerminalNode identifier = defCtx.Identifier();
-            if(defCtx.constExp()==null) //不是数组
+            if(defCtx.constExp()==null || defCtx.constExp().size()==0) //不是数组
             {
                 currentSymbolTable.addConst(identifier.getSymbol(),defCtx.constInitVal().initValues[0]);
             }

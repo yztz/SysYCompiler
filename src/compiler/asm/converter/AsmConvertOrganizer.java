@@ -25,6 +25,7 @@ public class AsmConvertOrganizer {
         allConverter.add(new CallConverter());
         allConverter.add(new InitVarConverter());
         allConverter.add(new LAddrConverter());
+        allConverter.add(new UnaryConverter());
     }
 
     public static void process(AsmBuilder builder, RegGetter regGetter, FuncSymbol funcSymbol, IRBlock irBlock)

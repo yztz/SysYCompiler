@@ -49,7 +49,7 @@ public class AsmUtil {
         }
     }
 
-    public static String getVarLabel(FuncSymbol funcSymbol, SymbolDomain domain, VarSymbol varSymbol)
+    public static String getVarLabel(FuncSymbol funcSymbol, SymbolDomain domain, ValueSymbol varSymbol)
     {
         return String.format(".L%s.%d.%s", funcSymbol == null ? "" : funcSymbol.getAsmLabel(),
                              domain.getId(), varSymbol.symbolToken.getText());
