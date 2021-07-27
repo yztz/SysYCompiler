@@ -12,14 +12,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class InterRepresent{
-    public IRGroup section;
+    public IRGroup group;
     public IRSection getSection()
     {
-        return section.getSection();
+        return group==null? null:group.getSection();
     }
     public IRGroup getGroup()
     {
-        return section;
+        return group;
     }
 
     public Map<AddressRWInfo, Reference> refMap = new HashMap<>();

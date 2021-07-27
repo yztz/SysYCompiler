@@ -29,6 +29,11 @@ public class RegGetterPreAlloc extends RegGetter{
     }
 
     @Override
+    public void stepToNextIR() {
+
+    }
+
+    @Override
     public void releaseAll() {
 
     }

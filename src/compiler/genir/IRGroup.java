@@ -35,7 +35,8 @@ public class IRGroup extends AbstractIR{
     {
         if(ir==null)
             return;
-        ir.section = this;
+
+        ir.group = this;
         ir.setLineNum(nextLineNum);
         nextLineNum++;
         _irs.addLast(ir);
@@ -84,6 +85,12 @@ public class IRGroup extends AbstractIR{
             totalOccupied+=ir.getLineOccupied();
         }
         return totalOccupied;
+    }
+
+    @Override
+    public void fullFillVacancy(InterRepresent ir) {
+
+        super.fullFillVacancy(ir);
     }
 
     @Override

@@ -40,7 +40,7 @@ public class AsmConvertOrganizer {
                     builder.label(ir.getLabel());
                 }
                 j+=converter.process(builder, regGetter, ir, flatIRList, j, funcSymbol)-1;
-
+                regGetter.stepToNextIR();
                 break;
             }
         }

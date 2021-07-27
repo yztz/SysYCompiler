@@ -5,6 +5,7 @@ import compiler.genir.code.AddressOrData;
 import compiler.genir.code.InterRepresent;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,18 @@ public class RegGetterImpl extends RegGetter {
             }
         }
     }
+    HashSet<Reg> readyToReleaseReg = new HashSet<>();
+    private void readyToRelease(Reg reg)
+    {
+        readyToReleaseReg.add(reg);
+    }
+    public void stepToNextIR()
+    {
+        for (Reg reg : readyToReleaseReg) {
+            regDesc.put(reg, null);
+        }
+        readyToReleaseReg.clear();
+    }
 /*    private static final String[] GENERAL_REG = {"R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12",};
     private static final String[] SPECIAL_REG = {"R13", "R14", "R15",};*/
 
@@ -67,10 +80,8 @@ public class RegGetterImpl extends RegGetter {
             }
 
             if (null == ref.nextRef) {  // 不存在引用则释放reg
-                Reg reg = varDesc.getOrDefault(key, null);
-                if (null != reg) {
-                    regDesc.put(reg, null);
-                }
+                readyToRelease(register);
+
             }
             return register;
         }
@@ -91,10 +102,7 @@ public class RegGetterImpl extends RegGetter {
             varDesc.put(key, register);
 
             if (null == ref.nextRef) {  // 不存在引用则释放reg
-                Reg reg = varDesc.getOrDefault(key, null);
-                if (null != reg) {
-                    regDesc.put(reg, null);
-                }
+                readyToRelease(register);
             }
         }
     }

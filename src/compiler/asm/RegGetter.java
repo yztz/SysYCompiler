@@ -11,7 +11,7 @@ public abstract class RegGetter {
      public abstract void setReg(InterRepresent ir,AddressOrData address,Reg register);
      public abstract Map<AddressRWInfo, Reg> getMapOfIR(InterRepresent ir);
      protected abstract boolean isFreeReg(Reg reg);
-
+     public abstract void stepToNextIR();
      /**
       * 获取空闲的寄存器
       * @param index 第几个空闲的寄存器

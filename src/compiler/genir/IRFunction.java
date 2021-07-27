@@ -57,7 +57,7 @@ public class IRFunction extends AbstractIR{
             startDefaultSection();
 
         currentSection.addGroup(group);
-        tryFullFillVacancy();
+        fullFillVacancy();
     }
 
     public void insertGroupAfter(IRGroup group,IRGroup benchmark)
@@ -85,6 +85,7 @@ public class IRFunction extends AbstractIR{
         IRGroup irGroup =new IRGroup(description);
         irGroup.addCode(ir);
         addGroup(irGroup);
+        fullFillVacancy();
     }
 
     public void startSection(IRSection section)
@@ -97,32 +98,34 @@ public class IRFunction extends AbstractIR{
         section.setId(nextGroupID++);
         sections.add(section);
 
-        // 添加一节，需要把上一节未兑现的空位转移到新的节
-        if(currentSection!=null)
-            transferBookVacancy(currentSection,section);
 
         currentSection = section;
 
-        tryFullFillVacancy();
     }
 
-    private void transferBookVacancy(IRSection from,IRSection to)
-    {
-        to.vacancyHolders.addAll(from.vacancyHolders);
-        from.vacancyHolders.clear();
+    private Map<InterRepresentHolder,Integer> vacancyBooker = new HashMap<>();
+
+    @Override
+    public void bookVacancy(InterRepresentHolder holder) {
+        vacancyBooker.put(holder,getLineOccupied());
     }
 
-    private void tryFullFillVacancy()
-    {
-        if(currentSection.getLastIR()!=null)
-            fullFillVacancy(currentSection.getLastIR());
-        else{
-            for (InterRepresentHolder holder : vacancyHolders) {
-                currentSection.bookVacancy(holder);
+    public void fullFillVacancy() {
+        List<InterRepresent> irs = flatIR();
+        HashSet<InterRepresentHolder> done=new HashSet<>();
+        for (InterRepresentHolder holder : vacancyBooker.keySet()) {
+            int wantLineNum =  vacancyBooker.get(holder);
+            if(irs.size()>wantLineNum)
+            {
+                holder.setInterRepresent(irs.get(wantLineNum));
+                done.add(holder);
             }
-            vacancyHolders.clear();
+        }
+        for (InterRepresentHolder holder : done) {
+            vacancyBooker.remove(holder);
         }
     }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
