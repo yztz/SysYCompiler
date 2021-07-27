@@ -233,13 +233,6 @@ public class Utils {
         return ret;
     }
 
-    public static AstNode findFirstStat(AstNode currStat) {
-        while (!OP.isStatement(currStat)) {
-            currStat = currStat.getLeft();
-        }
-
-        return currStat;
-    }
 
     public static AstNode findNextStat(AstNode currStat) {
 //        if (currStat.parent.getRight() != currStat) return currStat.parent.getRight(currStat);
@@ -249,22 +242,22 @@ public class Utils {
             currStat = currStat.parent;
         currStat = currStat.parent.getRight(currStat);
         // 当前节点不是语句
-        while (!OP.isStatement(currStat)) {
-            // 当前节点是叶节点，右移寻找非叶节点
-            if (currStat.isLeaf()) {
-                while (currStat.isLeaf()) {
-                    AstNode right = currStat.parent.getRight(currStat);
-                    if (null == right) {
-                        System.err.println("不存在下条可用的语句");
-                        return null;
-                    } else {
-                        currStat = right;
-                    }
-                }
-                continue;
-            }
-            currStat = currStat.getLeft();
-        }
+//        while (!OP.isStatement(currStat)) {
+//            // 当前节点是叶节点，右移寻找非叶节点
+//            if (currStat.isLeaf()) {
+//                while (currStat.isLeaf()) {
+//                    AstNode right = currStat.parent.getRight(currStat);
+//                    if (null == right) {
+//                        System.err.println("不存在下条可用的语句");
+//                        return null;
+//                    } else {
+//                        currStat = right;
+//                    }
+//                }
+//                continue;
+//            }
+//            currStat = currStat.getLeft();
+//        }
         return currStat;
     }
 

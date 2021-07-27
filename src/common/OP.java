@@ -45,16 +45,6 @@ public enum OP {
     AND,
     OR;
 
-    //    public static final OP[] STATEMENT = {ASSIGN, IF_ELSE, WHILE, PARAM, FUNCTION, RETURN, GOTO};
-    public static final OP[] STATEMENT = {
-            ASSIGN,
-            IF_ELSE,
-            WHILE,
-            PARAM,
-            FUNCTION,
-            RETURN,
-            GOTO,
-    };
 
     public static final OP[] REL_OP = {
             //NEGATE,
@@ -76,13 +66,6 @@ public enum OP {
     }
 
 
-    /**
-     * 判断当前节点是否是语句
-     */
-    public static boolean isStatement(AstNode node) {
-        if (null == node) return false;
-        return include(node.op, STATEMENT);
-    }
 
     /**
      * 判断是否是关系运算
