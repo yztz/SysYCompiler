@@ -1767,7 +1767,7 @@ public class SysYParser extends Parser {
 
 	public static class ExpContextBase extends HasInterRepresentBase{
 		public AddressOrData result;
-
+		public InterRepresentHolder startStmt;
 		public ExpContextBase() {
 		}
 
@@ -2457,7 +2457,8 @@ public class SysYParser extends Parser {
 			super(parent, invokingStateNumber);
 		}
 		public AddressOrData address;
-		public InterRepresentHolder vocancy;
+		//public InterRepresentHolder vocancy;
+		public InterRepresentHolder startStmt;
 	}
 
 	public static class RelExpContext extends RelExpContextBase {

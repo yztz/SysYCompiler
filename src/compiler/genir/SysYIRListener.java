@@ -322,10 +322,11 @@ public class SysYIRListener implements SysYListener {
         }
         if(ctx.exp().irGroup.getLineOccupied()>0)
         {
-            ctx.setStartStmt(new InterRepresentHolder(ctx.exp().irGroup.getFirst()));
+            ctx.setStartStmt(ctx.exp().startStmt);
             _currentIRFunc.addGroup(ctx.exp().irGroup);
         }else{
-            ctx.setStartStmt(new InterRepresentHolder(ctx.lVal().irGroup.getFirst()));
+            ctx.setStartStmt(ctx.lVal().exp().size()>0?ctx.lVal().exp().get(0).startStmt:
+                                new InterRepresentHolder(ctx.lVal().irGroup.getFirst())); //这个三元表达式不用也行
         }
 
         _currentIRFunc.addGroup(ctx.lVal().irGroup);
@@ -341,7 +342,7 @@ public class SysYIRListener implements SysYListener {
         if (ctx.exp()!=null) {
             _currentIRFunc.addGroup(ctx.exp().irGroup);
         }
-        ctx.setStartStmt(new InterRepresentHolder(ctx.exp().irGroup.getFirst()));
+        ctx.setStartStmt(ctx.exp().startStmt);
     }
 
     @Override
@@ -517,6 +518,7 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void exitExp(SysYParser.ExpContext ctx) {
         ctx.result=ctx.addExp().result;
+        ctx.startStmt = ctx.addExp().startStmt;
     }
 
     @Override
@@ -584,6 +586,7 @@ public class SysYIRListener implements SysYListener {
                     );
                     ctx.irGroup.addCode(lAddrRepresent);
                     ctx.result = lAddrRepresent.target;
+                    ctx.startStmt=new InterRepresentHolder(lAddrRepresent);
                 }else{ //否则则取对应值
                     for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                         ctx.irGroup.addCode(ir);
@@ -592,12 +595,13 @@ public class SysYIRListener implements SysYListener {
                             , symbolAndOffset.offsetResult);
                     ctx.irGroup.addCode(loadRepresent);
                     ctx.result = loadRepresent.target;
-
+                    ctx.startStmt=new InterRepresentHolder(loadRepresent);
                 }
 
             }
         }else{
             ctx.result=ctx.exp().result;
+            ctx.startStmt = ctx.exp().startStmt;
         }
     }
 
@@ -609,6 +613,7 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void exitPrimaryExpr(SysYParser.PrimaryExprContext ctx) {
         ctx.result=ctx.primaryExp().result;
+        ctx.startStmt = ctx.primaryExp().startStmt;
     }
 
     @Override
@@ -625,19 +630,30 @@ public class SysYIRListener implements SysYListener {
             funcSymbol = new ExternalFuncSymbol(identifier.getSymbol().getText());
 
         CallRepresent ir;
-        if (ctx.funcRParams() != null) {
+        if (ctx.funcRParams() != null && ctx.funcRParams().exp().size()>0) {
             List<SysYParser.ExpContext> expContextList = ctx.funcRParams().exp();
             AddressOrData[] params = new AddressOrData[expContextList.size()];
             for (int i = 0; i < expContextList.size(); i++) {
                 params[i] = expContextList.get(i).result;
 
                 _currentIRFunc.addGroup(expContextList.get(i).irGroup); //把参数表达式添加到ir
+
+                if(ctx.startStmt==null)
+                {
+                    //找到一个不是null的为止
+                    ctx.startStmt = ctx.funcRParams().exp(i).startStmt;
+                }
             }
             ir = InterRepresentFactory.createFuncCallRepresent(funcSymbol,params);
+
+
         }else{
             ir = InterRepresentFactory.createFuncCallRepresent(funcSymbol);
         }
-
+        if(ctx.startStmt==null)
+        {
+            ctx.startStmt = new InterRepresentHolder(ir);
+        }
         _currentIRFunc.funcSymbol.setHasFuncCallInside(true);
 
         ctx.irGroup.addCode(ir);
@@ -667,6 +683,7 @@ public class SysYIRListener implements SysYListener {
         UnaryRepre ir = InterRepresentFactory.createUnaryRepresent(opcode, ctx.unaryExp().result);
         ctx.irGroup.addCode(ir);
         ctx.result=ir.target;
+        ctx.startStmt = new InterRepresentHolder(ir);
     }
 
     @Override
@@ -688,6 +705,7 @@ public class SysYIRListener implements SysYListener {
     public void exitMulExp(SysYParser.MulExpContext ctx) {
         if (ctx.op==null) {
             ctx.result=ctx.unaryExp().result;
+            ctx.startStmt = ctx.unaryExp().startStmt;
         }else{
             BinocularRepre.Opcodes opcodes=null;
             if (ctx.Star() != null) {
@@ -704,6 +722,7 @@ public class SysYIRListener implements SysYListener {
                                                                               ctx.unaryExp().result);
             ctx.irGroup.addCode(ir);
             ctx.result = ir.target;
+            ctx.startStmt=ctx.mulExp().startStmt;
         }
     }
 
@@ -716,6 +735,7 @@ public class SysYIRListener implements SysYListener {
     public void exitAddExp(SysYParser.AddExpContext ctx) {
         if (ctx.op==null) {
             ctx.result=ctx.mulExp().result;
+            ctx.startStmt = ctx.mulExp().startStmt;
         }else{
             BinocularRepre.Opcodes opcodes=null;
             if (ctx.Plus() != null) {
@@ -730,6 +750,7 @@ public class SysYIRListener implements SysYListener {
                                                                               ctx.mulExp().result);
             ctx.irGroup.addCode(ir);
             ctx.result = ir.target;
+            ctx.startStmt = ctx.addExp().startStmt;
         }
     }
 
@@ -749,8 +770,8 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterRelExp(SysYParser.RelExpContext ctx) {
-        ctx.vocancy = new InterRepresentHolder();
-        ctx.irGroup.bookVacancy(ctx.vocancy);
+        /*ctx.vocancy = new InterRepresentHolder();
+        ctx.irGroup.bookVacancy(ctx.vocancy);*/
     }
 
     private void createIfGotoPair(SysYParser.BranchContextBase ctx, IfGotoRepresent.RelOp relOp,
@@ -768,6 +789,7 @@ public class SysYIRListener implements SysYListener {
     public void exitRelExp(SysYParser.RelExpContext ctx) {
         if (ctx.op==null) {
             ctx.address=ctx.addExp().result;
+            ctx.startStmt = ctx.addExp().startStmt;
         }else
         {
             IfGotoRepresent.RelOp relOp= null;
@@ -796,13 +818,13 @@ public class SysYIRListener implements SysYListener {
     public void exitEqExp(SysYParser.EqExpContext ctx) {
         if(ctx.op==null)
         {
-            ctx.vocancy =ctx.relExp().vocancy;
+            ctx.startStmt =ctx.relExp().startStmt;
             ctx.trueList=ctx.relExp().trueList;
             ctx.falseList=ctx.relExp().falseList;
             ctx.address=ctx.relExp().address;
         }else{
-            ctx.vocancy = new InterRepresentHolder();
-            ctx.irGroup.bookVacancy(ctx.vocancy);
+            ctx.startStmt = ctx.eqExp().startStmt;
+            /*ctx.irGroup.bookVacancy(ctx.startStmt);*/
             IfGotoRepresent.RelOp relOp= null;
             if(ctx.Equal()!=null){
                 relOp= IfGotoRepresent.RelOp.EQUAL;
@@ -827,19 +849,19 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void exitLAndExp(SysYParser.LAndExpContext ctx) {
         if (ctx.And()==null) {
-            ctx.vocancy = ctx.eqExp().vocancy;
+            ctx.startStmt = ctx.eqExp().startStmt;
             ctx.address=ctx.eqExp().address;
 
             ctx.trueList=ctx.eqExp().trueList;
             ctx.falseList=ctx.eqExp().falseList;
         }else{
-            ctx.vocancy = ctx.lAndExp().vocancy;
+            ctx.startStmt = ctx.lAndExp().startStmt;
             ctx.trueList=ctx.eqExp().trueList;
             ctx.falseList = mergeList(ctx.lAndExp().falseList,ctx.eqExp().falseList);
 
             // 回填
             for (GotoRepresent ir : ctx.lAndExp().trueList) {
-                ir.targetHolder=ctx.eqExp().vocancy;
+                ir.targetHolder=ctx.eqExp().startStmt;
             }
         }
     }
@@ -852,19 +874,19 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void exitLOrExp(SysYParser.LOrExpContext ctx) {
         if (ctx.Or()==null) {
-            ctx.vocancy = ctx.lAndExp().vocancy;
+            ctx.startStmt = ctx.lAndExp().startStmt;
             ctx.address=ctx.lAndExp().address;
 
             ctx.trueList=ctx.lAndExp().trueList;
             ctx.falseList=ctx.lAndExp().falseList;
         }else{
-            ctx.vocancy = ctx.lOrExp().vocancy;
+            ctx.startStmt = ctx.lOrExp().startStmt;
             ctx.trueList = mergeList(ctx.lOrExp().trueList,ctx.lAndExp().trueList);
             ctx.falseList = ctx.lAndExp().falseList;
 
             // 回填
             for (GotoRepresent ir : ctx.lOrExp().falseList) {
-                ir.targetHolder=ctx.lAndExp().vocancy;
+                ir.targetHolder=ctx.lAndExp().startStmt;
             }
         }
     }
