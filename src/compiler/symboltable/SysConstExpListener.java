@@ -2,6 +2,7 @@ package compiler.symboltable;
 
 import antlr.SysYListener;
 import antlr.SysYParser;
+import compiler.Util;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.ListenerUtil;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -288,7 +289,7 @@ public class SysConstExpListener implements SysYListener {
     public void exitPrimaryExp(SysYParser.PrimaryExpContext ctx) {
         if(ctx.Integer_const()!=null)
         {
-            ctx.result=new AddressOrData(true, Integer.parseInt(ctx.Integer_const().getSymbol().getText()));
+            ctx.result=new AddressOrData(true, Util.getIntFromStr(ctx.Integer_const().getSymbol().getText()));
         }else if(ctx.exp()!=null)
         {
             ctx.result = ctx.exp().result;

@@ -7,7 +7,8 @@ import compiler.asm.Regs;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.CallRepresent;
 import compiler.genir.code.InterRepresent;
-import compiler.symboltable.FuncSymbol;
+import compiler.symboltable.function.AbstractFuncSymbol;
+import compiler.symboltable.function.FuncSymbol;
 
 import java.util.*;
 
@@ -20,7 +21,7 @@ public class CallConverter extends AsmConverter{
     @Override
     public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
         CallRepresent callIr = (CallRepresent) ir;
-        FuncSymbol targetFun = callIr.funcSymbol;
+        AbstractFuncSymbol targetFun = callIr.funcSymbol;
 
         if(callIr.params!=null)
         {
@@ -64,7 +65,8 @@ public class CallConverter extends AsmConverter{
 
 
 
-        builder.bl(targetFun.getAsmLabel());
+        builder.bl(targetFun instanceof FuncSymbol ?((FuncSymbol)targetFun).getAsmLabel():
+                           targetFun.getFuncName());
         if (callIr.returnResult != null) {
             regGetter.setReg(callIr,callIr.returnResult,Regs.R0);
         }

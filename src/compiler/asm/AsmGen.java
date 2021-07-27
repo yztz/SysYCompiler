@@ -5,11 +5,9 @@ import compiler.genir.AbstractIR;
 import compiler.genir.IRBlock;
 import compiler.genir.IRFunction;
 import compiler.genir.IRUnion;
-import compiler.genir.code.GotoRepresent;
-import compiler.genir.code.InterRepresent;
-import compiler.genir.code.LAddrRepresent;
-import compiler.genir.code.LSRepresent;
+import compiler.genir.code.*;
 import compiler.symboltable.*;
+import compiler.symboltable.function.FuncSymbol;
 
 import java.util.*;
 
@@ -124,6 +122,12 @@ public class AsmGen {
             {
                 usedSymbol.add(((LAddrRepresent) ir).valueSymbol);
             }
+            /*if(ir instanceof BinocularRepre &&
+                ((BinocularRepre) ir).OP== BinocularRepre.Opcodes.MOD)
+            {
+                builder.word(ModNum.instance.initValues[0]);
+                ModNum.instance.setIndexInFunctionData(indexInFunc++,funcSymbol);
+            }*/
         }
 
         for (ValueSymbol symbol : symbolTableHost.getGlobalSymbolTable().getAllSymbol()) {
@@ -251,10 +255,10 @@ public class AsmGen {
                 enterPoints.add(((GotoRepresent) ir).getTargetIR());
 
                 String label;
-                if (ir.hasLabel()) label = ir.getLabel();
-                else {
-                    label = String.format("%s.%d", funcSymbol.funcName.getText(), labelID++);
-                }
+                /*if (ir.hasLabel()) label = ir.getLabel();
+                else {*/
+                    label = String.format("%s.%d", funcSymbol.getFuncName(), labelID++);
+                //}
                 ((GotoRepresent) ir).getTargetIR().setLabel(label);
             }
         }

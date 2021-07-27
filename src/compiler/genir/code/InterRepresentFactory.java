@@ -1,6 +1,7 @@
 package compiler.genir.code;
 
-import compiler.symboltable.FuncSymbol;
+import compiler.symboltable.function.AbstractFuncSymbol;
+import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.ValueSymbol;
 
 public class InterRepresentFactory {
@@ -16,11 +17,11 @@ public class InterRepresentFactory {
         return new UnaryRepre(opcodes,source,currentAddress++);
     }
 
-    public static CallRepresent createFuncCallRepresent(FuncSymbol funcSymbol)
+    public static CallRepresent createFuncCallRepresent(AbstractFuncSymbol funcSymbol)
     {
         return new CallRepresent(funcSymbol,currentAddress++);
     }
-    public static CallRepresent createFuncCallRepresent(FuncSymbol funcSymbol,AddressOrData[] params)
+    public static CallRepresent createFuncCallRepresent(AbstractFuncSymbol funcSymbol, AddressOrData[] params)
     {
         return new CallRepresent(funcSymbol,params,currentAddress++);
     }

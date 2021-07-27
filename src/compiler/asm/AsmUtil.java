@@ -3,6 +3,7 @@ package compiler.asm;
 import compiler.ConstDef;
 import compiler.genir.code.*;
 import compiler.symboltable.*;
+import compiler.symboltable.function.FuncSymbol;
 
 import java.util.function.Consumer;
 
@@ -61,7 +62,7 @@ public class AsmUtil {
     }
     public static String getFuncDataLabel(FuncSymbol funcSymbol)
     {
-        return String.format(".%s.data",funcSymbol.funcName.getText());
+        return String.format(".%s.data",funcSymbol.getFuncName());
     }
 
     public static int getSymbolArrayIndexOffset(int arrayIndex)

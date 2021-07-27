@@ -4,7 +4,7 @@ import compiler.ConstDef;
 import compiler.asm.*;
 import compiler.asm.operand.ShiftOp;
 import compiler.genir.code.LSRepresent;
-import compiler.symboltable.FuncSymbol;
+import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.ParamSymbol;
 import compiler.symboltable.ValueSymbol;
 

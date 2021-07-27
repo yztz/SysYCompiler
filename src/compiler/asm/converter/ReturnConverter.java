@@ -5,7 +5,7 @@ import compiler.asm.RegGetter;
 import compiler.asm.Regs;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.ReturnRepresent;
-import compiler.symboltable.FuncSymbol;
+import compiler.symboltable.function.FuncSymbol;
 
 import java.util.Collection;
 import java.util.List;

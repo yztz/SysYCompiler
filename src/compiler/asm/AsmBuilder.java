@@ -136,7 +136,10 @@ public class AsmBuilder {
     public AsmBuilder size(String targetLabel, int size) {
         return addDirective("size", targetLabel, String.valueOf(size));
     }
-
+    public AsmBuilder addInstruction(String op, String r1, String r2, String r3, String r4) {
+        building.add(String.format("\t%s\t%s, %s, %s, %s", op, r1, r2, r3,r4));
+        return this;
+    }
     public AsmBuilder addInstruction(String op, String r1, String r2, String r3) {
         building.add(String.format("\t%s\t%s, %s, %s", op, r1, r2, r3));
         return this;
@@ -150,6 +153,11 @@ public class AsmBuilder {
     public AsmBuilder addInstruction(String op, String r1) {
         building.add(String.format("\t%s\t%s", op, r1));
         return this;
+    }
+
+    public AsmBuilder quadrupleReg(QuadOP op,Reg rdLo,Reg rdHi,Reg rm,Reg rn)
+    {
+        return addInstruction(op.getText(),rdLo.getText(),rdHi.getText(),rm.getText(),rn.getText());
     }
 
     public AsmBuilder tripleReg(TripleRegOP op, Reg rd, Reg rn, Reg rm) {
@@ -376,6 +384,15 @@ public class AsmBuilder {
             return name().toLowerCase(Locale.ROOT);
         }
     }
+
+    public enum QuadOP{
+        SMULL;
+
+        public String getText() {
+            return name().toLowerCase(Locale.ROOT);
+        }
+    }
+
 
     public enum Mem {
         LDR, STR;

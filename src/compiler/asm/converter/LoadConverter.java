@@ -1,13 +1,11 @@
 package compiler.asm.converter;
 
-import compiler.ConstDef;
 import compiler.asm.*;
-import compiler.asm.operand.RegShiftImmOperand;
-import compiler.asm.operand.ShiftOp;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.LSRepresent;
 import compiler.genir.code.LoadRepresent;
 import compiler.symboltable.*;
+import compiler.symboltable.function.FuncSymbol;
 
 import java.util.Collection;
 import java.util.List;

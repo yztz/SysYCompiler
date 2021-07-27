@@ -1,5 +1,6 @@
 package compiler.symboltable;
 
+import compiler.symboltable.function.FuncSymbol;
 import org.antlr.v4.runtime.Token;
 
 import java.util.HashMap;
@@ -7,7 +8,7 @@ import java.util.Map;
 
 public class FuncSymbolTable {
     private int defineOrder = 0;
-    public final Map<String,Map<Integer,FuncSymbol>> funcSymbols=new HashMap<>();
+    public final Map<String,Map<Integer, FuncSymbol>> funcSymbols=new HashMap<>();
 
     public FuncSymbol addFunc(Token funcName,int paramNum,BType returnType)
     {

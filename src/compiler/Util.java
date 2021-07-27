@@ -13,4 +13,13 @@ public class Util {
 
         return ints;
     }
+
+    public static int getIntFromStr(String num)
+    {
+        if(num.contains("x"))
+        {
+            return Integer.parseInt(num.replace("0x",""),16);
+        }
+        return Integer.parseInt(num);
+    }
 }

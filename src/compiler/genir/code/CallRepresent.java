@@ -3,25 +3,26 @@ package compiler.genir.code;
 import compiler.asm.AddressRWInfo;
 import compiler.asm.Reg;
 import compiler.asm.Regs;
-import compiler.symboltable.FuncSymbol;
+import compiler.symboltable.function.AbstractFuncSymbol;
+import compiler.symboltable.function.FuncSymbol;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class CallRepresent extends InterRepresent{
     public AddressOrData returnResult;
-    public FuncSymbol funcSymbol;
+    public AbstractFuncSymbol funcSymbol;
     public AddressOrData[] params;
-    public CallRepresent(FuncSymbol funcSymbol) {
+    public CallRepresent(AbstractFuncSymbol funcSymbol) {
         this.funcSymbol = funcSymbol;
     }
 
-    public CallRepresent(FuncSymbol funcSymbol,int targetAddress) {
+    public CallRepresent(AbstractFuncSymbol funcSymbol,int targetAddress) {
         this.returnResult = new AddressOrData(false, targetAddress);
         this.funcSymbol = funcSymbol;
     }
 
-    public CallRepresent( FuncSymbol funcSymbol, AddressOrData[] params,int targetAddress) {
+    public CallRepresent( AbstractFuncSymbol funcSymbol, AddressOrData[] params,int targetAddress) {
         this.returnResult = new AddressOrData(false, targetAddress);
         this.funcSymbol = funcSymbol;
         this.params = params;
@@ -33,8 +34,8 @@ public class CallRepresent extends InterRepresent{
         if(params!=null)
             paramsStr = Arrays.stream(params).map(AddressOrData::toString).collect(Collectors.joining(","));
         if(returnResult==null)
-            return String.format("%s: %-7s %s(%s)",lineNumToString(),"CALL",funcSymbol.funcName.getText(),paramsStr);
-        return String.format("%s: %-7s %s(%s) %-4s",lineNumToString(),"CALL",funcSymbol.funcName.getText(),
+            return String.format("%s: %-7s %s(%s)",lineNumToString(),"CALL",funcSymbol.getFuncName(),paramsStr);
+        return String.format("%s: %-7s %s(%s) %-4s",lineNumToString(),"CALL",funcSymbol.getFuncName(),
                                                 paramsStr,
                                                 returnResult.toString());
     }
@@ -42,8 +43,7 @@ public class CallRepresent extends InterRepresent{
     @Override
     public Collection<AddressRWInfo> getAllAddressRWInfo() {
         List<AddressRWInfo> addressRWInfos = new ArrayList<>();
-        if(funcSymbol.hasReturn())
-            addressRWInfos.add(new AddressRWInfo(returnResult, true));
+        addressRWInfos.add(new AddressRWInfo(returnResult, true));
 
         for(int i=0;i<Math.min(4,params==null?0:params.length);i++)
         {

@@ -4,7 +4,7 @@ import compiler.ConstDef;
 import compiler.asm.*;
 import compiler.genir.code.InitVarRepresent;
 import compiler.genir.code.InterRepresent;
-import compiler.symboltable.FuncSymbol;
+import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.VarSymbol;
 
 import java.util.Collection;

@@ -3,7 +3,7 @@ package compiler.asm.converter;
 import compiler.asm.AsmBuilder;
 import compiler.asm.RegGetter;
 import compiler.genir.code.InterRepresent;
-import compiler.symboltable.FuncSymbol;
+import compiler.symboltable.function.FuncSymbol;
 
 import java.util.Collection;
 import java.util.List;

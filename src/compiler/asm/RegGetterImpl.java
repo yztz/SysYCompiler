@@ -146,4 +146,9 @@ public class RegGetterImpl extends RegGetter {
     protected boolean isFreeReg(Reg register) {
         return !regDesc.containsKey(register) || regDesc.get(register) == null;
     }
+
+    @Override
+    public void releaseAll() {
+        regDesc.replaceAll((r, v) -> null);
+    }
 }

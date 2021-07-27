@@ -1,13 +1,17 @@
-package compiler.symboltable;
+package compiler.symboltable.function;
 
+import compiler.symboltable.BType;
+import compiler.symboltable.ParamSymbol;
+import compiler.symboltable.SymbolDomain;
+import compiler.symboltable.ValueSymbol;
 import org.antlr.v4.runtime.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FuncSymbol {
+public class FuncSymbol extends AbstractFuncSymbol{
 
-    public Token funcName;
+    private final Token funcNameToken;
     public int defineOrder = -1;
     /*public IRFunction irFunction; //对应的所有IR语句*/
 
@@ -22,8 +26,8 @@ public class FuncSymbol {
     {
         return paramSymbols.size();
     }
-    public FuncSymbol(Token funcName, int defineOrder,int overloadIdent, BType returnType) {
-        this.funcName = funcName;
+    public FuncSymbol(Token funcNameToken, int defineOrder, int overloadIdent, BType returnType) {
+        this.funcNameToken = funcNameToken;
         this.defineOrder = defineOrder;
         this.returnType = returnType;
         this.overloadIdent = overloadIdent;
@@ -32,9 +36,13 @@ public class FuncSymbol {
     {
         this.domains.add(domain);
     }
+    public String getFuncName()
+    {
+        return funcNameToken.getText();
+    }
     public String getAsmLabel()
     {
-        return overloadIdent==0?funcName.getText():String.format("%s.%d",funcName,overloadIdent);
+        return overloadIdent==0? funcNameToken.getText():String.format("%s.%d", funcNameToken, overloadIdent);
     }
     public String getAsmEndLabel()
     {

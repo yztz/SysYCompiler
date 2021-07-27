@@ -27,4 +27,9 @@ public class RegGetterPreAlloc extends RegGetter{
     protected boolean isFreeReg(Reg reg) {
         return false;
     }
+
+    @Override
+    public void releaseAll() {
+
+    }
 }

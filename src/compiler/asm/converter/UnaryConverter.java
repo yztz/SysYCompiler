@@ -3,12 +3,10 @@ package compiler.asm.converter;
 import compiler.asm.AsmBuilder;
 import compiler.asm.Reg;
 import compiler.asm.RegGetter;
-import compiler.asm.operand.ImmOperand;
 import compiler.asm.operand.RegOperand;
-import compiler.genir.code.BinocularRepre;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.UnaryRepre;
-import compiler.symboltable.FuncSymbol;
+import compiler.symboltable.function.FuncSymbol;
 
 import java.util.Collection;
 import java.util.List;

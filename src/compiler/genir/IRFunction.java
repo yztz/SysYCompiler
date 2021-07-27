@@ -2,7 +2,7 @@ package compiler.genir;
 
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.InterRepresentHolder;
-import compiler.symboltable.FuncSymbol;
+import compiler.symboltable.function.FuncSymbol;
 
 import java.util.*;
 
@@ -36,6 +36,8 @@ public class IRFunction extends AbstractIR{
      */
     public void endSection(String description)
     {
+        if(currentSection==null)
+            return;
         currentSection.description = description;
         this.vacancyHolders.addAll(currentSection.vacancyHolders);
         currentSection.vacancyHolders.clear();
@@ -58,14 +60,15 @@ public class IRFunction extends AbstractIR{
         tryFullFillVacancy();
     }
 
-    public void insertGroupAfter(IRGroup group,IRGroup index)
+    public void insertGroupAfter(IRGroup group,IRGroup benchmark)
     {
-        currentSection.insertAfter(group,index);
+        benchmark.getSection().insertAfter(group,benchmark);
     }
 
-    public void insertGroupBefore(IRGroup group,IRGroup index)
+    public void insertGroupBefore(IRGroup group,IRGroup benchmark)
     {
-        currentSection.insertBefore(group,index);
+        benchmark.getSection().insertBefore(group,benchmark);
+
     }
 
     public void split(IRGroup index,String desc1,String desc2)

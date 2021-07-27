@@ -68,4 +68,6 @@ public abstract class RegGetter {
      public Reg getTmpRegister() {
           return getFreeReg(0);
      }
+
+     public abstract void releaseAll();
 }

@@ -4,7 +4,7 @@ import compiler.asm.AsmBuilder;
 import compiler.asm.RegGetter;
 import compiler.genir.IRBlock;
 import compiler.genir.code.InterRepresent;
-import compiler.symboltable.FuncSymbol;
+import compiler.symboltable.function.FuncSymbol;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,5 +44,6 @@ public class AsmConvertOrganizer {
                 break;
             }
         }
+        regGetter.releaseAll();
     }
 }

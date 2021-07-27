@@ -1,5 +1,7 @@
 package compiler.symboltable;
 
+import compiler.symboltable.function.FuncSymbol;
+
 public class SymbolDomain {
     public final static SymbolDomain globalDomain=new SymbolDomain(0,null,null);
 

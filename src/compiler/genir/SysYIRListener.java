@@ -3,6 +3,9 @@ package compiler.genir;
 import antlr.SysYListener;
 import antlr.SysYParser;
 import compiler.genir.code.*;
+import compiler.symboltable.function.AbstractFuncSymbol;
+import compiler.symboltable.function.ExternalFuncSymbol;
+import compiler.symboltable.function.FuncSymbol;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -197,7 +200,7 @@ public class SysYIRListener implements SysYListener {
         {
             funSize  = ctx.funcFParams().funcFParam().size();
         }
-        FuncSymbol funcSymbol = funcSymbolTable.getFuncSymbol(ctx.Identifier().getText(),funSize);
+        FuncSymbol funcSymbol = funcSymbolTable.getFuncSymbol(ctx.Identifier().getText(), funSize);
         _currentIRFunc = new IRFunction(funcSymbol);
         irUnion.addIR(_currentIRFunc);
     }
@@ -301,7 +304,7 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void exitAssignStat(SysYParser.AssignStatContext ctx) {
         _currentIRFunc.addGroup(ctx.exp().irGroup);
-        _currentIRFunc.addGroup(ctx.lVal().irGroup);
+
         AddressOrData sourceResult = ctx.exp().result;
 
         SysYParser.LValContext lValCtx = ctx.lVal();
@@ -315,6 +318,7 @@ public class SysYIRListener implements SysYListener {
                     , symbolAndOffset.offsetResult, sourceResult);
             lValCtx.irGroup.addCode(saveRepresent);
         }
+        _currentIRFunc.addGroup(ctx.lVal().irGroup);
     }
 
     @Override
@@ -324,7 +328,10 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitSemiStat(SysYParser.SemiStatContext ctx) {
-        // todo 这是干啥的
+        if (ctx.exp()!=null) {
+            _currentIRFunc.addGroup(ctx.exp().irGroup);
+        }
+
     }
 
     @Override
@@ -542,7 +549,8 @@ public class SysYIRListener implements SysYListener {
         TerminalNode numTerminal = ctx.Integer_const();
         if(numTerminal!=null)
         {
-            ctx.result = new AddressOrData(true, Integer.parseInt(numTerminal.getSymbol().getText()));
+            // 在ConstExpListener里已经完成了
+            //ctx.result = new AddressOrData(true, Util.getIntFromStr(numTerminal.getSymbol().getText()));
         }else if(ctx.lVal()!=null) //左值，变量
         {
             SysYParser.LValContext lValCtx = ctx.lVal();
@@ -570,7 +578,7 @@ public class SysYIRListener implements SysYListener {
 
             }
         }else{
-            ctx.result=ctx.exp().result;
+            //ctx.result=ctx.exp().result;
         }
     }
 
@@ -592,10 +600,10 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void exitFunctionExpr(SysYParser.FunctionExprContext ctx) {
         TerminalNode identifier = ctx.Identifier();
-        FuncSymbol funcSymbol=funcSymbolTable.getFuncSymbol(identifier.getSymbol().getText(),
-                                                            ctx.funcRParams() != null?ctx.funcRParams().exp().size():0);
+        AbstractFuncSymbol funcSymbol=funcSymbolTable.getFuncSymbol(identifier.getSymbol().getText(),
+                                                                    ctx.funcRParams() != null?ctx.funcRParams().exp().size():0);
         if(funcSymbol==null)
-            System.out.println("Function is not defined");
+            funcSymbol = new ExternalFuncSymbol(identifier.getSymbol().getText());
 
         CallRepresent ir;
         if (ctx.funcRParams() != null) {
