@@ -65,11 +65,11 @@ public class Util {
     }
     public static int getSymbolOffsetFp(ValueSymbol symbol)
     {
-        return -symbol.getOffsetByte()-2* ConstDef.WORD_SIZE;
+        return -symbol.getOffsetByte()-2* ConstDef.WORD_SIZE - symbol.getByteSize();
     }
     public static int getSymbolOffsetFp(ValueSymbol symbol, int arrayIndex)
     {
-        return -symbol.getOffsetByte()-2* ConstDef.WORD_SIZE + arrayIndex*ConstDef.WORD_SIZE;
+        return getSymbolOffsetFp(symbol) + arrayIndex*ConstDef.WORD_SIZE;
     }
 
     public static int getParamOffsetCalledFp(int index)
