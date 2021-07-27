@@ -13,7 +13,7 @@ import compiler.symboltable.SymbolTableHost;
 
 import java.io.*;
 
-public class compiler {
+public class Compiler {
     public static void main(String[] args)
     {
         String inputFileStr = null;
