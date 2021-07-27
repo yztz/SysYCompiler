@@ -1,6 +1,6 @@
 package compiler.genir;
 
-import com.sun.istack.internal.Nullable;
+
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.InterRepresentHolder;
 
@@ -122,14 +122,14 @@ public class IRSection extends AbstractIR{
         return irGroups.get(index);
     }
 
-    @Nullable
+    
     public InterRepresent getFirstIR()
     {
         if(irGroups.size()==0)
             return null;
         return irGroups.getFirst().getFirst();
     }
-    @Nullable
+    
     public InterRepresent getLastIR()
     {
         if(irGroups.size()==0 || irGroups.getLast().getSize()==0)

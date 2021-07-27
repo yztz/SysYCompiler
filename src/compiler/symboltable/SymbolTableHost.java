@@ -1,7 +1,7 @@
 package compiler.symboltable;
 
 
-import com.sun.istack.internal.Nullable;
+
 import org.antlr.v4.runtime.Token;
 
 import java.util.HashMap;
@@ -21,7 +21,7 @@ public class SymbolTableHost {
      * @param func 所属函数
      * @return 符号表
      */
-    public SymbolDomain createSymbolDomain(@Nullable SymbolDomain fatherDomain,
+    public SymbolDomain createSymbolDomain( SymbolDomain fatherDomain,
                                            FuncSymbol func)
     {
         int domainIndex = funcDomainNumMap.getOrDefault(func,0);
@@ -37,7 +37,7 @@ public class SymbolTableHost {
      * @param symbolToken 符号Token
      * @return 符号，无则返回null
      */
-    @Nullable
+    
     public VarSymbol searchVarSymbol(SymbolDomain startDomain, Token symbolToken)
     {
         String ident = symbolToken.getText();

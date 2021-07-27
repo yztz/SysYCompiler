@@ -1,6 +1,6 @@
 package compiler.genir;
 
-import com.sun.istack.internal.Nullable;
+
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.InterRepresentHolder;
 
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractIR {
-    @Nullable
+    
     public AbstractIR parent;
     private int id;
     public int getID() {

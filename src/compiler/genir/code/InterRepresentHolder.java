@@ -1,6 +1,6 @@
 package compiler.genir.code;
 
-import com.sun.istack.internal.Nullable;
+
 
 public class InterRepresentHolder {
     public InterRepresentHolder(){
@@ -10,7 +10,7 @@ public class InterRepresentHolder {
         this.interRepresent = interRepresent;
     }
 
-    @Nullable
+    
     private InterRepresent interRepresent;
 
     public InterRepresent getInterRepresent() {

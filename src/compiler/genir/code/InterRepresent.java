@@ -2,7 +2,7 @@ package compiler.genir.code;
 
 import compiler.asm.AddressRWInfo;
 import compiler.asm.Reference;
-import com.sun.istack.internal.Nullable;
+
 import compiler.asm.Reg;
 import compiler.genir.IRSection;
 import compiler.genir.IRGroup;
@@ -24,14 +24,14 @@ public abstract class InterRepresent{
 
     public Map<AddressRWInfo, Reference> refMap = new HashMap<>();
 
-    @Nullable
+    
     private String label;
 
     public boolean hasLabel()
     {
         return label!=null;
     }
-    @Nullable
+    
     public String getLabel()
     {
         return label;

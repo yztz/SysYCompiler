@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.junit.Test;
+//import org.junit.Test;
 import compiler.symboltable.*;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class antlrTest {
         return new SysYParser(tokens);
     }
 
-    @Test
+    //@Test
     public void testSymbol()
     {
         ParseTree tree = getParser("test/testSymbol.sys").compUnit();
@@ -50,7 +50,7 @@ public class antlrTest {
         }*/
     }
 
-    @Test
+    //@Test
     public void testExp() {
         ParseTree tree = getParser("test/testExp.sys").exp();
         ParseTreeWalker walker = new ParseTreeWalker();
@@ -64,7 +64,7 @@ public class antlrTest {
         System.out.println(irListener.irUnion.toString());
     }
 
-    @Test
+    //@Test
     public void testIf()
     {
         SysYParser parser = getParser("test/testWhileIf.sys");
@@ -80,7 +80,7 @@ public class antlrTest {
         System.out.println(irListener.irUnion.toString());
     }
 
-    @Test
+    //@Test
     public void testFunc()
     {
         SysYParser parser = getParser("test/testFunc.sys");
@@ -95,7 +95,7 @@ public class antlrTest {
         System.out.println(irListener.irUnion.toString());
     }
 
-    @Test
+    //@Test
     public void testFull()
     {
         SysYParser parser = getParser("test/testFull.sys");
