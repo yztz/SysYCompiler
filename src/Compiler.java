@@ -39,7 +39,7 @@ public class Compiler {
                     break;
             }
         }
-
+        if(inputFileStr==null || outputFileStr==null) return;
         SysYParser parser = getParser(inputFileStr);
         ParseTree tree = parser.compUnit();
         ParseTreeWalker walker = new ParseTreeWalker();

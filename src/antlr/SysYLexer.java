@@ -1,4 +1,4 @@
-// Generated from D:/java/SysYCompiler/src\SysY.g4 by ANTLR 4.9.1
+// Generated from D:\Source\antlr\SysY\SysY.g4 by ANTLR 4.8
 
 package antlr;
 
@@ -13,7 +13,7 @@ import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class SysYLexer extends Lexer {
-	static { RuntimeMetaData.checkVersion("4.9.1", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.8", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =

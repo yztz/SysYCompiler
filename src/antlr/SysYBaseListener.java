@@ -1,4 +1,4 @@
-// Generated from D:/java/SysYCompiler/src\SysY.g4 by ANTLR 4.9.1
+// Generated from D:\Source\antlr\SysY\SysY.g4 by ANTLR 4.8
 
 package antlr;
 
