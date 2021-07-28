@@ -3,12 +3,11 @@ package ir.code;
 import ast.IAstValue;
 import common.ILabel;
 import common.OP;
-import common.symbol.Variable;
-import ir.IName;
-import ir.Reference;
+import asm.IName;
+import asm.Reference;
+import common.symbol.Function;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -37,6 +36,10 @@ public abstract class IR {
 
     public abstract void traverseLVal(Consumer<IName> handler);
     public abstract void traverseRVal(Consumer<IName> handler);
+
+    public boolean isStartOfFunction() {
+        return label instanceof Function;
+    }
 
     public String ref2String() {
         StringBuilder sb = new StringBuilder();

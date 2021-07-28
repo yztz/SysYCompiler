@@ -1,4 +1,4 @@
-package ir;
+package asm;
 
 import ast.IAstValue;
 

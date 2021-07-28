@@ -15,7 +15,7 @@ public class AstTest {
 //        Utils.interpreterAst(root);
     }
     @Test
-    public void testConst() {
+    public void testFull() {
         SysYParser parser = Utils.getParser("test/testFull.sys");
         ParseTree tree = parser.compUnit();
         AstNode root = visitor.visit(tree);

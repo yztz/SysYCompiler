@@ -55,6 +55,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
         }
 //        Utils.findFirstStat(ret).label = function;
         ret.label = function;
+        System.out.println(function.name + ": " + function.totalOffset);
 
         return ret;
     }
@@ -106,7 +107,10 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
     public AstNode visitSemiStat(SysYParser.SemiStatContext ctx) {
         if (null != ctx.exp()) {
             AstNode ret = visit(ctx.exp());
-            if (ret.op == OP.CALL) return ret;
+            if (ret.op == OP.CALL) {
+                Domain.currentFunc.existCall = true;
+                return ret;
+            }
         }
         return null;
     }

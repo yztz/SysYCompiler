@@ -2,8 +2,7 @@ package ir.code;
 
 import ast.IAstValue;
 import common.OP;
-import common.symbol.Variable;
-import ir.IName;
+import asm.IName;
 
 import java.util.function.Consumer;
 

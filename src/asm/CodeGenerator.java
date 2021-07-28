@@ -1,110 +1,54 @@
 package asm;
 
-import ast.AstNode;
-import common.OP;
+import asm.code.AsmFactory;
+import common.Register;
+import common.symbol.Function;
+import ir.IRs;
+import ir.code.IR;
+
+import static asm.Utils.write;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class CodeGenerator {
-    RegGetter regGetter = new RegGetterImpl();
+    Map<Register, Set<IName>> regDesc = new HashMap<>();
+    Map<IName, Set<IAddress>> addrDesc = new HashMap<>();
+    RegisterAllocator allocator;
+    IRs irs;
 
-    public CodeGenerator() {
 
+
+    public CodeGenerator(IRs irs) {
+        this.irs = irs;
+        allocator = new RegisterAllocator(irs);
     }
 
-    public void genCode(AstNode root) {
-        OP op = root.op;
-        if (root.isLeaf()) {
-            switch (root.op){
-                case MINUS:
-                    break;
 
-                case PARAM:
-                    break;
-                case STATEMENTS:
-                    break;
+    public void genCode() {
+        for (IR ir : irs) {
+            if (ir.isStartOfFunction()) {
+                Function function = (Function) ir.label;
 
-                case CONTINUE:
-                    break;
-
-                case BREAK:
-                    break;
-
-                case RETURN:
-                    break;
-
-
-                case FUNCTION:
-                    break;
-
-                case IMMEDIATE:
-                    break;
-
-                case VARIABLE:
-                    break;
             }
         }
-
-
-        switch (op){
-            case ADD:
-                break;
-            case MINUS:
-                break;
-            case SUB:
-                break;
-            case MUL:
-                break;
-            case DIV:
-                break;
-            case MOD:
-                break;
-            case ASSIGN:
-                break;
-            case STATEMENTS:
-                break;
-            case VAL_GROUP:
-                break;
-            case ROOT:
-                break;
-            case CALL:
-                break;
-            case PARAM:
-                break;
-            case IF_ELSE:
-                break;
-            case WHILE:
-                break;
-            case CONTINUE:
-                break;
-            case BREAK:
-                break;
-            case RETURN:
-                break;
-            case FUNCTION:
-                break;
-            case IMMEDIATE:
-                break;
-            case VARIABLE:
-                break;
-            case NEGATE:
-                break;
-            case LE:
-                break;
-            case LT:
-                break;
-            case GE:
-                break;
-            case GT:
-                break;
-            case EQ:
-                break;
-            case NOT_EQ:
-                break;
-            case AND:
-                break;
-            case OR:
-                break;
-        }
     }
+
+    private void genFuncHead(Function function) {
+        write(function.name + ":");
+        if (function.existCall) {
+            write("\tpush {fp, lr}");
+            write("\tadd fp, sp, #4");
+        } else {
+            write("\tpush {fp}");
+            write("\tadd fp, sp, #0");
+        }
+        write("");
+    }
+
+
+
+
 
 
 }

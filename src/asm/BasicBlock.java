@@ -1,4 +1,4 @@
-package ir;
+package asm;
 
 import common.ILabel;
 import common.OP;
@@ -7,7 +7,6 @@ import ir.code.GoToIR;
 import ir.code.IR;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class BasicBlock{
     private static final Map<ILabel, BasicBlock> labelMap = new HashMap<>();
@@ -17,7 +16,9 @@ public class BasicBlock{
     private List<IR> irs = new ArrayList<>();
     public final int id;
 
+    public Map<IName, Reference> refTable;
     public List<BasicBlock> nodes = new ArrayList<>();
+
 
     private BasicBlock(int id) {
         this.id = id;

@@ -1,6 +1,6 @@
 package common.symbol;
 
-import ir.Reference;
+import asm.Reference;
 
 import java.util.HashMap;
 import java.util.Map;

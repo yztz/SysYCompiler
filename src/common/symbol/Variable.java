@@ -2,7 +2,7 @@ package common.symbol;
 
 import ast.IAstValue;
 import ast.Immediate;
-import ir.IName;
+import asm.IName;
 
 import java.util.*;
 

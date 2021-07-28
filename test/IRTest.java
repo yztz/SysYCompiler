@@ -1,12 +1,12 @@
 import antlr.SysYParser;
+import asm.BasicBlock;
+import asm.RegisterAllocator;
 import ast.AstNode;
 import ast.AstVisitor;
 import ir.*;
 import ir.code.IR;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
-
-import java.util.List;
 
 public class IRTest {
     AstVisitor visitor = new AstVisitor();

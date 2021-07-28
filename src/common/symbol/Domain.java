@@ -6,7 +6,7 @@ public class Domain {
     public static Map<String, Function> functions = new HashMap<>();
     private static Deque<Domain> stack = new ArrayDeque<>();
     public static Domain globalDomain = new Domain(null);
-    private static Function currentFunc = null;
+    public static Function currentFunc = null;
     private static int globalOffset = 0;
 
     private static Domain nextDomain = null;

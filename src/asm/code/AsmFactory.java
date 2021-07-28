@@ -1,80 +1,72 @@
 package asm.code;
 
-import asm.RegGetter;
-import asm.RegGetterImpl;
-import asm.Register;
+import common.Register;
 import asm.Utils;
 import common.symbol.Function;
 
-import static asm.Register.FP;
-import static asm.Register.SP;
 
 public class AsmFactory {
-    private static FunContext funContext = null;
 
-
-    public static Register ldr(Register register, int offset) {
-        write(String.format("ldr %s, [%s, #%d]", register, FP, offset));
-        return register;
+    public static String ldr(Register register, int offset) {
+        return String.format("\tldr %s, [fp, #%d]", register, offset);
     }
 
 
-    public static void str(Register register, int offset) {
-        write(String.format("str %s, [%s, #%d]", register, FP, offset));
+    public static String str(Register register, int offset) {
+        return String.format("\tstr %s, [fp, #%d]", register, offset);
     }
 
-//    public static void param(Variable variable, Register register) {
-//        write(String.format());
+
+    public static String loadImm(int value, Register register) {
+        return String.format("\tmov %s %d", register, value);
+    }
+
+    public static String add(Register rd, Register rn, Register rm) {
+        return String.format("\tadd %s, %s, %s", rd, rn, rm);
+    }
+
+    public static String add(Register rd, Register rn, int imm) {
+        return String.format("\tadd %s, %s, #%d", rd, rn, imm);
+    }
+
+    public static String sub(Register rd, Register rn, Register rm) {
+        return String.format("\tsub %s, %s, %s", rd, rn, rm);
+    }
+
+    public static String sub(Register rd, Register rn, int imm) {
+        return String.format("\tsub %s, %s, #%d", rd, rn, imm);
+    }
+
+    public static String label(String label) {
+        return String.format("%s:", label);
+    }
+
+
+
+
+//    public static void enterFunc(Function function) {
+//        funContext = new FunContext(function);
+//    }
+//
+//    public static void leaveFunc() {
+//        // 输出上下文内容
+//        funContext.emit();
+//
+//        funContext = null;
 //    }
 
 
-    private static Register loadImm(int value, Register register) {
-        write(String.format("mov %s %d", register, value));
-        return register;
-    }
 
 
-    public static void enterFunc(Function function) {
-        funContext = new FunContext(function);
-    }
-
-    public static void leaveFunc() {
-        if (funContext.existCall)
-            write(String.format("push {%s, %s}", FP, SP));
-        else
-            write(String.format("push {%s}", FP));
-
-        funContext = null;
-    }
+//    private static void write(String code) {
+//        code = "\t" + code;
+//        if (null == funContext) {   // 输出
+//            Utils.write(code);
+//        } else {    // 输出到函数上下文
+//            funContext.write(code);
+//        }
+//    }
 
 
 
-
-    private static void write(String code) {
-        if (null == funContext) {
-            Utils.write(code);
-        } else {
-            funContext.write(code);
-        }
-    }
-
-
-    static class FunContext {
-        private final StringBuilder codes = new StringBuilder();
-
-        Function function;
-        boolean existCall;
-
-        public FunContext(Function function) {
-            this.function = function;
-        }
-
-        public void write(String code) {
-            this.codes.append(code).append('\n');
-        }
-
-        public void emit() {
-            Utils.write(codes.toString());
-        }
-    }
 }

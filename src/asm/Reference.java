@@ -1,4 +1,4 @@
-package ir;
+package asm;
 
 import ir.code.IR;
 

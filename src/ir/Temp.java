@@ -1,6 +1,6 @@
 package ir;
 
-import ast.IAstValue;
+import asm.IName;
 
 public class Temp implements IName {
     private static int next_id = 0;

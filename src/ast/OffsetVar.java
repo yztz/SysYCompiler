@@ -1,7 +1,7 @@
 package ast;
 
 import common.symbol.Variable;
-import ir.IName;
+import asm.IName;
 
 public class OffsetVar implements IName {
     public Variable variable;

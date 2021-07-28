@@ -1,8 +1,8 @@
-package asm;
+package common;
 
-import ast.IAstValue;
+import asm.IAddress;
 
-public enum Register implements IAstValue {
+public enum Register implements IAddress {
     r1,
     r2,
     r3,

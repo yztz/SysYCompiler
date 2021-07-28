@@ -1,13 +1,21 @@
-package ir;
+package asm;
 
 import common.ILabel;
 import common.OP;
+import common.Register;
+import ir.*;
 import ir.code.GoToIR;
 import ir.code.IR;
 
 import java.util.*;
+import static common.Register.*;
 
 public class RegisterAllocator {
+    public static final Register[] availableReg = {
+            r4, r5, r6, r7, r8, r9, r10, r12
+    };
+
+
     public List<BasicBlock> blocks = new ArrayList<>();
 
     public RegisterAllocator(IRs irs) {
@@ -15,7 +23,7 @@ public class RegisterAllocator {
         calcNextRef();
     }
 
-    public void transBlock(IRs irs) {
+    private void transBlock(IRs irs) {
         int len = irs.size();
         Set<IR> enterPoints = new HashSet<>();   // 入口点
         enterPoints.add(irs.getIR(0));
@@ -52,24 +60,25 @@ public class RegisterAllocator {
         }
         BasicBlock.buildEdges(blocks);
     }
-    public void calcNextRef() {
+    private void calcNextRef() {
         for (BasicBlock block : blocks) {
-            Map<IName, Reference> refMap = new HashMap<>();
+            Map<IName, Reference> refTable = new HashMap<>();
             List<IR> irs = block.getIRs();
             for (int i = irs.size() - 1; i >= 0; i--) {
                 // todo pass：可以删去x不活跃的语句
                 IR ir = irs.get(i);
                 ir.traverseLVal(name -> {
-                    refMap.putIfAbsent(name, new Reference(null, true));
-                    ir.refMap.put(name, refMap.get(name));
-                    refMap.put(name, new Reference(null, false));
+                    refTable.putIfAbsent(name, new Reference(null, true));
+                    ir.refMap.put(name, refTable.get(name));
+                    refTable.put(name, new Reference(null, false));
                 });
                 ir.traverseRVal(name -> {
-                    refMap.putIfAbsent(name, new Reference(null, true));
-                    ir.refMap.put(name, refMap.get(name));
-                    refMap.put(name, new Reference(ir, true));
+                    refTable.putIfAbsent(name, new Reference(null, true));
+                    ir.refMap.put(name, refTable.get(name));
+                    refTable.put(name, new Reference(ir, true));
                 });
             }
+            block.refTable = refTable;
         }
     }
 }
