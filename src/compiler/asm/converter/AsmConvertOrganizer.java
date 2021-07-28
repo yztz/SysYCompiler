@@ -41,7 +41,7 @@ public class AsmConvertOrganizer {
                 }
                 j+=converter.process(builder, regGetter, ir, flatIRList, j, funcSymbol)-1;
                 regGetter.stepToNextIR();
-                builder.commit(ir.toString());
+                //builder.commit(ir.toString());
                 break;
             }
         }

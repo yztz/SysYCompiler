@@ -29,15 +29,20 @@ public class IfGotoConverter extends AsmConverter{
             Reg rd = regGetter.getReg(ir,ifIr.left);
             Reg rn = regGetter.getReg(ir,ifIr.right);
             builder.cmp(rd,rn);
-        }else if(!ifIr.left.isData){
+        }else if(!ifIr.left.isData ){
             Reg rd = regGetter.getReg(ir,ifIr.left);
             int imm8m = ifIr.right.item;
             builder.cmp(rd,imm8m);
-        }else {
+        }else if(!ifIr.right.isData ){
             Reg rd = regGetter.getReg(ir,ifIr.right);
             int imm8m = ifIr.left.item;
             builder.cmp(rd,imm8m);
             relOp = relOp.getReverse(); //左右颠倒
+        }else{ //todo 都是立即数
+            Reg rd = regGetter.getTmpRegister(0);
+            Reg rn = regGetter.getTmpRegister(1);
+            builder.mov(rd,ifIr.left.item);
+            builder.mov(rn,ifIr.right.item);
         }
 
         switch (relOp)
