@@ -78,6 +78,14 @@ public class AsmBuilder {
         return addDirective("data");
     }
 
+    public AsmBuilder bss() {
+        return addDirective("bss");
+    }
+
+    public AsmBuilder space(int byteSize) {
+        return addDirective("space",String.valueOf(byteSize));
+    }
+
     public AsmBuilder text() {
         return addDirective("text");
     }
@@ -343,6 +351,9 @@ public class AsmBuilder {
         building = new AsmSection();
         return ended;
     }
+
+
+
 
     /**
      * @return

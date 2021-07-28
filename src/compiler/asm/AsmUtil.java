@@ -56,9 +56,9 @@ public class AsmUtil {
                              domain.getId(), varSymbol.symbolToken.getText());
     }
 
-    public static boolean isNeedInitInDataSection(VarSymbol varSymbol)
+    public static boolean isNeedInitInDataSection(HasInitSymbol varSymbol)
     {
-        return varSymbol.hasConstInitValue && varSymbol.initValues.length>1;
+        return (varSymbol instanceof VarSymbol && ((VarSymbol) varSymbol).hasConstInitValue) && varSymbol.initValues.length>1;
     }
     public static String getFuncDataLabel(FuncSymbol funcSymbol)
     {

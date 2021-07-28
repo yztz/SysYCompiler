@@ -1,5 +1,6 @@
 package compiler.symboltable;
 
+import compiler.ConstDef;
 import org.antlr.v4.runtime.Token;
 
 public class ParamSymbol extends ValueSymbol{
@@ -22,5 +23,10 @@ public class ParamSymbol extends ValueSymbol{
     @Override
     public int getOffsetByte() {
         return offsetByte;
+    }
+
+    @Override
+    public int getByteSize() {
+        return ConstDef.WORD_SIZE;
     }
 }

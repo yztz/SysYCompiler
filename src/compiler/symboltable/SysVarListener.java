@@ -176,6 +176,7 @@ public class SysVarListener implements SysYListener {
 
     @Override
     public void enterInitVal(SysYParser.InitValContext ctx) {
+
         int dimSize = 1;
         for(int i=ctx.whichDim;i<ctx.dimensions.length;i++)
         {
@@ -208,12 +209,9 @@ public class SysVarListener implements SysYListener {
                 ctx.initValues[ctx.symbolOffset]=initResult.item;
             }else{
                 hasConstInitVal = false;
-                //todo 这些咋办
-                /*VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,ctx.ident);
-                SaveRepresent ir = InterRepresentFactory.createSaveRepresent(ctx.symbol, new AddressOrData(true, ctx.symbolOffset),
-                                                                             initResult);
-                irCodes.addCode(ir);*/
             }
+        }else{
+            hasConstInitVal=false;
         }
         // 必须每一项都有常数值
         for (SysYParser.InitValContext initValCtx : ctx.initVal()) {

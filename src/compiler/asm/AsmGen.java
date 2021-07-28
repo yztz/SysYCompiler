@@ -1,5 +1,6 @@
 package compiler.asm;
 
+import compiler.Util;
 import compiler.asm.converter.AsmConvertOrganizer;
 import compiler.genir.IRCollection;
 import compiler.genir.IRBlock;
@@ -177,14 +178,23 @@ public class AsmGen {
             if (symbol instanceof HasInitSymbol) {
                 HasInitSymbol varSymbol = (HasInitSymbol) symbol;
 
+                AsmBuilder builder = new AsmBuilder();
+                String label = varSymbol.symbolToken.getText();
+                varSymbol.asmDataLabel = label;
+                if(AsmUtil.isNeedInitInDataSection(varSymbol))
+                {
+                    buildInitValues(sections, varSymbol, builder, label);
+                }else{
+                    builder.bss().align(2).type(label,AsmBuilder.Type.Object)
+                            .size(label, varSymbol.getByteSize()).label(label)
+                            .space(varSymbol.getByteSize());
+                    sections.add(builder.getSection());
+                }
                 /*if (varSymbol instanceof VarSymbol && !((VarSymbol) varSymbol).hasConstInitValue) {
                     continue;
                 }*/
 
-                AsmBuilder builder = new AsmBuilder();
-                String label = varSymbol.symbolToken.getText();
 
-                buildInitValues(sections, varSymbol, builder, label);
             }
         }
 
