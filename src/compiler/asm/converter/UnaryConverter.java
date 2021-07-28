@@ -30,16 +30,16 @@ public class UnaryConverter extends AsmConverter{
                 case ADD:
                     break;
                 case NOT:
-                    // todo 这个not是想干啥
+                    result = result==0?1:0;
                     break;
             }
             builder.mov(regGetter.getReg(ir,uIR.target),result);
         }else{
             Reg rd = regGetter.getReg(ir,uIR.target);
+            Reg rn = regGetter.getReg(ir,uIR.source);
             switch (uIR.OP) {
 
                 case MINUS:
-                    Reg rn = regGetter.getReg(ir,uIR.source);
                     builder.sub(rn,rn,1);
                     builder.regOperand(AsmBuilder.RegOperandOP.MVN,rd,new RegOperand(rn));
                     break;
@@ -47,7 +47,10 @@ public class UnaryConverter extends AsmConverter{
                     //builder.mov(rd,new RegOperand(rd));
                     break;
                 case NOT:
-                    // todo 这个not是想干啥
+                    builder.cmp(rn,0);
+                    builder.addInstruction("moveq",rd.getText(),"#1");
+                    builder.addInstruction("movne",rd.getText(),"#0");
+                    builder.addInstruction("uxtb",rd.getText(),rd.getText());
                     break;
             }
         }

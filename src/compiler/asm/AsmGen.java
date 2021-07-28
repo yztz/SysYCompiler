@@ -1,7 +1,7 @@
 package compiler.asm;
 
 import compiler.asm.converter.AsmConvertOrganizer;
-import compiler.genir.AbstractIR;
+import compiler.genir.IRCollection;
 import compiler.genir.IRBlock;
 import compiler.genir.IRFunction;
 import compiler.genir.IRUnion;
@@ -22,7 +22,7 @@ public class AsmGen {
         StringBuilder builder = new StringBuilder();
 
         List<AsmSection> staticDataSection = genStaticData();
-        for (AbstractIR ir : irUnion.getAll()) {
+        for (IRCollection ir : irUnion.getAll()) {
             if (ir instanceof IRFunction) {
 
                 AsmSection dataSection = genFunctionData(((IRFunction) ir).funcSymbol, (IRFunction) ir);

@@ -4,20 +4,20 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 public class IRUnion {
-    private final LinkedList<AbstractIR> children = new LinkedList<>();
+    private final LinkedList<IRCollection> children = new LinkedList<>();
 
-    public void addIR(AbstractIR abstractIR)
+    public void addIR(IRCollection IRCollection)
     {
-        children.add(abstractIR);
+        children.add(IRCollection);
     }
-    public Collection<AbstractIR> getAll()
+    public Collection<IRCollection> getAll()
     {
         return children;
     }
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (AbstractIR child : children) {
+        for (IRCollection child : children) {
             sb.append(child.toString()).append("\r\n");
         }
         return sb.toString();

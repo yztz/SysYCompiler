@@ -4,23 +4,14 @@ import compiler.asm.AddressRWInfo;
 import compiler.asm.Reference;
 
 import compiler.asm.Reg;
-import compiler.genir.IRSection;
-import compiler.genir.IRGroup;
+import compiler.genir.IRCollection;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class InterRepresent{
-    public IRGroup group;
-    public IRSection getSection()
-    {
-        return group==null? null:group.getSection();
-    }
-    public IRGroup getGroup()
-    {
-        return group;
-    }
+    public IRCollection collection;
 
     public Map<AddressRWInfo, Reference> refMap = new HashMap<>();
 
@@ -63,11 +54,9 @@ public abstract class InterRepresent{
 
     public String getPath()
     {
-        return String.format("%03d-%03d-%03d",
-                             getSection()==null?999:
-                             getSection().getID(),
-                             getGroup()==null?999:
-                             getGroup().getID(), lineNum);
+        return String.format("%03d-%03d",
+                             collection==null?999:
+                                     collection.getID(), lineNum);
     }
 
     public abstract Collection<AddressRWInfo> getAllAddressRWInfo();

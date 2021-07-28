@@ -2,7 +2,7 @@ package compiler.symboltable;
 
 
 
-import compiler.genir.IRGroup;
+import compiler.genir.IRCollection;
 import org.antlr.v4.runtime.Token;
 
 public class VarSymbol extends HasInitSymbol {
@@ -10,7 +10,7 @@ public class VarSymbol extends HasInitSymbol {
     public BType bType = BType.INT; //好像只有int
     public boolean isFuncParam = false;
     
-    public IRGroup initIR = null;
+    public IRCollection initIR = null;
     
 
     public boolean hasConstInitValue = false; //如果有的话用initValues,没有的话要用InitIR计算

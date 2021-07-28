@@ -5,7 +5,7 @@ import compiler.genir.code.InterRepresent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IRBlock extends AbstractIR{
+public class IRBlock extends IRCollection {
     public String label;
 
     public IRBlock prevBlock;

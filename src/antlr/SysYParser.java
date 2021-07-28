@@ -2,8 +2,8 @@
 
 package antlr;
 
+import compiler.genir.IRCollection;
 import compiler.genir.IRFunction;
-import compiler.genir.IRGroup;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.GotoRepresent;
 import compiler.genir.code.InterRepresentHolder;
@@ -134,7 +134,7 @@ public class SysYParser extends Parser {
 	}
 
 	public static class HasInterRepresentBase extends DomainedContext{
-		public IRGroup irGroup;
+		public IRCollection irGroup;
 
 		public HasInterRepresentBase(ParserRuleContext parent, int invokingStateNumber) {
 			super(parent, invokingStateNumber);
@@ -183,7 +183,7 @@ public class SysYParser extends Parser {
 		}
 	}
 
-	public static class InitValContextBase extends HasInterRepresentBase{
+	public static class InitValContextBase extends DomainedContext{
 		public int[] initValues;
 		public int symbolOffset;
 		public int whichDim; //第几个维度
@@ -721,7 +721,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class VarDefContext extends HasInterRepresentBase {
+	public static class VarDefContext extends DomainedContext {
 		public TerminalNode Identifier() { return getToken(SysYParser.Identifier, 0); }
 		public List<TerminalNode> LeftBracket() { return getTokens(SysYParser.LeftBracket); }
 		public TerminalNode LeftBracket(int i) {
@@ -1765,9 +1765,10 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ExpContextBase extends HasInterRepresentBase{
+	public static class ExpContextBase extends DomainedContext{
 		public AddressOrData result;
 		public InterRepresentHolder startStmt;
+		public boolean not;
 		public ExpContextBase() {
 		}
 
@@ -1886,7 +1887,8 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class LValContext extends HasInterRepresentBase {
+	public static class LValContext extends DomainedContext {
+		public InterRepresentHolder startStmt;
 		public TerminalNode Identifier() { return getToken(SysYParser.Identifier, 0); }
 		public List<TerminalNode> LeftBracket() { return getTokens(SysYParser.LeftBracket); }
 		public TerminalNode LeftBracket(int i) {
@@ -2445,12 +2447,13 @@ public class SysYParser extends Parser {
 		}
 		return _localctx;
 	}
-	public static class BranchContextBase extends HasInterRepresentBase {
+	public static class BranchContextBase extends DomainedContext {
 		public BranchContextBase(ParserRuleContext parent, int invokingStateNumber) {
 			super(parent, invokingStateNumber);
 		}
 		public List<GotoRepresent> trueList = null;
 		public List<GotoRepresent> falseList = null;
+		public InterRepresentHolder startStmt;
 	}
 	public static class RelExpContextBase extends BranchContextBase{
 		public RelExpContextBase(ParserRuleContext parent, int invokingStateNumber) {
@@ -2458,7 +2461,6 @@ public class SysYParser extends Parser {
 		}
 		public AddressOrData address;
 		//public InterRepresentHolder vocancy;
-		public InterRepresentHolder startStmt;
 	}
 
 	public static class RelExpContext extends RelExpContextBase {
