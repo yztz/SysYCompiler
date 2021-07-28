@@ -41,6 +41,10 @@ public abstract class RegGetter {
              Regs.R9,
              Regs.R10,
              Regs.R12,
+             Regs.R0,
+             Regs.R1,
+             Regs.R2,
+             Regs.R3
      };
 
      /**

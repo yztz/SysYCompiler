@@ -18,6 +18,7 @@ public abstract class ValueSymbol {
         this.symbolToken = symbolToken;
         dimensions=new int[]{1};
         length = 1;
+        byteSize=4;
     }
 
     public ValueSymbol(Token symbolToken, int[] dimensions,boolean isArray) {

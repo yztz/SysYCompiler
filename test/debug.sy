@@ -1,25 +1,35 @@
-int deepWhileBr(int a, int b) {
-  int c;
-  c = a + b;
-  while (c < 75) {
-    int d;
-    d = 42;
-    if (c < 100) {
-      c = c + d;
-      if (c > 99) {
-        int e;
-        e = d * 2;
-        if (1 == 1) {
-          c = e * 2;
-        }
-      }
-    }
-  }
-  return (c);
+int n;
+
+int gcd(int m,int n)
+{ 
+    int a;
+    int b;
+    a=m;
+    b=n;
+
+    int t;
+    int r;
+
+    if(m<n) { t=m;m=n;n=t; }
+
+    r=m%n;
+
+    while(r!=0)
+
+    {m=n;   n=r;   r=m%n;  }
+
+   return (a*b)/n;
 }
 
-int main() {
-  int p;
-  p = 2;
-  return deepWhileBr(p, p);
+int main()
+{
+    //newline=10;
+    int i;
+    int m;
+    //m = 1478;
+    //int t;
+    i=getint();
+    m=getint();
+    
+    return gcd(i,m);
 }
