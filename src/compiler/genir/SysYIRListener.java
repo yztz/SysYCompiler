@@ -291,6 +291,7 @@ public class SysYIRListener implements SysYListener {
 
         SysYParser.LValContext lValCtx = ctx.lVal();
         ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
+
         for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
             _currentCollection.addCode(ir);
         }
@@ -299,11 +300,11 @@ public class SysYIRListener implements SysYListener {
                 , symbolAndOffset.offsetResult, sourceResult);
         _currentCollection.addCode(saveRepresent);
 
-        if(ctx.exp()!=null && ctx.exp().startStmt!=null) //todo
+        if(ctx.lVal().startStmt!=null){
+            ctx.setStartStmt(ctx.lVal().startStmt);
+        }else if(ctx.exp()!=null && ctx.exp().startStmt!=null) //todo
         {
             ctx.setStartStmt(ctx.exp().startStmt);
-        }else if(ctx.lVal().startStmt!=null){
-            ctx.setStartStmt(ctx.lVal().startStmt); //这个三元表达式不用也行
         }else{
             ctx.setStartStmt(new InterRepresentHolder(saveRepresent));
         }
@@ -482,6 +483,15 @@ public class SysYIRListener implements SysYListener {
         ctx.trueList=ctx.lOrExp().trueList;
         ctx.falseList=ctx.lOrExp().falseList;
 
+        //没有||&&等表达式，也没有><等比较，只有一个值的情况下，两个list都会等于true
+        if(ctx.trueList==null && ctx.falseList==null)
+        {
+            List<InterRepresent> pair = createIfGotoPair(ctx, IfGotoRepresent.RelOp.NOT_EQUAL, ctx.lOrExp().address,
+                                                         new AddressOrData(true, 0));
+            _currentCollection.addCode(pair.get(0));
+            _currentCollection.addCode(pair.get(1));
+        }
+
         for (GotoRepresent ir : ctx.trueList) {
             _currentCollection.bookVacancy(ir.targetHolder);
             //System.out.println("true "+ir.lineNum);
@@ -503,6 +513,7 @@ public class SysYIRListener implements SysYListener {
                 if(ctx.exp().get(i).startStmt==null)
                     continue;
                 ctx.startStmt = ctx.exp().get(i).startStmt;
+                break;
             }
         }
     }

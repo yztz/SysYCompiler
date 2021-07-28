@@ -324,6 +324,12 @@ public class AsmBuilder {
         return addInstruction(RegRegOperandOP.SUB.getText(), rd.getText(), rn.getText(), toImm(imm12));
     }
 
+    public AsmBuilder commit(String commit)
+    {
+        building.add(String.format("@%s",commit));
+        return this;
+    }
+
     public AsmSection getSection() {
         return building;
     }

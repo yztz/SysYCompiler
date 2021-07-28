@@ -33,9 +33,9 @@ public abstract class LSConverter extends AsmConverter {
                                 offset, false, false);
                 }else{
 
-                    int offsetFPWord = AsmUtil.getSymbolOffset(valueSymbol)/ ConstDef.WORD_SIZE;
+                    //int offsetFPWord = AsmUtil.getSymbolOffset(valueSymbol)/ ConstDef.WORD_SIZE;
                     Reg rm = regGetter.getReg(ir,ir.offset);
-                    builder.add(rm,rm,offsetFPWord);
+                    //builder.add(rm,rm,offsetFPWord);
                     builder.mem(op, null, rd, baseAddrReg,
                                 rm, false, ShiftOp.LSL, 2, false, false);
                 }
@@ -82,6 +82,11 @@ public abstract class LSConverter extends AsmConverter {
                 builder.ldr(tmp,Regs.FP,offsetFP); // 先读取地址
 
                 Reg rm = regGetter.getReg(ir,ir.offset);
+
+                if(tmp==rm)
+                {
+                    System.err.println("Base address reg equal to offset address :"+ir);
+                }
 
                 builder.mem(op, null, rd, tmp,
                             rm, false, ShiftOp.LSL, 2, false, false);
