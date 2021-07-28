@@ -291,6 +291,9 @@ public class SysYIRListener implements SysYListener {
 
         SysYParser.LValContext lValCtx = ctx.lVal();
         ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
+        for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
+            _currentCollection.addCode(ir);
+        }
 
         SaveRepresent saveRepresent = InterRepresentFactory.createSaveRepresent(symbolAndOffset.symbol
                 , symbolAndOffset.offsetResult, sourceResult);
@@ -483,7 +486,7 @@ public class SysYIRListener implements SysYListener {
             _currentCollection.bookVacancy(ir.targetHolder);
             //System.out.println("true "+ir.lineNum);
         }
-
+        ctx.startStmt = ctx.lOrExp().startStmt;
     }
 
     @Override
@@ -539,7 +542,11 @@ public class SysYIRListener implements SysYListener {
                             , symbolAndOffset.offsetResult);
                     _currentCollection.addCode(loadRepresent);
                     ctx.result = loadRepresent.target;
-                    ctx.startStmt=new InterRepresentHolder(loadRepresent);
+                    if (lValCtx.startStmt!=null) {
+                        ctx.startStmt=lValCtx.startStmt;
+                    }else{
+                        ctx.startStmt=new InterRepresentHolder(loadRepresent);
+                    }
                 }
 
             }
@@ -728,7 +735,6 @@ public class SysYIRListener implements SysYListener {
         List<InterRepresent> irs=new ArrayList<>();
         irs.add(ifGoto);
         irs.add(goTo);
-
         return irs;
     }
     @Override
@@ -754,6 +760,8 @@ public class SysYIRListener implements SysYListener {
             List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.relExp().address, ctx.addExp().result);
             _currentCollection.addCode(pair.get(0));
             _currentCollection.addCode(pair.get(1));
+
+            ctx.startStmt = ctx.relExp().startStmt;
         }
     }
 

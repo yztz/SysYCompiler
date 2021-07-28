@@ -3,8 +3,8 @@ package compiler.asm;
 import compiler.genir.code.InterRepresent;
 
 public class Reference {
-    public final InterRepresent nextRef;
-    public final boolean isAlive;
+    public  InterRepresent nextRef;
+    public  boolean isAlive;
 
     public Reference(InterRepresent nextRef, boolean isAlive) {
         this.nextRef = nextRef;

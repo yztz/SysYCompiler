@@ -234,7 +234,7 @@ public class AsmBuilder {
         } else {
 
             // op{size} rd, [rn,+/-rm, shift_op#shift]{!}
-            return addInstruction(op + s, rd.getText(),
+            return addInstruction(op.getText() + s, rd.getText(),
                                   String.format("[%s, %s%s, %s#%d]%s", rn.getText(), rmNeg ? "-" : "", rm.getText(),
                                                 shiftOp.getText(), shift, saveOffset ? "!" : ""));
         }

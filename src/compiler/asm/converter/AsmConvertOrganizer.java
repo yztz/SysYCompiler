@@ -44,6 +44,6 @@ public class AsmConvertOrganizer {
                 break;
             }
         }
-        regGetter.releaseAll();
+        //regGetter.releaseAll();
     }
 }

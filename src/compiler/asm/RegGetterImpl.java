@@ -24,7 +24,6 @@ public class RegGetterImpl extends RegGetter {
         for (IRBlock block : irBlocks) {
             Map<AddressRWInfo, Reference> refTable = new HashMap<>();
             for (int i = block.irs.size() - 1; i >= 0; i--) {
-
                 InterRepresent ir = block.irs.get(i);
 
                 ir.getAllAddressRWInfo().forEach(var -> {
