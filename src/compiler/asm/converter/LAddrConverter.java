@@ -4,6 +4,7 @@ import compiler.ConstDef;
 import compiler.asm.*;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.LAddrRepresent;
+import compiler.symboltable.ParamSymbol;
 import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.ValueSymbol;
 
@@ -25,6 +26,9 @@ public class LAddrConverter extends AsmConverter{
         {
             int offsetInFuncData = symbol.getIndexInFunctionData(funcSymbol)* ConstDef.WORD_SIZE;
             builder.ldr(rd, AsmUtil.getFuncDataLabel(funcSymbol), offsetInFuncData);
+        }else if(symbol instanceof ParamSymbol){ //todo 这么处理好吗
+            int offsetFP = AsmUtil.getSymbolOffsetFp(symbol);
+            builder.ldr(rd,Regs.FP,offsetFP); // 读取地址
         }else{
             int symbolOffsetFp = AsmUtil.getSymbolOffsetFp(symbol);
             builder.add(rd,Regs.FP,symbolOffsetFp);
