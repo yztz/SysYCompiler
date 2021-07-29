@@ -44,7 +44,7 @@ public class UnaryConverter extends AsmConverter{
                     builder.regOperand(AsmBuilder.RegOperandOP.MVN,rd,new RegOperand(rn));
                     break;
                 case ADD:
-                    //builder.mov(rd,new RegOperand(rd));
+                    builder.mov(rd,new RegOperand(rn));
                     break;
                 case NOT:
                     builder.cmp(rn,0);
