@@ -694,10 +694,13 @@ public class SysYIRListener implements SysYListener {
             _currentCollection.addCode(ir);
             ctx.result = ir.target;
 
-            if(ctx.mulExp().startStmt==null)
+            if(ctx.mulExp().startStmt!=null)
                 ctx.startStmt = ctx.mulExp().startStmt;
-            else
+            else if(ctx.unaryExp().startStmt!=null)
                 ctx.startStmt = ctx.unaryExp().startStmt;
+            else{
+                ctx.startStmt = new InterRepresentHolder(ir);
+            }
         }
     }
 
@@ -726,10 +729,13 @@ public class SysYIRListener implements SysYListener {
             _currentCollection.addCode(ir);
             ctx.result = ir.target;
 
-            if(ctx.addExp().startStmt==null)
-                ctx.startStmt = ctx.mulExp().startStmt;
-            else
+            if(ctx.addExp().startStmt!=null)
                 ctx.startStmt = ctx.addExp().startStmt;
+            else if(ctx.mulExp().startStmt!=null)
+                ctx.startStmt = ctx.mulExp().startStmt;
+            else{
+                ctx.startStmt = new InterRepresentHolder(ir);
+            }
         }
     }
 
@@ -793,6 +799,8 @@ public class SysYIRListener implements SysYListener {
 
             if(ctx.relExp().startStmt!=null)
                 ctx.startStmt = ctx.relExp().startStmt;
+            else if(ctx.addExp().startStmt!=null)
+                ctx.startStmt = ctx.addExp().startStmt;
             else
                 ctx.startStmt = new InterRepresentHolder(pair.get(0));
         }
@@ -829,6 +837,8 @@ public class SysYIRListener implements SysYListener {
 
             if(ctx.eqExp().startStmt!=null)
                 ctx.startStmt = ctx.eqExp().startStmt;
+            else if(ctx.relExp().startStmt!=null)
+                ctx.startStmt = ctx.relExp().startStmt;
             else
                 ctx.startStmt = new InterRepresentHolder(pair.get(0));
         }
