@@ -354,21 +354,34 @@ public class SysYIRListener implements SysYListener {
             for (GotoRepresent ir : ctx.cond().falseList) {
                 ir.setTargetIR(elseStart);
             }
-            // 需要插入一句goto，在if的代码块执行完成后跳过else代码块
-            GotoRepresent skipElseStmtIR = new GotoRepresent(null);
+            if(ctx.stmt().get(0).getStartStmt()!=null)
+            {
+                // 需要插入一句goto，在if的代码块执行完成后跳过else代码块
+                GotoRepresent skipElseStmtIR = new GotoRepresent(null);
 
-            _currentCollection.insertBefore(skipElseStmtIR, elseStart, "skip stmts in else block");
-            _currentCollection.bookVacancy(skipElseStmtIR.targetHolder);
+                _currentCollection.insertBefore(skipElseStmtIR, elseStart, "skip stmts in else block");
+                _currentCollection.bookVacancy(skipElseStmtIR.targetHolder);
+            }
 
         }else{
             for (GotoRepresent ir : ctx.cond().falseList) {
                 _currentCollection.bookVacancy(ir.targetHolder);
             }
         }
-        // 回填trueList
-        for (GotoRepresent ir : ctx.cond().trueList) {
-            ir.setTargetIR(ctx.stmt(0).getStartStmt().getInterRepresent());
+
+        if(ctx.stmt().get(0).getStartStmt()!=null)
+        {
+            // 回填trueList
+            for (GotoRepresent ir : ctx.cond().trueList) {
+                ir.setTargetIR(ctx.stmt(0).getStartStmt().getInterRepresent());
+            }
+        }else
+        {
+            for (GotoRepresent ir : ctx.cond().trueList) {
+                _currentCollection.bookVacancy(ir.targetHolder);
+            }
         }
+
 
 
         // 传递breakQuad和continueQuad给父级可能存在的while节点
@@ -399,9 +412,17 @@ public class SysYIRListener implements SysYListener {
         GotoRepresent gotoStart = new GotoRepresent(whileStartIR);
         _currentCollection.addCode(gotoStart, "while end");
 
-        InterRepresent stmtStartIR = ctx.stmt().getStartStmt().getInterRepresent();
-        for (GotoRepresent ir : ctx.cond().trueList) {
-            ir.targetHolder.setInterRepresent(stmtStartIR);
+        if(ctx.stmt().getStartStmt()!=null) //stmt可能一条语句都没有
+        {
+            InterRepresent stmtStartIR = ctx.stmt().getStartStmt().getInterRepresent();
+            for (GotoRepresent ir : ctx.cond().trueList) {
+                ir.targetHolder.setInterRepresent(stmtStartIR);
+            }
+
+        }else{
+            for (GotoRepresent ir : ctx.cond().trueList) {
+                ir.targetHolder.setInterRepresent(whileStartIR);
+            }
         }
         for (GotoRepresent ir : ctx.cond().falseList) {
             _currentCollection.bookVacancy(ir.targetHolder);
@@ -435,7 +456,7 @@ public class SysYIRListener implements SysYListener {
         ctx.setBreakQuads(new ArrayList<>());
         ctx.getBreakQuads().add(breakGoto.targetHolder);
         _currentCollection.addCode(breakGoto, "break");
-
+        ctx.setStartStmt(new InterRepresentHolder(breakGoto));
     }
 
     @Override
@@ -450,7 +471,7 @@ public class SysYIRListener implements SysYListener {
         ctx.getContinueQuads().add(continueGoto.targetHolder);
 
         _currentCollection.addCode(continueGoto, "continue");
-
+        ctx.setStartStmt(new InterRepresentHolder(continueGoto));
     }
 
     @Override
@@ -466,7 +487,7 @@ public class SysYIRListener implements SysYListener {
         }else{
             returnRepresent =new ReturnRepresent();
         }
-
+        ctx.setStartStmt(new InterRepresentHolder(returnRepresent));
         _currentCollection.addCode(returnRepresent);
     }
 
@@ -490,8 +511,8 @@ public class SysYIRListener implements SysYListener {
     public void exitCond(SysYParser.CondContext ctx) {
         ctx.trueList=ctx.lOrExp().trueList;
         ctx.falseList=ctx.lOrExp().falseList;
-
-        //没有||&&等表达式，也没有><等比较，只有一个值的情况下，两个list都会等于true
+        // todo 表达式是一个常量的情况下，会出现空指针异常
+        //没有||&&等表达式，也没有><等比较，只有一个值的情况下，两个list都会等于null
         if(ctx.trueList==null && ctx.falseList==null)
         {
             List<InterRepresent> pair = createIfGotoPair(ctx, IfGotoRepresent.RelOp.NOT_EQUAL, ctx.lOrExp().address,
@@ -976,12 +997,12 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterEveryRule(ParserRuleContext parserRuleContext) {
-        if(parserRuleContext instanceof SysYParser.StmtContext)
+        /*if(parserRuleContext instanceof SysYParser.StmtContext)
         {
             SysYParser.StmtContext stmtContext=(SysYParser.StmtContext) parserRuleContext;
             stmtContext.setStartStmt(new InterRepresentHolder(null));
-            _currentCollection.bookVacancy(stmtContext.getStartStmt());
-        }
+            //_currentCollection.bookVacancy(stmtContext.getStartStmt());
+        }*/
     }
 
     @Override
