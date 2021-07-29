@@ -17,10 +17,10 @@ public class Util {
 
     public static int getIntFromStr(String num)
     {
-        if(num.substring(0,2).toLowerCase(Locale.ROOT).equals("0x"))
+        if(num.startsWith("0x") || num.startsWith("0X"))
         {
             return Integer.parseInt(num.replace("0x",""),16);
-        }else if(num.charAt(0) == '0')
+        }else if(num.startsWith("0"))
         {
             return Integer.parseInt(num.substring(1),8);
         }
