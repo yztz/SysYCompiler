@@ -17,13 +17,23 @@ public class Util {
 
     public static int getIntFromStr(String num)
     {
+        boolean neg = false;
+        if(num.startsWith("-"))
+        {
+            num = num.substring(1);
+            neg = true;
+        }else if(num.startsWith("+"))
+        {
+            num = num.substring(1);
+        }
         if(num.startsWith("0x") || num.startsWith("0X"))
         {
             return Integer.parseInt(num.replace("0x",""),16);
-        }else if(num.startsWith("0"))
+        }else if(num.startsWith("0") && num.length()>1)
         {
             return Integer.parseInt(num.substring(1),8);
         }
-        return Integer.parseInt(num);
+        int i = Integer.parseInt(num);
+        return neg?-i:i;
     }
 }
