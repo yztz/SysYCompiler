@@ -97,4 +97,31 @@ public class AsmUtil {
     {
         return (index-4)*ConstDef.WORD_SIZE;
     }
+
+
+    /**
+     * ror32 - rotate a 32-bit value right
+     */
+    public static int ror32(int word, int shift)
+    {
+        return (word >> (shift & 31)) | (word << ((-shift) & 31));
+    }
+
+    public static int rol32(int word, int shift)
+    {
+        return (word << shift) | (word >> ((-shift) & 31));
+    }
+
+    /*
+     * Checks if immediate value can be converted to imm12(12 bits) value.
+     */
+    public static boolean imm8m(int x)
+    {
+        int rot;
+
+        for (rot = 0; rot < 16; rot++)
+            if ((x & ~ror32(0xff, 2 * rot)) == 0)
+                return true;
+        return false;
+    }
 }

@@ -25,6 +25,7 @@ public class SysYIRListener implements SysYListener {
     public FuncSymbolTable funcSymbolTable;
     public IRUnion irUnion = new IRUnion();
     private IRCollection _currentCollection;
+    private IRFunction _currentFunction;
     private Stack<IRCollection> irCollectionStack=new Stack<>();
     public SysYIRListener(SymbolTableHost symbolTableHost, FuncSymbolTable funcSymbolTable) {
         this.symbolTableHost = symbolTableHost;
@@ -178,7 +179,8 @@ public class SysYIRListener implements SysYListener {
             funSize  = ctx.funcFParams().funcFParam().size();
         }
         FuncSymbol funcSymbol = funcSymbolTable.getFuncSymbol(ctx.Identifier().getText(), funSize);
-        _currentCollection = new IRFunction(funcSymbol);
+        _currentFunction = new IRFunction(funcSymbol);
+        _currentCollection = _currentFunction;
         irUnion.addIR(_currentCollection);
     }
 
@@ -191,7 +193,7 @@ public class SysYIRListener implements SysYListener {
         {*/
         _currentCollection.addCode(new ReturnRepresent(), "default return");
         /*}*/
-
+        _currentFunction = null;
     }
 
     @Override
@@ -609,7 +611,7 @@ public class SysYIRListener implements SysYListener {
         {
             ctx.startStmt = new InterRepresentHolder(ir);
         }
-        ((IRFunction)_currentCollection).funcSymbol.setHasFuncCallInside(true);
+        (_currentFunction).funcSymbol.setHasFuncCallInside(true);
 
         _currentCollection.addCode(ir);
         ctx.result = ir.returnResult;

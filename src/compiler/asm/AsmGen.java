@@ -123,6 +123,18 @@ public class AsmGen {
             {
                 usedSymbol.add(((LAddrRepresent) ir).valueSymbol);
             }
+            for (AddressRWInfo addressRWInfo : ir.getAllAddressRWInfo()) {
+                System.out.println(addressRWInfo.address.item);
+                if(addressRWInfo.isWrite)
+                    continue;
+                if(!addressRWInfo.address.isData)
+                    continue;
+
+                int  num = addressRWInfo.address.item;
+                if (!AsmUtil.imm8m(num)) { //不是imm8m
+                    System.err.println(num);
+                }
+            }
             /*if(ir instanceof BinocularRepre &&
                 ((BinocularRepre) ir).OP== BinocularRepre.Opcodes.MOD)
             {

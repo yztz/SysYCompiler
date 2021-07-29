@@ -1,5 +1,6 @@
 package compiler.asm.converter;
 
+import compiler.ConstDef;
 import compiler.asm.*;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.LAddrRepresent;
@@ -20,8 +21,15 @@ public class LAddrConverter extends AsmConverter{
         LAddrRepresent retIr = (LAddrRepresent) ir;
         Reg rd = regGetter.getReg(retIr, retIr.target);
         ValueSymbol symbol = retIr.valueSymbol;
-        int symbolOffsetFp = AsmUtil.getSymbolOffsetFp(symbol);
-        builder.add(rd,Regs.FP,symbolOffsetFp);
+        if(symbol.isGlobalSymbol())
+        {
+            int offsetInFuncData = symbol.getIndexInFunctionData(funcSymbol)* ConstDef.WORD_SIZE;
+            builder.ldr(rd, AsmUtil.getFuncDataLabel(funcSymbol), offsetInFuncData);
+        }else{
+            int symbolOffsetFp = AsmUtil.getSymbolOffsetFp(symbol);
+            builder.add(rd,Regs.FP,symbolOffsetFp);
+        }
+
         return 1;
     }
 }
