@@ -68,7 +68,8 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitDecl(SysYParser.DeclContext ctx) {
-        ctx.setStartStmt(ctx.varDecl().getStartStmt());
+        if(ctx.varDecl()!=null)
+            ctx.setStartStmt(ctx.varDecl().getStartStmt());
     }
 
     @Override

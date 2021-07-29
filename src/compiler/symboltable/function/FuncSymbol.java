@@ -62,7 +62,7 @@ public class FuncSymbol extends AbstractFuncSymbol{
             }
         }
 
-        return ((int) Math.ceil(((double)totalByteSize)/4.0))*4 *2;//4字节对齐,直接乘2
+        return ((int) Math.ceil(((double)totalByteSize)/4.0))*4 +32;//4字节对齐,直接乘2
     }
 
     private boolean funcCallInside = false;
