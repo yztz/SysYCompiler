@@ -68,7 +68,7 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitDecl(SysYParser.DeclContext ctx) {
-
+        ctx.setStartStmt(ctx.varDecl().getStartStmt());
     }
 
     @Override
@@ -124,7 +124,13 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitVarDecl(SysYParser.VarDeclContext ctx) {
-
+        for (int i = 0; i < ctx.varDef().size(); i++) {
+            if(ctx.varDef(i).getStartStmt()!=null)
+            {
+                ctx.setStartStmt(ctx.varDef(i).getStartStmt());
+                break;
+            }
+        }
     }
 
     @Override
@@ -143,9 +149,12 @@ public class SysYIRListener implements SysYListener {
             _currentCollection = irCollectionStack.pop();
             if(!symbol.hasConstInitValue)
             {
+                ctx.setStartStmt(new InterRepresentHolder(symbol.initIR.getFirst()));
                 _currentCollection.addCodes(symbol.initIR);
             }else{
-                _currentCollection.addCode(new InitVarRepresent(symbol), "Init var:"+symbol.symbolToken.getText());
+                InitVarRepresent initIR = new InitVarRepresent(symbol);
+                ctx.setStartStmt(new InterRepresentHolder(initIR));
+                _currentCollection.addCode(initIR, "Init var:"+symbol.symbolToken.getText());
             }
         }else{
             _currentCollection = irCollectionStack.pop();
@@ -265,7 +274,8 @@ public class SysYIRListener implements SysYListener {
             ctx.setBreakQuads(ctx.stmt().getBreakQuads());
             ctx.setContinueQuads(ctx.stmt().getContinueQuads());
             ctx.setStartStmt(ctx.stmt().getStartStmt());
-            ctx.setStartStmt(ctx.stmt().getStartStmt());
+        }else{
+            ctx.setStartStmt(ctx.decl().getStartStmt());
         }
     }
 
@@ -781,7 +791,10 @@ public class SysYIRListener implements SysYListener {
             _currentCollection.addCode(pair.get(0));
             _currentCollection.addCode(pair.get(1));
 
-            ctx.startStmt = ctx.relExp().startStmt;
+            if(ctx.relExp().startStmt!=null)
+                ctx.startStmt = ctx.relExp().startStmt;
+            else
+                ctx.startStmt = new InterRepresentHolder(pair.get(0));
         }
     }
 
@@ -799,7 +812,7 @@ public class SysYIRListener implements SysYListener {
             ctx.falseList=ctx.relExp().falseList;
             ctx.address=ctx.relExp().address;
         }else{
-            ctx.startStmt = ctx.eqExp().startStmt;
+
             /*ctx.irGroup.bookVacancy(ctx.startStmt);*/
             IfGotoRepresent.RelOp relOp= null;
             if(ctx.Equal()!=null){
@@ -810,10 +823,14 @@ public class SysYIRListener implements SysYListener {
                 System.err.println("Unknown rel opcode");
             }
 
-
             List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.eqExp().address, ctx.relExp().address);
             _currentCollection.addCode(pair.get(0));
             _currentCollection.addCode(pair.get(1));
+
+            if(ctx.eqExp().startStmt!=null)
+                ctx.startStmt = ctx.eqExp().startStmt;
+            else
+                ctx.startStmt = new InterRepresentHolder(pair.get(0));
         }
     }
 

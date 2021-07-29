@@ -99,7 +99,7 @@ public class IRCollection {
         }
         return sb.toString();
     }
-
+    public InterRepresent getFirst(){return irs.getFirst();}
     public InterRepresent getLast()
     {
         return irs.getLast();

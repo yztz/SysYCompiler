@@ -275,7 +275,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class DeclContext extends DomainedContext {
+	public static class DeclContext extends PositionalbleBase {
 		public ConstDeclContext constDecl() {
 			return getRuleContext(ConstDeclContext.class,0);
 		}
@@ -645,7 +645,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class VarDeclContext extends DomainedContext {
+	public static class VarDeclContext extends PositionalbleBase {
 		public BTypeContext bType() {
 			return getRuleContext(BTypeContext.class,0);
 		}
@@ -721,7 +721,7 @@ public class SysYParser extends Parser {
 		return _localctx;
 	}
 
-	public static class VarDefContext extends DomainedContext {
+	public static class VarDefContext extends PositionalbleBase {
 		public TerminalNode Identifier() { return getToken(SysYParser.Identifier, 0); }
 		public List<TerminalNode> LeftBracket() { return getTokens(SysYParser.LeftBracket); }
 		public TerminalNode LeftBracket(int i) {

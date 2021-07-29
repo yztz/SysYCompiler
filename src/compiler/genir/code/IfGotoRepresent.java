@@ -19,8 +19,12 @@ public class IfGotoRepresent extends GotoRepresent {
 
     @Override
     public String toString() {
-        InterRepresent targetIR = targetHolder.getInterRepresent();
-        return String.format("%s: if %s %s %s goto %s",lineNumToString(), left, relOp, right,targetIR==null?-1:
+
+        InterRepresent targetIR = null;
+        if(targetHolder!=null)
+            targetIR = targetHolder.getInterRepresent();
+        return String.format("%s: if %s %s %s goto %s",lineNumToString(), left, relOp, right,targetIR==null?"***null" +
+                "***":
                 targetIR.lineNumToString() );
     }
 
