@@ -84,7 +84,12 @@ public class IRCollection {
         addCode(ir);
     }
 
-
+    public void addCodes(IRCollection irs)
+    {
+        for (InterRepresent ir : irs.irs) {
+            addCode(ir);
+        }
+    }
 
     @Override
     public String toString() {

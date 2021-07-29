@@ -210,9 +210,9 @@ public class SysVarListener implements SysYListener {
             }else{
                 hasConstInitVal = false;
             }
-        }else{
+        }/*else{
             hasConstInitVal=false;
-        }
+        }*/
         // 必须每一项都有常数值
         for (SysYParser.InitValContext initValCtx : ctx.initVal()) {
             hasConstInitVal&=initValCtx.hasConstInitValue;

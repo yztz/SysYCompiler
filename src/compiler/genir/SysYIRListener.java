@@ -14,6 +14,7 @@ import compiler.symboltable.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * 深度优先遍历语法树
@@ -24,6 +25,7 @@ public class SysYIRListener implements SysYListener {
     public FuncSymbolTable funcSymbolTable;
     public IRUnion irUnion = new IRUnion();
     private IRCollection _currentCollection;
+    private Stack<IRCollection> irCollectionStack=new Stack<>();
     public SysYIRListener(SymbolTableHost symbolTableHost, FuncSymbolTable funcSymbolTable) {
         this.symbolTableHost = symbolTableHost;
         this.funcSymbolTable = funcSymbolTable;
@@ -126,7 +128,8 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterVarDef(SysYParser.VarDefContext ctx) {
-
+        irCollectionStack.push(_currentCollection);
+        _currentCollection = new IRCollection();
     }
 
     @Override
@@ -135,24 +138,16 @@ public class SysYIRListener implements SysYListener {
         {
             VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,ctx.Identifier().getSymbol());
 
-            if(_currentCollection !=null)
-                _currentCollection.addCode(new InitVarRepresent(symbol), "Init var:"+symbol.symbolToken.getText());
-            if(ctx.initVal().initValues!=null && ctx.initVal().initValues.length==1)
+            symbol.initIR = _currentCollection;
+            _currentCollection = irCollectionStack.pop();
+            if(!symbol.hasConstInitValue)
             {
-                /*if(symbol!=null)
-                {
-                    *//* todo 当只有一个数据时，直接生成一条中间表示
-                    *//*
-                    symbol.initIR = ctx.initVal().irGroup;
-
-                    SaveRepresent ir = InterRepresentFactory.createSaveRepresent(symbol,
-                                                                                 new AddressOrData(true, 0),
-                                                                                 new AddressOrData(true,
-                                                                                                   ctx.initVal().initValues.get(0)));
-
-                    symbol.initIR.addCode(ir);
-                }*/
+                _currentCollection.addCodes(symbol.initIR);
+            }else{
+                _currentCollection.addCode(new InitVarRepresent(symbol), "Init var:"+symbol.symbolToken.getText());
             }
+        }else{
+            _currentCollection = irCollectionStack.pop();
         }
     }
 
@@ -643,7 +638,11 @@ public class SysYIRListener implements SysYListener {
         UnaryRepre ir = InterRepresentFactory.createUnaryRepresent(opcode, ctx.unaryExp().result);
         _currentCollection.addCode(ir);
         ctx.result=ir.target;
-        ctx.startStmt = new InterRepresentHolder(ir);
+
+        if(ctx.unaryExp().startStmt!=null)
+            ctx.startStmt = ctx.unaryExp().startStmt;
+        else
+            ctx.startStmt = new InterRepresentHolder(ir);
     }
 
     @Override
@@ -682,7 +681,11 @@ public class SysYIRListener implements SysYListener {
                                                                               ctx.unaryExp().result);
             _currentCollection.addCode(ir);
             ctx.result = ir.target;
-            ctx.startStmt=ctx.mulExp().startStmt;
+
+            if(ctx.mulExp().startStmt==null)
+                ctx.startStmt = ctx.mulExp().startStmt;
+            else
+                ctx.startStmt = ctx.unaryExp().startStmt;
         }
     }
 
@@ -710,7 +713,11 @@ public class SysYIRListener implements SysYListener {
                                                                               ctx.mulExp().result);
             _currentCollection.addCode(ir);
             ctx.result = ir.target;
-            ctx.startStmt = ctx.addExp().startStmt;
+
+            if(ctx.addExp().startStmt==null)
+                ctx.startStmt = ctx.mulExp().startStmt;
+            else
+                ctx.startStmt = ctx.addExp().startStmt;
         }
     }
 
@@ -940,75 +947,9 @@ public class SysYIRListener implements SysYListener {
             stmtContext.setStartStmt(new InterRepresentHolder(null));
             _currentCollection.bookVacancy(stmtContext.getStartStmt());
         }
-
-        // 每个表达式一个section, 由父节点向子节点传递，子节点在其中添加IR语句
-        /*if(parserRuleContext instanceof SysYParser.ExpContextBase)
-        {
-            for (ParseTree child : parserRuleContext.children) {
-                if(child instanceof SysYParser.ExpContextBase)
-                {
-                    ((SysYParser.ExpContextBase) child).irGroup =
-                            ((SysYParser.ExpContextBase) parserRuleContext).irGroup;
-                }
-            }
-        }*/
-        /*if(parserRuleContext instanceof SysYParser.RelExpContextBase)
-        {
-            for (ParseTree child : parserRuleContext.children) {
-                if(child instanceof SysYParser.RelExpContextBase)
-                {
-                    ((SysYParser.RelExpContextBase) child).irGroup =
-                            ((SysYParser.RelExpContextBase) parserRuleContext).irGroup;
-                }
-                if(child instanceof SysYParser.ExpContextBase)
-                {
-                    ((SysYParser.ExpContextBase) child).irGroup =
-                            ((SysYParser.RelExpContextBase) parserRuleContext).irGroup;
-                }
-            }
-        }*/
-//        if(parserRuleContext instanceof SysYParser.HasInterRepresentBase)
-//        {
-//            SysYParser.HasInterRepresentBase stmtContext=(SysYParser.HasInterRepresentBase) parserRuleContext;
-//            stmtContext.startStmtHolder = new InterRepresentHolder(null);
-//            if (stmtContext.parent instanceof SysYParser.PositionableBase) {
-//                stmtContext.irSection = ((SysYParser.PositionableBase) stmtContext.parent).irSection;
-//            }
-//        }
     }
 
     @Override
     public void exitEveryRule(ParserRuleContext parserRuleContext) {
-        /*if (parserRuleContext instanceof SysYParser.PositionalbleBase) {
-            SysYParser.PositionalbleBase ctx = (SysYParser.PositionalbleBase)parserRuleContext;
-            if(ctx.getStartStmt()==null)
-            {
-                for (ParseTree child : ctx.children) {
-                    if (!(child instanceof SysYParser.PositionalbleBase)) {
-                        continue;
-                    }
-                    if(((SysYParser.PositionalbleBase) child).getStartStmt() ==null)
-                    {
-                        continue;
-                    }
-                    ctx.setStartStmt(((SysYParser.PositionalbleBase) child).getStartStmt());
-                    break;
-                }
-            }
-
-
-            for (int i = ctx.children.size() - 1; i >= 0; i--) {
-                ParseTree child = ctx.children.get(i);
-                if (!(child instanceof SysYParser.IPositionable)) {
-                    continue;
-                }
-                if(((SysYParser.IPositionable) child).getEndStmt() == null)
-                {
-                    continue;
-                }
-                ctx.setEndStmt(((SysYParser.IPositionable) child).getEndStmt());
-                break;
-            }
-        }*/
     }
 }
