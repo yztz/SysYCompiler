@@ -121,7 +121,8 @@ public class AsmGen {
         for (InterRepresent ir : irFunction.flatIR()) {
             if(ir instanceof CallRepresent)
             {
-                maxCallParamNum = Math.max(maxCallParamNum,((CallRepresent) ir).params.length);
+                if(((CallRepresent) ir).params!=null)
+                    maxCallParamNum = Math.max(maxCallParamNum,((CallRepresent) ir).params.length);
             }
         }
         int frameSize = ((int) Math.ceil(((double)totalByteSize)/4.0 + maxCallParamNum))*4 + 8;//4字节对齐,直接乘2
