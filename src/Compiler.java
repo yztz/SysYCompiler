@@ -20,50 +20,59 @@ public class Compiler {
         String outputFileStr = null;
         boolean optimization = false;
         String operation = null;
-        for (int i = 0, argsLength = args.length; i < argsLength; i++) {
-            String arg = args[i];
-            switch (arg) {
-                case "-S":
-                    operation = arg; //也只有-S吧
-
-                    break;
-                case "-O1":
-                    optimization = true;
-                    break;
-                case "-o":
-                    outputFileStr = args[i+1];
-                    i++;
-                    break;
-                default:
-                    inputFileStr = arg;
-                    break;
-            }
-        }
-        if(inputFileStr==null || outputFileStr==null) return;
-        SysYParser parser = getParser(inputFileStr);
-        ParseTree tree = parser.compUnit();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        SymbolTableHost symbolTableHost=new SymbolTableHost();
-        FuncSymbolTable funcSymbolTable=new FuncSymbolTable();
-        prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
-        SysYIRListener irListener = new SysYIRListener(symbolTableHost, funcSymbolTable);
-        walker.walk(irListener, tree);
-
-        System.out.println(irListener.irUnion.toString());
-
-        AsmGen asmGen = new AsmGen(symbolTableHost);
-        String result = asmGen.generate(irListener.irUnion);
-
-        FileWriter writer;
         try {
+            for (int i = 0, argsLength = args.length; i < argsLength; i++) {
+                String arg = args[i];
+                switch (arg) {
+                    case "-S":
+                        operation = arg; //也只有-S吧
+
+                        break;
+                    case "-O1":
+                        optimization = true;
+                        break;
+                    case "-o":
+                        outputFileStr = args[i+1];
+                        i++;
+                        break;
+                    default:
+                        inputFileStr = arg;
+                        break;
+                }
+            }
+            if(inputFileStr==null || outputFileStr==null) return;
+            SysYParser parser = getParser(inputFileStr);
+            ParseTree tree = parser.compUnit();
+            ParseTreeWalker walker = new ParseTreeWalker();
+            SymbolTableHost symbolTableHost=new SymbolTableHost();
+            FuncSymbolTable funcSymbolTable=new FuncSymbolTable();
+            prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
+            SysYIRListener irListener = new SysYIRListener(symbolTableHost, funcSymbolTable);
+            walker.walk(irListener, tree);
+
+            System.out.println(irListener.irUnion.toString());
+
+            AsmGen asmGen = new AsmGen(symbolTableHost);
+            String result = asmGen.generate(irListener.irUnion);
+
+            FileWriter writer;
+
             writer = new FileWriter(outputFileStr);
             writer.write("");//清空原文件内容
             writer.write(result);
             writer.flush();
             writer.close();
-        } catch (IOException e) {
+        }catch (Exception e)
+        {
+            System.err.println(e.getMessage());
             e.printStackTrace();
+            try {
+                throw e;
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
         }
+
         //System.out.println(result);
     }
     private static void prepareSymbol(ParseTree tree, ParseTreeWalker walker, SymbolTableHost symbolTableHost,
