@@ -2,16 +2,46 @@ const int a = 4;
 const int b = 6;
 const int c = a+b;
 const int e[5] = {a,b,c};
+
+
 int main()
 {
-    int i = 0;
-    int r = 0;
-    if(a&&0)
-    {
-        if(!a && a>3)
-        {
-            return 1;
-        }
-    }
-    return r;
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+    int f;
+    int g;
+    int h;
+    int i;
+    int j;
+    int k;
+    int l;
+    int m;
+    int n;
+    int a1;
+    int b1;
+    int c1;
+    int d1;
+    int e1;
+    int f1;
+    int g1;
+    int h1;
+    int i1;
+    int j1;
+    int k1;
+    int l1;
+    int m1;
+    int n1;
+    int a1;
+    int b2[100][100];
+    int c2[100][100];
+    int d2[100][100];
+    int e2[100][100];
+    int f2[100][100];
+    int g2[100][100];
+    int h2[100][100];
+    int i2[100][100];
+    return h2[99,99];
 }

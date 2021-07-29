@@ -488,7 +488,7 @@ public class SysYIRListener implements SysYListener {
         }else{
             returnRepresent =new ReturnRepresent();
         }
-        if (ctx.exp().startStmt != null) {
+        if (ctx.exp()!=null && ctx.exp().startStmt != null) {
             ctx.setStartStmt(ctx.exp().startStmt);
         }else{
             ctx.setStartStmt(new InterRepresentHolder(returnRepresent));

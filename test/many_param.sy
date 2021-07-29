@@ -1,0 +1,26 @@
+const int a = 4;
+const int b = 6;
+const int c = a+b;
+const int e[5] = {a,b,c};
+
+int A(int a, int b,int c ,int d,int e,int f,int g, int h, int i, int j, int k,
+        int a1, int b1,int c1 ,int d1,int e1,int f1,int g1, int h1, int i1, int j1, int k1,
+        int a2, int b2,int c2 ,int d2,int e2,int f2,int g2, int h2, int i2, int j2, int k2,
+        int a3, int b3,int c3 ,int d3,int e3,int f3,int g3, int h3, int i3, int j3, int k3,
+        int a4, int b4,int c4 ,int d4,int e4,int f4,int g4, int h4, int i4, int j4, int k4)
+{
+    return a+b+c+d+e+f+g+h+i+j+k+
+            a1+b1+c1+d1+e1+f1+g1+h1+i1+j1+k1+
+            a2+b2+c2+d2+e2+f2+g2+h2+i2+j2+k2+
+            a3+b3+c3+d3+e3+f3+g3+h3+i3+j3+k3+
+            a4+b4+c4+d4+e4+f4+g4+h4+i4+j4+k4;
+}
+
+int main()
+{
+    return A(1,4,6,7,8,9,2,7,3,11,12,
+            1,4,6,7,8,9,2,7,3,11,12,
+            1,4,6,7,8,9,2,7,3,11,12,
+            1,4,6,7,8,9,2,7,3,11,12,
+            1,4,6,7,8,9,2,7,3,11,12);
+}

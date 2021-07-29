@@ -53,16 +53,14 @@ public class FuncSymbol extends AbstractFuncSymbol{
         return returnType!=BType.VOID;
     }
 
-    public int getFrameSize()
+    private int stackFrameSize;
+    public void setStackFrameSize(int val)
     {
-        int totalByteSize = 0;
-        for (SymbolDomain domain : domains) {
-            for (ValueSymbol symbol : domain.symbolTable.getAllSymbol()) {
-                totalByteSize+= symbol.getByteSize();
-            }
-        }
-
-        return ((int) Math.ceil(((double)totalByteSize)/4.0))*4 +32;//4字节对齐,直接乘2
+        stackFrameSize =val;
+    }
+    public int getStackFrameSize()
+    {
+        return stackFrameSize;
     }
 
     private boolean funcCallInside = false;

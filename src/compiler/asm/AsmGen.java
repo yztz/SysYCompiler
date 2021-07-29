@@ -1,7 +1,7 @@
 package compiler.asm;
 
-import compiler.Util;
 import compiler.asm.converter.AsmConvertOrganizer;
+import compiler.asm.converter.CallConverter;
 import compiler.genir.IRCollection;
 import compiler.genir.IRBlock;
 import compiler.genir.IRFunction;
@@ -43,6 +43,7 @@ public class AsmGen {
 
     public AsmSection genFunction(IRFunction irFunction) {
         FuncSymbol funcSymbol = irFunction.funcSymbol;
+        prepareInformation(funcSymbol,irFunction);
         AsmBuilder asmBuilder = new AsmBuilder(funcSymbol.getAsmLabel());
 
         List<IRBlock> irBlocks = divideIntoBlock(irFunction);
@@ -74,14 +75,14 @@ public class AsmGen {
 
         if (asmBuilder.isLrModified()) {
             asmBuilder.push(new Reg[]{Regs.FP}, true).add(Regs.FP, Regs.SP, 4).sub(Regs.SP, Regs.SP,
-                                                                                  funcSymbol.getFrameSize()+4);
+                                                                                  funcSymbol.getStackFrameSize()+4);
         } else {
             //str fp,[sp,#-4]!
             //add fp,sp,#0,
             //sub sp,sp,#20
             asmBuilder.mem(AsmBuilder.Mem.STR, null, Regs.FP, Regs.SP, -4, true, false);
             asmBuilder.add(Regs.FP, Regs.SP, 0);
-            asmBuilder.sub(Regs.SP, Regs.SP, funcSymbol.getFrameSize() + 4);
+            asmBuilder.sub(Regs.SP, Regs.SP, funcSymbol.getStackFrameSize() + 4);
         }
 
         for (int i = 0; i < Math.min(4,funcSymbol.getParamNum()); i++) {
@@ -106,6 +107,25 @@ public class AsmGen {
             asmBuilder.add(Regs.SP, Regs.FP, 0).mem(AsmBuilder.Mem.LDR, null, Regs.FP, Regs.SP, 4, false, true).bx(
                     Regs.LR);
         }
+    }
+
+    public void prepareInformation(FuncSymbol funcSymbol,IRFunction irFunction)
+    {
+        int totalByteSize = 0;
+        for (SymbolDomain domain : funcSymbol.domains) {
+            for (ValueSymbol symbol : domain.symbolTable.getAllSymbol()) {
+                totalByteSize+= symbol.getByteSize();
+            }
+        }
+        int maxCallParamNum = 0;
+        for (InterRepresent ir : irFunction.flatIR()) {
+            if(ir instanceof CallRepresent)
+            {
+                maxCallParamNum = Math.max(maxCallParamNum,((CallRepresent) ir).params.length);
+            }
+        }
+        int frameSize = ((int) Math.ceil(((double)totalByteSize)/4.0 + maxCallParamNum))*4 + 8;//4字节对齐,直接乘2
+        funcSymbol.setStackFrameSize(frameSize);
     }
 
     public AsmSection genFunctionData(FuncSymbol funcSymbol,IRFunction irFunction)
