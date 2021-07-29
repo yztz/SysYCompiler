@@ -2,6 +2,9 @@ package compiler.asm.converter;
 
 import compiler.ConstDef;
 import compiler.asm.*;
+import compiler.asm.operand.ImmOperand;
+import compiler.asm.operand.RegShiftImmOperand;
+import compiler.asm.operand.ShiftOp;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.LAddrRepresent;
 import compiler.symboltable.ParamSymbol;
@@ -26,12 +29,30 @@ public class LAddrConverter extends AsmConverter{
         {
             int offsetInFuncData = symbol.getIndexInFunctionData(funcSymbol)* ConstDef.WORD_SIZE;
             builder.ldr(rd, AsmUtil.getFuncDataLabel(funcSymbol), offsetInFuncData);
+            if(retIr.offset.isData && retIr.offset.item!=0)
+            {
+                builder.add(rd,rd,new ImmOperand(retIr.offset.item*ConstDef.WORD_SIZE));
+            }
         }else if(symbol instanceof ParamSymbol){ //todo 这么处理好吗
             int offsetFP = AsmUtil.getSymbolOffsetFp(symbol);
+            if(retIr.offset.isData)
+            {
+                offsetFP+=(retIr.offset.item*ConstDef.WORD_SIZE);
+            }
             builder.ldr(rd,Regs.FP,offsetFP); // 读取地址
         }else{
             int symbolOffsetFp = AsmUtil.getSymbolOffsetFp(symbol);
+            if(retIr.offset.isData)
+            {
+                symbolOffsetFp+=(retIr.offset.item*ConstDef.WORD_SIZE);
+            }
             builder.add(rd,Regs.FP,symbolOffsetFp);
+
+        }
+        if(!retIr.offset.isData)
+        {
+            builder.add(rd,rd,new RegShiftImmOperand(ShiftOp.LSL,
+                                                     regGetter.getReg(retIr,retIr.offset),2));
         }
 
         return 1;

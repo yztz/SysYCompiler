@@ -546,11 +546,14 @@ public class SysYIRListener implements SysYListener {
             {
                 //是数组，并且没有下标表达式，则取地址
 
-                // todo 参数和指针，这么处理不太好
-                if(/*!(symbolAndOffset.symbol instanceof ParamSymbol) &&*/ symbolAndOffset.symbol.isArray() && (lValCtx.exp()==null||lValCtx.exp().size()==0))
+                if(/*!(symbolAndOffset.symbol instanceof ParamSymbol) &&*/ symbolAndOffset.symbol.isArray() &&
+                        (lValCtx.exp()==null||lValCtx.exp().size()<symbolAndOffset.symbol.dimensions.length))
                 {
+                    for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
+                        _currentCollection.addCode(ir);
+                    }
                     LAddrRepresent lAddrRepresent = InterRepresentFactory.createLAddrRepresent(
-                            symbolAndOffset.symbol
+                            symbolAndOffset.symbol, symbolAndOffset.offsetResult
                     );
                     _currentCollection.addCode(lAddrRepresent);
                     ctx.result = lAddrRepresent.target;

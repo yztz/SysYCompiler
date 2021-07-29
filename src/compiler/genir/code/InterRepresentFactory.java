@@ -34,6 +34,11 @@ public class InterRepresentFactory {
         return new LAddrRepresent(new AddressOrData(false,currentAddress++),varSymbol );
     }
 
+    public static LAddrRepresent createLAddrRepresent(ValueSymbol varSymbol,AddressOrData offset)
+    {
+        return new LAddrRepresent(new AddressOrData(false,currentAddress++),varSymbol,offset);
+    }
+
     public static SaveRepresent createSaveRepresent(ValueSymbol valueSymbol,AddressOrData offset,AddressOrData source)
     {
         return new SaveRepresent(valueSymbol,offset,source);
