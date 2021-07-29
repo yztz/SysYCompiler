@@ -123,7 +123,7 @@ public class AsmGen {
             {
                 usedSymbol.add(((LAddrRepresent) ir).valueSymbol);
             }
-            for (AddressRWInfo addressRWInfo : ir.getAllAddressRWInfo()) {
+            /*for (AddressRWInfo addressRWInfo : ir.getAllAddressRWInfo()) {
                 System.out.println(addressRWInfo.address.item);
                 if(addressRWInfo.isWrite)
                     continue;
@@ -134,7 +134,7 @@ public class AsmGen {
                 if (!AsmUtil.imm8m(num)) { //不是imm8m
                     System.err.println(num);
                 }
-            }
+            }*/
             /*if(ir instanceof BinocularRepre &&
                 ((BinocularRepre) ir).OP== BinocularRepre.Opcodes.MOD)
             {
@@ -193,7 +193,8 @@ public class AsmGen {
                 AsmBuilder builder = new AsmBuilder();
                 String label = varSymbol.symbolToken.getText();
                 varSymbol.asmDataLabel = label;
-                if(AsmUtil.isNeedInitInDataSection(varSymbol))
+                if((varSymbol instanceof VarSymbol && ((VarSymbol) varSymbol).hasConstInitValue)
+                    || varSymbol instanceof ConstSymbol)
                 {
                     buildInitValues(sections, varSymbol, builder, label);
                 }else{
