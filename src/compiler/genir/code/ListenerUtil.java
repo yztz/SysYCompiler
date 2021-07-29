@@ -33,7 +33,7 @@ public class ListenerUtil {
         ValueSymbol varSymbol = symbolTableHost.searchSymbol(ctx.domain, token);
         List<InterRepresent> irToCalculateOffset = new ArrayList<>();
         if(varSymbol==null){
-            System.err.println("Symbol is not defined");
+            //System.err.println("Symbol is not defined");
             return null;
         }
         else {
@@ -90,5 +90,19 @@ public class ListenerUtil {
             return new SymbolWithOffset(varSymbol, offset, irToCalculateOffset);
 
         }
+    }
+
+    public static  int[] getDimsFromConstExp(List<SysYParser.ConstExpContext> expCtxList) {
+        int[] dims= new int[expCtxList.size()];
+        for (int i = 0; i < expCtxList.size(); i++) {
+            if (expCtxList.get(i).result!=null&&
+                    expCtxList.get(i).result.isData) {
+                dims[i]= expCtxList.get(i).result.item;
+            }else{
+                dims[i]=1;
+                System.err.println("Array size must be constant");
+            }
+        }
+        return dims;
     }
 }

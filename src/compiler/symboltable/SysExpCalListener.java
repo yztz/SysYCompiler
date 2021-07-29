@@ -12,11 +12,11 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 /**
  * 计算常数表达式的值
  */
-public class SysConstExpListener implements SysYListener {
+public class SysExpCalListener implements SysYListener {
 
     SymbolTableHost symbolTableHost;
 
-    public SysConstExpListener(SymbolTableHost symbolTableHost) {
+    public SysExpCalListener(SymbolTableHost symbolTableHost) {
         this.symbolTableHost = symbolTableHost;
     }
 

@@ -13,6 +13,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import compiler.symboltable.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -513,9 +514,35 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitCond(SysYParser.CondContext ctx) {
+        // todo 表达式是一个常量的情况下，会出现空指针异常
+
+        if(ctx.lOrExp().startStmt==null)
+        {
+            AddressOrData address = ctx.lOrExp().address;
+            if(address.isData)
+            {
+                ctx.lOrExp().trueList = new ArrayList<>();
+                ctx.lOrExp().falseList = new ArrayList<>();
+                GotoRepresent gotoIR = new GotoRepresent(null);
+                _currentFunction.addCode(gotoIR);
+                if(address.item!=0)
+                {
+                    ctx.lOrExp().trueList.add(gotoIR);
+                }else{
+                    ctx.lOrExp().falseList.add(gotoIR);
+                }
+                ctx.startStmt = new InterRepresentHolder(gotoIR);
+            }else{
+                System.err.println("条件表达式不是常量，但找不到对应的IR");
+            }
+
+        }else{
+            ctx.startStmt = ctx.lOrExp().startStmt;
+        }
+
         ctx.trueList=ctx.lOrExp().trueList;
         ctx.falseList=ctx.lOrExp().falseList;
-        // todo 表达式是一个常量的情况下，会出现空指针异常
+
         //没有||&&等表达式，也没有><等比较，只有一个值的情况下，两个list都会等于null
         if(ctx.trueList==null && ctx.falseList==null)
         {
@@ -526,10 +553,9 @@ public class SysYIRListener implements SysYListener {
         }
 
         for (GotoRepresent ir : ctx.trueList) {
-            _currentCollection.bookVacancy(ir.targetHolder);
-            //System.out.println("true "+ir.lineNum);
+                _currentCollection.bookVacancy(ir.targetHolder);
+                //System.out.println("true "+ir.lineNum);
         }
-        ctx.startStmt = ctx.lOrExp().startStmt;
     }
 
     @Override
@@ -891,41 +917,128 @@ public class SysYIRListener implements SysYListener {
             ctx.trueList=ctx.eqExp().trueList;
             ctx.falseList=ctx.eqExp().falseList;
         }else{
-            /*if(ctx.lAndExp().trueList==null && ctx.eqExp().trueList==null)
+
+
+            if(ctx.lAndExp().startStmt==null && ctx.eqExp().startStmt==null) //两边都是常数
             {
-                List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                             ctx.lAndExp().address, new AddressOrData(true, 0));
-                List<InterRepresent> pair2 = createIfGotoPair(ctx.eqExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                              ctx.eqExp().address, new AddressOrData(true, 0));
-                _currentCollection.insertBefore(pair.get(0), ctx.eqExp().startStmt.getInterRepresent());
-                _currentCollection.insertBefore(pair.get(1), ctx.eqExp().startStmt.getInterRepresent());
-                _currentCollection.addCode(pair2.get(0));
-                _currentCollection.addCode(pair2.get(1));
-
-            }else */if(ctx.lAndExp().trueList==null)
+                if(ctx.lAndExp().address.isData && ctx.eqExp().address.isData)
+                {
+                    GotoRepresent gotoIR = new GotoRepresent(null); //无条件跳转了
+                    _currentFunction.addCode(gotoIR);
+                    ctx.startStmt = new InterRepresentHolder(gotoIR);
+                    if(ctx.lAndExp().address.item!=0 && ctx.eqExp().address.item!=0) //恒为true
+                    {
+                        List<GotoRepresent> trueList = new ArrayList<>();
+                        trueList.add(gotoIR);
+                        ctx.trueList = trueList;
+                        ctx.falseList = new ArrayList<>();
+                    }else{
+                        List<GotoRepresent> falseList = new ArrayList<>();
+                        falseList.add(gotoIR);
+                        ctx.trueList = new ArrayList<>();
+                        ctx.falseList = falseList;
+                    }
+                }else{
+                    System.err.println("lOrExp,表达式不是常数，但找不到对应的IR");
+                }
+            } else if(ctx.eqExp().startStmt==null) //右边是常数
             {
-                List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                             ctx.lAndExp().address, new AddressOrData(true, 0));
-                _currentCollection.insertBefore(pair.get(0), ctx.eqExp().startStmt.getInterRepresent());
-                _currentCollection.insertBefore(pair.get(1), ctx.eqExp().startStmt.getInterRepresent());
+                if(ctx.lAndExp().trueList==null)
+                {
+                    List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
+                                                                 ctx.lAndExp().address, new AddressOrData(true, 0));
 
-            }
-            if(ctx.eqExp().trueList==null){
-                List<InterRepresent> pair = createIfGotoPair(ctx.eqExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                             ctx.eqExp().address, new AddressOrData(true, 0));
-                _currentCollection.addCode(pair.get(0));
-                _currentCollection.addCode(pair.get(1));
-            }
+                    InterRepresent lEqStart =  ctx.eqExp().startStmt!=null?
+                            ctx.eqExp().startStmt.getInterRepresent():
+                            null;
+                    if(lEqStart!=null)
+                    {
+                        _currentCollection.insertBefore(pair.get(0), lEqStart);
+                        _currentCollection.insertBefore(pair.get(1), lEqStart);
+                    }else{
+                        _currentCollection.addCode(pair.get(0));
+                        _currentCollection.addCode(pair.get(1));
+                    }
+                }
 
+                ctx.startStmt  = ctx.lAndExp().startStmt;
+                if(ctx.eqExp().address.isData)
+                {
+                    if(ctx.eqExp().address.item!=0) //非零，对整体不影响
+                    {
+                        ctx.trueList = ctx.lAndExp().trueList;
+                        ctx.falseList = ctx.lAndExp().falseList;
 
+                    }else{
+                        ctx.trueList = new ArrayList<>();
+                        //false，所以必定不执行
+                        ctx.falseList = mergeList(ctx.lAndExp().trueList,
+                                                 ctx.lAndExp().falseList);
+                    }
+                }else{
+                    System.err.println("lOrExp,表达式不是常数，但找不到对应的IR");
+                }
+            }else if(ctx.lAndExp().startStmt==null) // 左边是常数
+            {
+                if(ctx.eqExp().trueList==null){
+                    List<InterRepresent> pair = createIfGotoPair(ctx.eqExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
+                                                                 ctx.eqExp().address, new AddressOrData(true, 0));
+                    _currentCollection.addCode(pair.get(0));
+                    _currentCollection.addCode(pair.get(1));
+                }
+                if(ctx.lAndExp().address.isData)
+                {
+                    ctx.trueList = ctx.eqExp().trueList;
+                    ctx.falseList = ctx.eqExp().falseList;
+                    if(ctx.lAndExp().address.item==0) //零，恒为false, 直接添加到tfalseList
+                    {
+                        GotoRepresent gotoIR = new GotoRepresent(null); //无条件跳转了
+                        _currentFunction.addCode(gotoIR);
+                        ctx.startStmt = new InterRepresentHolder(gotoIR);
+                        _currentFunction.insertBefore(gotoIR,
+                                                      ctx.eqExp().startStmt.getInterRepresent());
+                        ctx.falseList.add(gotoIR);
+                    }else{
+                        // 0 就什么都不做，没有影响
+                        ctx.startStmt = ctx.lAndExp().startStmt;
+                    }
+                }else{
+                    System.err.println("lOrExp,表达式不是常数，但找不到对应的IR");
+                }
+            }else { //都不是常数
 
-            ctx.startStmt = ctx.lAndExp().startStmt;
-            ctx.trueList=ctx.eqExp().trueList;
-            ctx.falseList = mergeList(ctx.lAndExp().falseList,ctx.eqExp().falseList);
+                if(ctx.lAndExp().trueList==null)
+                {
+                    List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
+                                                                 ctx.lAndExp().address, new AddressOrData(true, 0));
 
-            // 回填
-            for (GotoRepresent ir : ctx.lAndExp().trueList) {
-                ir.targetHolder=ctx.eqExp().startStmt;
+                    InterRepresent lEqStart =  ctx.eqExp().startStmt!=null?
+                            ctx.eqExp().startStmt.getInterRepresent():
+                            null;
+                    if(lEqStart!=null)
+                    {
+                        _currentCollection.insertBefore(pair.get(0), lEqStart);
+                        _currentCollection.insertBefore(pair.get(1), lEqStart);
+                    }else{
+                        _currentCollection.addCode(pair.get(0));
+                        _currentCollection.addCode(pair.get(1));
+                    }
+                }
+                if(ctx.eqExp().trueList==null){
+                    List<InterRepresent> pair = createIfGotoPair(ctx.eqExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
+                                                                 ctx.eqExp().address, new AddressOrData(true, 0));
+                    _currentCollection.addCode(pair.get(0));
+                    _currentCollection.addCode(pair.get(1));
+                }
+
+                ctx.startStmt = ctx.lAndExp().startStmt;
+                ctx.trueList=ctx.eqExp().trueList;
+                ctx.falseList = mergeList(ctx.lAndExp().falseList,ctx.eqExp().falseList);
+
+                // 回填
+                for (GotoRepresent ir : ctx.lAndExp().trueList) {
+                    ir.targetHolder=ctx.eqExp().startStmt;
+                }
             }
         }
     }
@@ -944,37 +1057,125 @@ public class SysYIRListener implements SysYListener {
             ctx.trueList=ctx.lAndExp().trueList;
             ctx.falseList=ctx.lAndExp().falseList;
         }else{
-            /*if(ctx.lOrExp().trueList==null && ctx.lAndExp().trueList==null)
-            {
-                List<InterRepresent> pair = createIfGotoPair(ctx.lOrExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                             ctx.lOrExp().address, new AddressOrData(true, 0));
-                List<InterRepresent> pair2 = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                             ctx.lAndExp().address, new AddressOrData(true, 0));
-                _currentCollection.addCode(pair.get(0));
-                _currentCollection.addCode(pair.get(1));
-                _currentCollection.addCode(pair2.get(0));
-                _currentCollection.addCode(pair2.get(1));
-            }else */if(ctx.lOrExp().trueList==null)
-            {
-                List<InterRepresent> pair = createIfGotoPair(ctx.lOrExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                                   ctx.lOrExp().address, new AddressOrData(true, 0));
-                _currentCollection.insertBefore(pair.get(0), ctx.lAndExp().startStmt.getInterRepresent());
-                _currentCollection.insertBefore(pair.get(1), ctx.lAndExp().startStmt.getInterRepresent());
-            }
-            if(ctx.lAndExp().trueList==null){
-                List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                             ctx.lAndExp().address, new AddressOrData(true, 0));
-                _currentCollection.addCode(pair.get(0));
-                _currentCollection.addCode(pair.get(1));
-            }
 
-            ctx.startStmt = ctx.lOrExp().startStmt;
-            ctx.trueList = mergeList(ctx.lOrExp().trueList,ctx.lAndExp().trueList);
-            ctx.falseList = ctx.lAndExp().falseList;
 
-            // 回填
-            for (GotoRepresent ir : ctx.lOrExp().falseList) {
-                ir.targetHolder=ctx.lAndExp().startStmt;
+            if(ctx.lAndExp().startStmt==null && ctx.lOrExp().startStmt==null) //两边都是常数
+            {
+                if(ctx.lOrExp().address.isData && ctx.lAndExp().address.isData)
+                {
+                    GotoRepresent gotoIR = new GotoRepresent(null); //无条件跳转了
+                    _currentFunction.addCode(gotoIR);
+                    ctx.startStmt = new InterRepresentHolder(gotoIR);
+                    if(ctx.lOrExp().address.item!=0 || ctx.lAndExp().address.item!=0) //恒为true
+                    {
+                        List<GotoRepresent> trueList = new ArrayList<>();
+                        trueList.add(gotoIR);
+                        ctx.trueList = trueList;
+                        ctx.falseList = new ArrayList<>();
+                    }else{
+                        List<GotoRepresent> falseList = new ArrayList<>();
+                        falseList.add(gotoIR);
+                        ctx.falseList = falseList;
+                        ctx.trueList = new ArrayList<>();
+                    }
+                }else{
+                    System.err.println("lOrExp,表达式不是常数，但找不到对应的IR");
+                }
+            } else if(ctx.lAndExp().startStmt==null) //右边是常数
+            {
+                ctx.startStmt  = ctx.lOrExp().startStmt;
+                if(ctx.lAndExp().address.isData)
+                {
+                    if(ctx.lOrExp().trueList==null)
+                    {
+                        List<InterRepresent> pair = createIfGotoPair(ctx.lOrExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
+                                                                     ctx.lOrExp().address, new AddressOrData(true, 0));
+                        InterRepresent lAndStart = ctx.lAndExp().startStmt!=null? ctx.lAndExp().startStmt.getInterRepresent()
+                                :null;
+                        if(lAndStart!=null)
+                        {
+                            _currentCollection.insertBefore(pair.get(0), lAndStart);
+                            _currentCollection.insertBefore(pair.get(1), lAndStart);
+                        }else{
+                            _currentCollection.addCode(pair.get(0));
+                            _currentCollection.addCode(pair.get(1));
+                        }
+
+                    }
+                    if(ctx.lAndExp().address.item!=0) //非零，恒为true
+                    {
+                        //恒为true，所以必定执行
+                        ctx.trueList = mergeList(ctx.lOrExp().trueList,
+                                                 ctx.lOrExp().falseList);
+                        ctx.falseList = new ArrayList<>();
+                    }else{ //为0，对整体不影响,
+                        ctx.trueList = ctx.lOrExp().trueList;
+                        ctx.falseList = ctx.lOrExp().falseList;
+                    }
+                }else{
+                    System.err.println("lOrExp,表达式不是常数，但找不到对应的IR");
+                }
+            }else if(ctx.lOrExp().startStmt==null) // 左边是常数
+            {
+                if(ctx.lOrExp().address.isData)
+                {
+                    if(ctx.lAndExp().trueList==null){
+                        List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
+                                                                     ctx.lAndExp().address, new AddressOrData(true, 0));
+                        _currentCollection.addCode(pair.get(0));
+                        _currentCollection.addCode(pair.get(1));
+                    }
+
+                    ctx.trueList = ctx.lAndExp().trueList;
+                    ctx.falseList = ctx.lAndExp().falseList;
+                    if(ctx.address.item!=0) //非零，恒为true, 直接添加到trueList
+                    {
+                        GotoRepresent gotoIR = new GotoRepresent(null); //无条件跳转了
+                        _currentFunction.addCode(gotoIR);
+                        ctx.startStmt = new InterRepresentHolder(gotoIR);
+                        _currentFunction.insertBefore(gotoIR,
+                                                      ctx.lAndExp().startStmt.getInterRepresent());
+                        ctx.trueList = ctx.lAndExp().trueList;
+                        ctx.trueList.add(gotoIR);
+                    }else{
+                        // 0 就什么都不做，没有影响
+                        ctx.startStmt = ctx.lAndExp().startStmt;
+                    }
+                }else{
+                    System.err.println("lOrExp,表达式不是常数，但找不到对应的IR");
+                }
+            }else { //都不是常数
+                if(ctx.lOrExp().trueList==null)
+                {
+                    List<InterRepresent> pair = createIfGotoPair(ctx.lOrExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
+                                                                 ctx.lOrExp().address, new AddressOrData(true, 0));
+                    InterRepresent lAndStart = ctx.lAndExp().startStmt!=null? ctx.lAndExp().startStmt.getInterRepresent()
+                            :null;
+                    if(lAndStart!=null)
+                    {
+                        _currentCollection.insertBefore(pair.get(0), lAndStart);
+                        _currentCollection.insertBefore(pair.get(1), lAndStart);
+                    }else{
+                        _currentCollection.addCode(pair.get(0));
+                        _currentCollection.addCode(pair.get(1));
+                    }
+
+                }
+                if(ctx.lAndExp().trueList==null){
+                    List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
+                                                                 ctx.lAndExp().address, new AddressOrData(true, 0));
+                    _currentCollection.addCode(pair.get(0));
+                    _currentCollection.addCode(pair.get(1));
+                }
+
+                ctx.startStmt = ctx.lOrExp().startStmt;
+                ctx.trueList = mergeList(ctx.lOrExp().trueList,ctx.lAndExp().trueList);
+                ctx.falseList = ctx.lAndExp().falseList;
+
+                // 回填
+                for (GotoRepresent ir : ctx.lOrExp().falseList) {
+                    ir.targetHolder=ctx.lAndExp().startStmt;
+                }
             }
         }
     }
