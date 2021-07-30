@@ -161,9 +161,9 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
                     for (int expIndex = 0; expIndex < paramCtx.exp().size(); expIndex++) {
                         if (paramCtx.exp(expIndex).result!=null&&
                                 paramCtx.exp(expIndex).result.isData) {
-                            dims[i+1] = paramCtx.exp(expIndex).result.item;
+                            dims[expIndex+1] = paramCtx.exp(expIndex).result.item;
                         }else{
-                            dims[i+1] = -1;
+                            dims[expIndex+1] = -1;
                             System.err.println("Array size must be constant");
                         }
                     }

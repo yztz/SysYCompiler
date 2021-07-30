@@ -145,7 +145,7 @@ public class AsmGen {
                 usedSymbol.add(((LAddrRepresent) ir).valueSymbol);
             }
             /*for (AddressRWInfo addressRWInfo : ir.getAllAddressRWInfo()) {
-                System.out.println(addressRWInfo.address.item);
+
                 if(addressRWInfo.isWrite)
                     continue;
                 if(!addressRWInfo.address.isData)

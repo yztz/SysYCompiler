@@ -124,4 +124,9 @@ public class AsmUtil {
                 return true;
         return false;
     }
+
+    public static int[] decompositionToImm12(int num)
+    {
+        return new int[0];
+    }
 }
