@@ -20,4 +20,26 @@ public abstract class HasInitSymbol extends ValueSymbol{
         super(symbolToken, dimensions, isArray);
         this.initValues= initValues;
     }
+
+    public boolean isAllZero()
+    {
+        if(initValues==null) return true;
+        for (int i = 0; i < initValues.length; i++) {
+            if(initValues[i]!=0)
+                return false;
+        }
+        return true;
+    }
+
+    public int getZeroTailLength()
+    {
+        if(initValues==null) return getLength();
+        int length = 0;
+        for (int i = initValues.length - 1; i >= 0; i--) {
+            if(initValues[i]!=0)
+                break;
+            length++;
+        }
+        return length;
+    }
 }

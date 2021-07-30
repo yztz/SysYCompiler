@@ -83,6 +83,10 @@ public class AsmBuilder {
         return addDirective("bss");
     }
 
+    public AsmBuilder comm(String label,int byteSize) {
+        return addDirective("comm",label,String.valueOf(byteSize));
+    }
+
     public AsmBuilder space(int byteSize) {
         return addDirective("space",String.valueOf(byteSize));
     }
@@ -291,8 +295,8 @@ public class AsmBuilder {
         return lsm("ldm", mode, rd, regsTarget);
     }
 
-    public AsmBuilder sdm(LSAddressMode mode, Reg rd, Reg[] regsTarget) {
-        return lsm("sdm", mode, rd, regsTarget);
+    public AsmBuilder stm(LSAddressMode mode, Reg rd, Reg[] regsTarget) {
+        return lsm("stm", mode, rd, regsTarget);
     }
 
     //----------------------------------常用-----------------------------------

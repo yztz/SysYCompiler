@@ -70,16 +70,18 @@ public class SymbolTable {
 
         domain.getFunc().paramSymbols.add(symbol);
     }
-    public void addConst(Token token,int constValue)
+    public ConstSymbol addConst(Token token,int constValue)
     {
         ConstSymbol symbol = new ConstSymbol(constValue,token);
         symbols.put(token.getText(), symbol);
+        return symbol;
     }
 
-    public void addConstArray(Token token, int[] dim, int[] constValues)
+    public ConstSymbol addConstArray(Token token, int[] dim, int[] constValues)
     {
         ConstSymbol symbol = new ConstSymbol(constValues, token,dim,true);
         symbols.put(token.getText(), symbol);
+        return symbol;
     }
     private int getCurrentOffset()
     {

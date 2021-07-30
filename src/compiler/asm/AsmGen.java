@@ -1,5 +1,6 @@
 package compiler.asm;
 
+import compiler.ConstDef;
 import compiler.asm.converter.AsmConvertOrganizer;
 import compiler.asm.converter.CallConverter;
 import compiler.genir.IRCollection;
@@ -219,9 +220,10 @@ public class AsmGen {
                 {
                     buildInitValues(sections, varSymbol, builder, label);
                 }else{
-                    builder.bss().align(2).type(label,AsmBuilder.Type.Object)
+                    /*builder.bss().align(2).type(label,AsmBuilder.Type.Object)
                             .size(label, varSymbol.getByteSize()).label(label)
-                            .space(varSymbol.getByteSize());
+                            .space(varSymbol.getByteSize());*/
+                    builder.comm(label, varSymbol.getByteSize());
                     sections.add(builder.getSection());
                 }
                 /*if (varSymbol instanceof VarSymbol && !((VarSymbol) varSymbol).hasConstInitValue) {
@@ -260,15 +262,18 @@ public class AsmGen {
 
         builder.type(label, AsmBuilder.Type.Object).data().global(label).align(2).label(label);
 
-        if(varSymbol.initValues!=null)
+        if(varSymbol.initValues!=null && !varSymbol.isAllZero())
         {
-            for (int initValue : varSymbol.initValues) {
+            int zeroTailLength = varSymbol.getZeroTailLength();
+            int[] initValues = varSymbol.initValues;
+            for (int i = 0; i < initValues.length - zeroTailLength; i++) {
+                int initValue = initValues[i];
                 builder.word(initValue);
             }
+            if(zeroTailLength!=0)
+                builder.space(zeroTailLength *ConstDef.WORD_SIZE);
         }else{
-            for (int i = 0; i < varSymbol.getLength(); i++) {
-                builder.word(0);
-            }
+            builder.space(varSymbol.getByteSize());
         }
 
         builder.size(label, varSymbol.getByteSize());

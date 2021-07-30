@@ -46,7 +46,7 @@ public class InitVarConverter extends AsmConverter{
                 }
                 builder.ldm(AsmBuilder.LSAddressMode.NONE, addr, regs);
                 builder.sub(addr, Regs.FP, -AsmUtil.getSymbolOffsetFp(varSymbol));
-                builder.sdm(AsmBuilder.LSAddressMode.NONE,addr ,regs);
+                builder.stm(AsmBuilder.LSAddressMode.NONE, addr , regs);
             }
         }else{ //不是数组
             Reg tmp = regGetter.getTmpRegister();
