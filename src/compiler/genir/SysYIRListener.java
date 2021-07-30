@@ -349,7 +349,7 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitIfStat(SysYParser.IfStatContext ctx) {
-        if(ctx.stmt().size()==2) //有else
+        if(ctx.stmt().size()==2 && ctx.stmt(1).getStartStmt()!=null) //有else,且不为空
         {
             InterRepresent elseStart=ctx.stmt(1).getStartStmt().getInterRepresent();
             for (GotoRepresent ir : ctx.cond().falseList) {
