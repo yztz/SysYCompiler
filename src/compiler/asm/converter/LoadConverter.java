@@ -17,7 +17,7 @@ public class LoadConverter extends LSConverter {
     }
 
     @Override
-    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
+    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         LoadRepresent loadIr = (LoadRepresent) ir;
         boolean flag = false;
         if (loadIr.valueSymbol instanceof ConstSymbol) {
@@ -32,7 +32,7 @@ public class LoadConverter extends LSConverter {
             }
         }
         if(!flag)
-            return super.process(AsmBuilder.Mem.LDR, builder, regGetter, (LSRepresent) ir,funcSymbol,
+            return super.process(AsmBuilder.Mem.LDR, builder, regGetter, (LSRepresent) ir,funcSymbol, dataHolder,
                              regGetter.getReg(ir, ((LSRepresent) ir).target));
         else
             return 1;

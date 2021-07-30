@@ -21,13 +21,13 @@ public class LAddrConverter extends AsmConverter{
     }
 
     @Override
-    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
+    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         LAddrRepresent retIr = (LAddrRepresent) ir;
         Reg rd = regGetter.getReg(retIr, retIr.target);
         ValueSymbol symbol = retIr.valueSymbol;
         if(symbol.isGlobalSymbol())
         {
-            int offsetInFuncData = symbol.getIndexInFunctionData(funcSymbol)* ConstDef.WORD_SIZE;
+            int offsetInFuncData = dataHolder.getIndexInFuncData(symbol)* ConstDef.WORD_SIZE;
             builder.ldr(rd, AsmUtil.getFuncDataLabel(funcSymbol), offsetInFuncData);
             if(retIr.offset.isData && retIr.offset.item!=0)
             {

@@ -16,6 +16,7 @@ public class AsmBuilder {
     private final String label;
     public boolean lrModified = false;
     private AsmSection building;
+
     public AsmBuilder() {
         building = new AsmSection();
         label = null;
@@ -25,7 +26,13 @@ public class AsmBuilder {
         this.label = label;
         building = new AsmSection();
     }
-
+    private boolean _hookMoveIfNotImm12 = false;
+    private FunctionDataHolder dataHolder;
+    public void hookMovIfNotImm12(FunctionDataHolder dataHolder)
+    {
+        this._hookMoveIfNotImm12 = true;
+        this.dataHolder = dataHolder;
+    }
     public static String toImm(int imm) {
         return String.format("#%d", imm);
     }
@@ -310,6 +317,14 @@ public class AsmBuilder {
     }
 
     public AsmBuilder mov(Reg rd, int imm12) {
+        if(_hookMoveIfNotImm12)
+        {
+            if(!AsmUtil.imm12(imm12))
+            {
+                dataHolder.addAndLoadFromFuncData(this,imm12,rd);
+                return this;
+            }
+        }
         return addInstruction(RegOperandOP.MOV.getText(), rd.getText(), String.format("#%d", imm12));
     }
 

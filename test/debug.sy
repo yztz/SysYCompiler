@@ -6,6 +6,10 @@ int func()
 int main()
 {
     int a;
+    if(a);
+
+    while(a);
+
     if(a)
     {
 

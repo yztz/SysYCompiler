@@ -17,7 +17,7 @@ public class BinocularConverter extends AsmConverter{
     }
 
     @Override
-    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
+    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         BinocularRepre bIR = (BinocularRepre) ir;
         if (bIR.sourceFirst.isData && bIR.sourceSecond.isData) { //都是立即数，在IR生成阶段这个应该就被处理掉了
             int result = 0;
@@ -42,8 +42,10 @@ public class BinocularConverter extends AsmConverter{
                     break;
             }
             Reg reg = regGetter.getReg(ir, bIR.target);
+
+            AsmUtil.dealIfNotImm12(result,reg,builder,dataHolder);
+
             builder.mov(reg,result);
-            //todo 分配哪个寄存器保存到AddressOrData里面了，有点乱，其实也可以不保存每一次都用getRegOfAddress获取
             return 1;
         }
 
@@ -60,20 +62,54 @@ public class BinocularConverter extends AsmConverter{
                                       new RegOperand(regGetter.getReg(ir,bIR.sourceSecond)));
             }else if(!bIR.sourceFirst.isData){
                 Reg rn = regGetter.getReg(ir,bIR.sourceFirst);
-                if (bIR.OP== BinocularRepre.Opcodes.ADD) {
-                    builder.add(reg, rn, bIR.sourceSecond.item);
+
+                if(AsmUtil.imm12(bIR.sourceSecond.item)) //是imm12
+                {
+                    if (bIR.OP== BinocularRepre.Opcodes.ADD) {
+                        builder.add(reg, rn, bIR.sourceSecond.item);
+                    }else{
+                        builder.sub(reg, rn, bIR.sourceSecond.item);
+                    }
                 }else{
-                    builder.sub(reg, rn, bIR.sourceSecond.item);
+                    Reg tmp = regGetter.getTmpRegister();
+                    dataHolder.addAndLoadFromFuncData(builder,bIR.sourceSecond.item,tmp);
+                    if (bIR.OP== BinocularRepre.Opcodes.ADD) {
+                        builder.add(reg, rn, tmp);
+                    }else{
+                        builder.sub(reg, rn, tmp);
+                    }
                 }
+
             }else{
                 Reg rn = regGetter.getReg(ir,bIR.sourceSecond);
+
                 if (bIR.OP== BinocularRepre.Opcodes.ADD) {
-                    builder.add(reg, rn, bIR.sourceFirst.item);
+                    if(AsmUtil.imm12(bIR.sourceFirst.item))
+                    {
+                        builder.add(reg, rn, bIR.sourceFirst.item);
+                    }else{
+                        Reg tmp = regGetter.getTmpRegister();
+                        dataHolder.loadFromFuncData(builder,bIR.sourceFirst.item,tmp);
+                        builder.add(reg, rn, tmp);
+                    }
+
                 }else{
-                    builder.regRegOperand(AsmBuilder.RegRegOperandOP.RSB,
-                                          reg,
-                                          rn,
-                                          new ImmOperand(bIR.sourceFirst.item));
+                    if(AsmUtil.imm8m(bIR.sourceFirst.item))
+                    {
+                        builder.regRegOperand(AsmBuilder.RegRegOperandOP.RSB,
+                                              reg,
+                                              rn,
+                                              new ImmOperand(bIR.sourceFirst.item));
+                    }else{
+                        Reg tmp = regGetter.getTmpRegister();
+                        dataHolder.loadFromFuncData(builder,bIR.sourceFirst.item,tmp);
+                        builder.regRegOperand(AsmBuilder.RegRegOperandOP.RSB,
+                                              reg,
+                                              rn,
+                                              new RegOperand(tmp));
+
+                    }
+
                 }
             }
         }else if(bIR.OP== BinocularRepre.Opcodes.DIV)

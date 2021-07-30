@@ -26,9 +26,15 @@ public class AsmGen {
         List<AsmSection> staticDataSection = genStaticData();
         for (IRCollection ir : irUnion.getAll()) {
             if (ir instanceof IRFunction) {
+                IRFunction irFunction = (IRFunction)ir;
+                FuncSymbol funcSymbol = irFunction.funcSymbol;
+                FunctionDataHolder holder = new FunctionDataHolder(funcSymbol);
 
-                AsmSection dataSection = genFunctionData(((IRFunction) ir).funcSymbol, (IRFunction) ir);
-                AsmSection funcSection = genFunction((IRFunction) ir);
+                prepareFunctionData(funcSymbol, irFunction, holder);
+
+                AsmSection funcSection = genFunction(irFunction,holder);
+
+                AsmSection dataSection = genFunctionData(funcSymbol, irFunction,holder);
 
                 funcSection.getText(builder);
                 dataSection.getText(builder);
@@ -42,18 +48,20 @@ public class AsmGen {
         return builder.toString();
     }
 
-    public AsmSection genFunction(IRFunction irFunction) {
+    public AsmSection genFunction(IRFunction irFunction,FunctionDataHolder holder) {
         FuncSymbol funcSymbol = irFunction.funcSymbol;
         prepareInformation(funcSymbol,irFunction);
+
         AsmBuilder asmBuilder = new AsmBuilder(funcSymbol.getAsmLabel());
 
         List<IRBlock> irBlocks = divideIntoBlock(irFunction);
 
         RegGetter regGetter = new RegGetterImpl(irBlocks);
-        // todo 汇编代码生成
 
+        // 如果mov的立即数不是imm12，则替换成ldr,改为从内存中加载
+        asmBuilder.hookMovIfNotImm12(holder);
         for (IRBlock irBlock : irBlocks) {
-            AsmConvertOrganizer.process(asmBuilder,regGetter,funcSymbol, irBlock);
+            AsmConvertOrganizer.process(asmBuilder,regGetter,funcSymbol,holder, irBlock);
         }
 
         AsmSection midSection = asmBuilder.startNew();
@@ -130,12 +138,8 @@ public class AsmGen {
         funcSymbol.setStackFrameSize(frameSize);
     }
 
-    public AsmSection genFunctionData(FuncSymbol funcSymbol,IRFunction irFunction)
+    public void prepareFunctionData(FuncSymbol funcSymbol,IRFunction irFunction,FunctionDataHolder holder)
     {
-        AsmBuilder builder = new AsmBuilder(AsmUtil.getFuncDataLabel(funcSymbol));
-        builder.align(2);
-        builder.label();
-        int indexInFunc = 0;
         HashSet<ValueSymbol> usedSymbol = new HashSet<>();
         for (InterRepresent ir : irFunction.flatIR()) {
             if(ir instanceof LSRepresent)
@@ -145,27 +149,62 @@ public class AsmGen {
             {
                 usedSymbol.add(((LAddrRepresent) ir).valueSymbol);
             }
-            /*for (AddressRWInfo addressRWInfo : ir.getAllAddressRWInfo()) {
-
-                if(addressRWInfo.isWrite)
-                    continue;
-                if(!addressRWInfo.address.isData)
-                    continue;
-
-                int  num = addressRWInfo.address.item;
-                if (!AsmUtil.imm8m(num)) { //不是imm8m
-                    System.err.println(num);
-                }
-            }*/
-            /*if(ir instanceof BinocularRepre &&
-                ((BinocularRepre) ir).OP== BinocularRepre.Opcodes.MOD)
-            {
-                builder.word(ModNum.instance.initValues[0]);
-                ModNum.instance.setIndexInFunctionData(indexInFunc++,funcSymbol);
-            }*/
         }
 
         for (ValueSymbol symbol : symbolTableHost.getGlobalSymbolTable().getAllSymbol()) {
+            if(!usedSymbol.contains(symbol))
+                continue;
+
+            if(symbol instanceof HasInitSymbol)
+            {
+                HasInitSymbol init = (HasInitSymbol) symbol;
+                holder.addData(init);
+            }
+        }
+
+        for (SymbolTable table : symbolTableHost.symbolTableMap.values()) {
+            SymbolDomain domain = table.getDomain();
+
+            if(funcSymbol!=domain.getFunc())
+                continue;
+
+            for (ValueSymbol symbol : table.getAllSymbol()) {
+                holder.addData(symbol);
+            }
+        }
+    }
+
+    public AsmSection genFunctionData(FuncSymbol funcSymbol,IRFunction irFunction,FunctionDataHolder holder)
+    {
+        AsmBuilder builder = new AsmBuilder(AsmUtil.getFuncDataLabel(funcSymbol));
+        builder.align(2);
+        builder.label();
+        int indexInFunc = 0;
+        for (Map.Entry<FunctionDataHolder.FuncData, Integer> dataAndIndex : holder.getDataAndIndex()) {
+            int index = dataAndIndex.getValue();
+            if (dataAndIndex.getKey() instanceof FunctionDataHolder.SymbolFuncData) {
+                ValueSymbol symbol = ((FunctionDataHolder.SymbolFuncData) dataAndIndex.getKey()).symbol;
+                if (symbol.isGlobalSymbol()) {
+                    if(symbol instanceof HasInitSymbol)
+                    {
+                        HasInitSymbol init = (HasInitSymbol) symbol;
+                        builder.word(init.asmDataLabel);
+                    }
+                }else{
+                    if (symbol instanceof HasInitSymbol) {
+                        HasInitSymbol varSymbol = (HasInitSymbol) symbol;
+                        if(AsmUtil.isNeedInitInDataSection(varSymbol))
+                        {
+                            builder.word(varSymbol.asmDataLabel);
+                        }else if(varSymbol.initValues!=null && varSymbol.initValues.length>0){
+                            builder.word(varSymbol.initValues[0]);
+                        }
+                    }
+                }
+            }
+        }
+
+        /*for (ValueSymbol symbol : symbolTableHost.getGlobalSymbolTable().getAllSymbol()) {
             if(!usedSymbol.contains(symbol))
                 continue;
 
@@ -200,7 +239,7 @@ public class AsmGen {
 
                 }
             }
-        }
+        }*/
 
         return builder.getSection();
     }

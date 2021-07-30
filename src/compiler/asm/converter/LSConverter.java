@@ -12,7 +12,7 @@ public abstract class LSConverter extends AsmConverter {
 
 
     public int process(AsmBuilder.Mem op, AsmBuilder builder, RegGetter regGetter, LSRepresent ir,
-                       FuncSymbol funcSymbol,Reg rd) {
+                       FuncSymbol funcSymbol,FunctionDataHolder data,Reg rd) {
         ValueSymbol valueSymbol = ir.valueSymbol;
 
         if(!(valueSymbol instanceof ParamSymbol) || !valueSymbol.isArray())
@@ -20,9 +20,13 @@ public abstract class LSConverter extends AsmConverter {
             Reg baseAddrReg;
             if(valueSymbol.isGlobalSymbol()) //是全局变量
             {
-                int offsetInFuncData = valueSymbol.getIndexInFunctionData(funcSymbol)* ConstDef.WORD_SIZE;
+                /*int offsetInFuncData = valueSymbol.getIndexInFunctionData(funcSymbol)* ConstDef.WORD_SIZE;
                 baseAddrReg = regGetter.getTmpRegister();
-                builder.ldr(baseAddrReg, AsmUtil.getFuncDataLabel(funcSymbol), offsetInFuncData);
+                builder.ldr(baseAddrReg, AsmUtil.getFuncDataLabel(funcSymbol), offsetInFuncData);*/
+
+                baseAddrReg = regGetter.getTmpRegister();
+                data.loadFromFuncData(builder,valueSymbol,baseAddrReg);
+
                 if(ir.offset==null || ir.offset.isData)
                 {
                     int offset = 0;

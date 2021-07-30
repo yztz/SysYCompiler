@@ -16,7 +16,7 @@ public class SaveConverter extends LSConverter {
     }
 
     @Override
-    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
+    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         SaveRepresent saveIR = (SaveRepresent)ir;
 
         Reg rd;
@@ -28,6 +28,6 @@ public class SaveConverter extends LSConverter {
             rd = regGetter.getReg(ir, saveIR.target);
         }
 
-        return super.process(AsmBuilder.Mem.STR, builder, regGetter, (LSRepresent) ir,funcSymbol,rd);
+        return super.process(AsmBuilder.Mem.STR, builder, regGetter, (LSRepresent) ir,funcSymbol,dataHolder,rd);
     }
 }

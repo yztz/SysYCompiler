@@ -1,6 +1,7 @@
 package compiler.asm.converter;
 
 import compiler.asm.AsmBuilder;
+import compiler.asm.FunctionDataHolder;
 import compiler.asm.Reg;
 import compiler.asm.RegGetter;
 import compiler.asm.operand.RegOperand;
@@ -18,7 +19,7 @@ public class UnaryConverter extends AsmConverter{
     }
 
     @Override
-    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
+    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         UnaryRepre uIR = (UnaryRepre) ir;
         if (uIR.source.isData) { //是立即数，在IR生成阶段这个应该就被处理掉了
             int result = uIR.source.item;

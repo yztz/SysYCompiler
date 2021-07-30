@@ -1,6 +1,7 @@
 package compiler.asm.converter;
 
 import compiler.asm.AsmBuilder;
+import compiler.asm.FunctionDataHolder;
 import compiler.asm.RegGetter;
 import compiler.asm.Regs;
 import compiler.genir.code.InterRepresent;
@@ -17,7 +18,7 @@ public class ReturnConverter extends AsmConverter{
     }
 
     @Override
-    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
+    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         ReturnRepresent retIr = (ReturnRepresent) ir;
         if (retIr.returnData != null) {
             if (retIr.returnData.isData) {

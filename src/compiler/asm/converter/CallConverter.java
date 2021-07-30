@@ -1,9 +1,6 @@
 package compiler.asm.converter;
 
-import compiler.asm.AsmBuilder;
-import compiler.asm.Reg;
-import compiler.asm.RegGetter;
-import compiler.asm.Regs;
+import compiler.asm.*;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.CallRepresent;
 import compiler.genir.code.InterRepresent;
@@ -19,7 +16,7 @@ public class CallConverter extends AsmConverter{
     }
 
     @Override
-    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
+    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         CallRepresent callIr = (CallRepresent) ir;
         AbstractFuncSymbol targetFun = callIr.funcSymbol;
 

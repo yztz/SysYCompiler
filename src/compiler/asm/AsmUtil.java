@@ -5,6 +5,8 @@ import compiler.genir.code.*;
 import compiler.symboltable.*;
 import compiler.symboltable.function.FuncSymbol;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class AsmUtil {
@@ -125,8 +127,43 @@ public class AsmUtil {
         return false;
     }
 
-    public static int[] decompositionToImm12(int num)
+    public static boolean imm12(int x)
     {
-        return new int[0];
+        return (x&0xfffff000) == 0;
+    }
+
+    public static void dealIfNotImm12(int num, Reg rd, AsmBuilder builder, FunctionDataHolder dataHolder)
+    {
+        if(!imm12(num))
+        {
+            dataHolder.addAndLoadFromFuncData(builder,num,rd);
+        }
+    }
+
+
+    /**
+     * 别用，这是有问题的
+     */
+    public static List<Integer> decompositionToImm12(int num)
+    {
+        List<Integer> result = new ArrayList<>();
+        int remain = num;
+        if(num>0)
+        {
+            while ((remain & 0xfffff000) !=0)
+            {
+                remain-=0x00000fff;
+                result.add(0x00000fff);
+            }
+            result.add(remain);
+        }else{
+            while ((remain & 0xfffff000) !=0)
+            {
+                remain+=0x00000fff;
+                result.add(0x00000fff);
+            }
+            result.add(remain);
+        }
+        return result;
     }
 }

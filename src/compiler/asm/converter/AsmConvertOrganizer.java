@@ -1,6 +1,7 @@
 package compiler.asm.converter;
 
 import compiler.asm.AsmBuilder;
+import compiler.asm.FunctionDataHolder;
 import compiler.asm.RegGetter;
 import compiler.genir.IRBlock;
 import compiler.genir.code.InterRepresent;
@@ -28,7 +29,7 @@ public class AsmConvertOrganizer {
         allConverter.add(new UnaryConverter());
     }
 
-    public static void process(AsmBuilder builder, RegGetter regGetter, FuncSymbol funcSymbol, IRBlock irBlock)
+    public static void process(AsmBuilder builder, RegGetter regGetter, FuncSymbol funcSymbol,FunctionDataHolder holder, IRBlock irBlock)
     {
         List<InterRepresent> flatIRList = irBlock.flatIR();
         for (int j = 0; j < flatIRList.size(); j++) {
@@ -39,7 +40,7 @@ public class AsmConvertOrganizer {
                 if (ir.hasLabel()) {
                     builder.label(ir.getLabel());
                 }
-                j+=converter.process(builder, regGetter, ir, flatIRList, j, funcSymbol)-1;
+                j+=converter.process(builder, regGetter, ir, flatIRList, j, funcSymbol,holder )-1;
                 regGetter.stepToNextIR();
                 //builder.commit(ir.toString());
                 break;

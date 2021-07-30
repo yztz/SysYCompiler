@@ -13,7 +13,7 @@ public abstract class ValueSymbol {
     protected int byteSize = 0;
     public boolean isGlobal = false;
 
-    private Map<FuncSymbol,Integer> indexInFuncDataMap = new HashMap<>();
+    //private Map<FuncSymbol,Integer> indexInFuncDataMap = new HashMap<>();
     public ValueSymbol(Token symbolToken) {
         this.symbolToken = symbolToken;
         dimensions=new int[]{1};
@@ -32,7 +32,7 @@ public abstract class ValueSymbol {
         this.isArray = isArray;
     }
 
-    public void setIndexInFunctionData(int index,FuncSymbol funcSymbol)
+/*    public void setIndexInFunctionData(int index,FuncSymbol funcSymbol)
     {
         indexInFuncDataMap.put(funcSymbol,index);
     }
@@ -40,7 +40,7 @@ public abstract class ValueSymbol {
     public int getIndexInFunctionData(FuncSymbol funcSymbol)
     {
         return indexInFuncDataMap.get(funcSymbol);
-    }
+    }*/
 
     /**
      * 展开后的一维长度

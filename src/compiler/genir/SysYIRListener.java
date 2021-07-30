@@ -326,7 +326,8 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitSemiStat(SysYParser.SemiStatContext ctx) {
-        ctx.setStartStmt(ctx.exp().startStmt);
+        if(ctx.exp()!=null)
+            ctx.setStartStmt(ctx.exp().startStmt);
     }
 
     @Override

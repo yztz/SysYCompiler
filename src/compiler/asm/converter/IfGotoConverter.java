@@ -1,6 +1,7 @@
 package compiler.asm.converter;
 
 import compiler.asm.AsmBuilder;
+import compiler.asm.FunctionDataHolder;
 import compiler.asm.Reg;
 import compiler.asm.RegGetter;
 import compiler.genir.code.IfGotoRepresent;
@@ -17,7 +18,7 @@ public class IfGotoConverter extends AsmConverter{
     }
 
     @Override
-    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
+    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         IfGotoRepresent ifIr = (IfGotoRepresent) ir;
 
         AsmBuilder.CondB cond = null;

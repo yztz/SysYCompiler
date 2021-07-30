@@ -17,11 +17,11 @@ public class InitVarConverter extends AsmConverter{
     }
 
     @Override
-    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol) {
+    public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         InitVarRepresent initIR = (InitVarRepresent) ir;
         VarSymbol varSymbol = initIR.varSymbol;
 
-        int offsetInFuncData = varSymbol.getIndexInFunctionData(funcSymbol)* ConstDef.WORD_SIZE;
+        int offsetInFuncData = dataHolder.getIndexInFuncData(varSymbol)* ConstDef.WORD_SIZE;
         String funcDataLabel = AsmUtil.getFuncDataLabel(funcSymbol);
 
         if(AsmUtil.isNeedInitInDataSection(varSymbol))//数据在数据区,funcData里保存的是地址
