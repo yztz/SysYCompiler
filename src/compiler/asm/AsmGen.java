@@ -168,7 +168,10 @@ public class AsmGen {
                 continue;
 
             for (ValueSymbol symbol : table.getAllSymbol()) {
-                holder.addData(symbol);
+                if(symbol instanceof HasInitSymbol)
+                {
+                    holder.addData(symbol);
+                }
             }
         }
     }
@@ -187,6 +190,8 @@ public class AsmGen {
                     {
                         HasInitSymbol init = (HasInitSymbol) symbol;
                         builder.word(init.asmDataLabel);
+                    }else{
+                        builder.space(ConstDef.WORD_SIZE);
                     }
                 }else{
                     if (symbol instanceof HasInitSymbol) {
@@ -196,13 +201,19 @@ public class AsmGen {
                             builder.word(varSymbol.asmDataLabel);
                         }else if(varSymbol.initValues!=null && varSymbol.initValues.length>0){
                             builder.word(varSymbol.initValues[0]);
+                        }else{
+                            builder.space(ConstDef.WORD_SIZE);
                         }
+                    }else{
+                        builder.space(ConstDef.WORD_SIZE);
                     }
                 }
             }else if(data instanceof FunctionDataHolder.ImmFuncData)
             {
                 FunctionDataHolder.ImmFuncData dataItem = (FunctionDataHolder.ImmFuncData) data;
                 builder.word(dataItem.imm32);
+            }else{
+                builder.space(ConstDef.WORD_SIZE);
             }
         }
 
