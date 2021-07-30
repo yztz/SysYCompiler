@@ -986,6 +986,9 @@ public class SysYIRListener implements SysYListener {
                                                                  ctx.eqExp().address, new AddressOrData(true, 0));
                     _currentCollection.addCode(pair.get(0));
                     _currentCollection.addCode(pair.get(1));
+                    if (ctx.eqExp().startStmt==null) {
+                        ctx.eqExp().startStmt= new InterRepresentHolder(pair.get(0));
+                    }
                 }
                 if(ctx.lAndExp().address.isData)
                 {
@@ -1001,7 +1004,7 @@ public class SysYIRListener implements SysYListener {
                         ctx.falseList.add(gotoIR);
                     }else{
                         // 0 就什么都不做，没有影响
-                        ctx.startStmt = ctx.lAndExp().startStmt;
+                        ctx.startStmt = ctx.eqExp().startStmt;
                     }
                 }else{
                     System.err.println("lOrExp,表达式不是常数，但找不到对应的IR");
@@ -1129,7 +1132,7 @@ public class SysYIRListener implements SysYListener {
 
                     ctx.trueList = ctx.lAndExp().trueList;
                     ctx.falseList = ctx.lAndExp().falseList;
-                    if(ctx.address.item!=0) //非零，恒为true, 直接添加到trueList
+                    if(ctx.lOrExp().address.item!=0) //非零，恒为true, 直接添加到trueList
                     {
                         GotoRepresent gotoIR = new GotoRepresent(null); //无条件跳转了
                         _currentFunction.addCode(gotoIR);
