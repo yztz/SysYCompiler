@@ -1,39 +1,13 @@
-int func()
-{
 
+int longlong()
+{
+    int a[100][100];
+    int b[200][200];
+    b[100][100]=66;
+    return b[100][100];
 }
 
 int main()
 {
-    int a;
-    if(a);
-
-    while(a);
-
-    if(a)
-    {
-
-    }else{
-
-    }
-
-    if(a)
-    {
-        putint(123);
-    }else{
-
-    }
-
-    if(a)
-    {
-
-    }
-    putint(321);
-
-    while(a)
-    {
-
-    }
-
-    return a[2];
+    return longlong();
 }

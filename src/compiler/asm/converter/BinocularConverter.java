@@ -43,7 +43,7 @@ public class BinocularConverter extends AsmConverter{
             }
             Reg reg = regGetter.getReg(ir, bIR.target);
 
-            AsmUtil.dealIfNotImm12(result,reg,builder,dataHolder);
+            //AsmUtil.dealIfNotImm12(result,reg,builder,dataHolder);
 
             builder.mov(reg,result);
             return 1;
@@ -63,14 +63,14 @@ public class BinocularConverter extends AsmConverter{
             }else if(!bIR.sourceFirst.isData){
                 Reg rn = regGetter.getReg(ir,bIR.sourceFirst);
 
-                if(AsmUtil.imm12(bIR.sourceSecond.item)) //是imm12
-                {
+                /*if(AsmUtil.imm12(bIR.sourceSecond.item)) //是imm12
+                {*/
                     if (bIR.OP== BinocularRepre.Opcodes.ADD) {
                         builder.add(reg, rn, bIR.sourceSecond.item);
                     }else{
                         builder.sub(reg, rn, bIR.sourceSecond.item);
                     }
-                }else{
+                /*}else{
                     Reg tmp = regGetter.getTmpRegister();
                     dataHolder.addAndLoadFromFuncData(builder,bIR.sourceSecond.item,tmp);
                     if (bIR.OP== BinocularRepre.Opcodes.ADD) {
@@ -78,29 +78,29 @@ public class BinocularConverter extends AsmConverter{
                     }else{
                         builder.sub(reg, rn, tmp);
                     }
-                }
+                }*/
 
             }else{
                 Reg rn = regGetter.getReg(ir,bIR.sourceSecond);
 
                 if (bIR.OP== BinocularRepre.Opcodes.ADD) {
-                    if(AsmUtil.imm12(bIR.sourceFirst.item))
-                    {
+                    /*if(AsmUtil.imm12(bIR.sourceFirst.item))
+                    {*/
                         builder.add(reg, rn, bIR.sourceFirst.item);
-                    }else{
+                    /*}else{
                         Reg tmp = regGetter.getTmpRegister();
                         dataHolder.loadFromFuncData(builder,bIR.sourceFirst.item,tmp);
                         builder.add(reg, rn, tmp);
-                    }
+                    }*/
 
                 }else{
-                    if(AsmUtil.imm8m(bIR.sourceFirst.item))
-                    {
+                    /*if(AsmUtil.imm8m(bIR.sourceFirst.item))
+                    {*/
                         builder.regRegOperand(AsmBuilder.RegRegOperandOP.RSB,
                                               reg,
                                               rn,
                                               new ImmOperand(bIR.sourceFirst.item));
-                    }else{
+                    /*}else{
                         Reg tmp = regGetter.getTmpRegister();
                         dataHolder.loadFromFuncData(builder,bIR.sourceFirst.item,tmp);
                         builder.regRegOperand(AsmBuilder.RegRegOperandOP.RSB,
@@ -108,7 +108,7 @@ public class BinocularConverter extends AsmConverter{
                                               rn,
                                               new RegOperand(tmp));
 
-                    }
+                    }*/
 
                 }
             }

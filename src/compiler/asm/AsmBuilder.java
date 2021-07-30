@@ -1,10 +1,6 @@
 package compiler.asm;
 
-import compiler.Util;
-import compiler.asm.operand.ImmOperand;
-import compiler.asm.operand.Operand;
-import compiler.asm.operand.RegOperand;
-import compiler.asm.operand.ShiftOp;
+import compiler.asm.operand.*;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -26,12 +22,18 @@ public class AsmBuilder {
         this.label = label;
         building = new AsmSection();
     }
-    private boolean _hookMoveIfNotImm12 = false;
+    private boolean _hookIfNotImmXX = false;
     private FunctionDataHolder dataHolder;
-    public void hookMovIfNotImm12(FunctionDataHolder dataHolder)
+    private RegGetter regGetter;
+
+    /**
+     * 如果传入的立即数不是imm8m和imm12，builder会自动进行一些处理，确保生成的程序正确
+     */
+    public void hookIfNotImmXX(FunctionDataHolder dataHolder, RegGetter regGetter)
     {
-        this._hookMoveIfNotImm12 = true;
+        this._hookIfNotImmXX = true;
         this.dataHolder = dataHolder;
+        this.regGetter = regGetter;
     }
     public static String toImm(int imm) {
         return String.format("#%d", imm);
@@ -184,7 +186,42 @@ public class AsmBuilder {
         return addInstruction(op.getText(), rd.getText(), rn.getText(), rm.getText());
     }
 
+    /**
+     * 检查操作数是否合法，比如是否符合imm8m，如果不合法，会自动进行一些处理，可能会插入一些语句
+     * @return 修复后的操作数
+     */
+    private Operand fixOperand(Operand operand)
+    {
+        if(operand instanceof RegShiftImmOperand)
+        {
+            RegShiftImmOperand rsi = (RegShiftImmOperand) operand;
+            if(!AsmUtil.imm8m(rsi.immData))
+            {
+                Reg tmp = regGetter.getTmpRegister();
+                ldr(tmp,rsi.immData);
+                //dataHolder.addAndLoadFromFuncData(this,rsi.immData,tmp);
+                return new RegShiftRegOperand(rsi.op,rsi.regM,tmp);
+            }
+        }
+
+        if(operand instanceof ImmOperand)
+        {
+            ImmOperand rsi = (ImmOperand) operand;
+            if(!AsmUtil.imm8m(rsi.imm8m))
+            {
+                Reg tmp = regGetter.getTmpRegister();
+                ldr(tmp,rsi.imm8m);
+                //dataHolder.addAndLoadFromFuncData(this,rsi.imm8m,tmp);
+                return new RegOperand(tmp);
+            }
+        }
+
+        return operand;
+    }
+
     public AsmBuilder regOperand(RegOperandOP op, Reg rd, Operand operand) {
+        if(_hookIfNotImmXX)
+            operand = fixOperand(operand);
         return addInstruction(op.getText(), rd.getText(), operand.getText());
     }
 
@@ -195,6 +232,8 @@ public class AsmBuilder {
     // --------------------跳转指令-------------------------------------
 
     public AsmBuilder regRegOperand(RegRegOperandOP op, Reg rd, Reg rn, Operand operand) {
+        if(_hookIfNotImmXX)
+            operand = fixOperand(operand);
         return addInstruction(op.getText(), rd.getText(), rn.getText(), operand.getText());
     }
 
@@ -226,6 +265,16 @@ public class AsmBuilder {
     // -------------------- 内存读写-----------------------------------
     public AsmBuilder mem(Mem op, Size size, Reg rd, Reg rn, int offset, boolean saveOffset, boolean postOffset) {
         String s = size == null ? "" : size.getText();
+
+        if(_hookIfNotImmXX)
+        {
+            if(offset>4095 || offset< -4095)
+            {
+                Reg tmp = regGetter.getTmpRegister();
+                ldr(tmp,offset);
+                return mem(op,size,rd,rn,tmp,false,ShiftOp.LSL,0,saveOffset,postOffset);
+            }
+        }
 
         if (postOffset) //操作完成后，变址
         {
@@ -267,6 +316,14 @@ public class AsmBuilder {
                                       offset > 0 ?
                                               String.format("%s+%d", label, offset) :
                                               String.format("%s%d", label, offset));
+    }
+
+    /**
+     * ldr伪指令,如果可以直接用mov，就用mov，不行的话就把imm放进常量池里，通过ldr加载
+     */
+    public AsmBuilder ldr(Reg rd,int imm)
+    {
+        return addInstruction("ldr",rd.getText(),String.format("=%d",imm));
     }
 
     public AsmBuilder sdr(Reg rd,Reg rn,int offset)
@@ -317,11 +374,12 @@ public class AsmBuilder {
     }
 
     public AsmBuilder mov(Reg rd, int imm12) {
-        if(_hookMoveIfNotImm12)
+        if(_hookIfNotImmXX)
         {
             if(!AsmUtil.imm12(imm12))
             {
-                dataHolder.addAndLoadFromFuncData(this,imm12,rd);
+                ldr(rd,imm12);
+                //dataHolder.addAndLoadFromFuncData(this,imm12,rd);
                 return this;
             }
         }
@@ -337,10 +395,21 @@ public class AsmBuilder {
     }
 
     public AsmBuilder add(Reg rd, Reg rn, int imm12) {
+        if(_hookIfNotImmXX)
+        {
+            if(!AsmUtil.imm12(imm12))
+            {
+                Reg tmp = regGetter.getTmpRegister();
+                ldr(tmp,imm12);
+                //dataHolder.addAndLoadFromFuncData(this,imm12,tmp);
+                return add(rd,rn,tmp);
+            }
+        }
         return addInstruction(RegRegOperandOP.ADD.getText(), rd.getText(), rn.getText(), toImm(imm12));
     }
 
     public AsmBuilder sub(Reg rd, Reg rn, Operand operand) {
+
         return regRegOperand(RegRegOperandOP.SUB, rd, rn, operand);
     }
 
@@ -349,6 +418,16 @@ public class AsmBuilder {
     }
 
     public AsmBuilder sub(Reg rd, Reg rn, int imm12) {
+        if(_hookIfNotImmXX)
+        {
+            if(!AsmUtil.imm12(imm12))
+            {
+                Reg tmp = regGetter.getTmpRegister();
+                ldr(tmp,imm12);
+                //dataHolder.addAndLoadFromFuncData(this,imm12,tmp);
+                return sub(rd,rn,tmp);
+            }
+        }
         return addInstruction(RegRegOperandOP.SUB.getText(), rd.getText(), rn.getText(), toImm(imm12));
     }
 

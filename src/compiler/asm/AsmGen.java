@@ -2,7 +2,6 @@ package compiler.asm;
 
 import compiler.ConstDef;
 import compiler.asm.converter.AsmConvertOrganizer;
-import compiler.asm.converter.CallConverter;
 import compiler.genir.IRCollection;
 import compiler.genir.IRBlock;
 import compiler.genir.IRFunction;
@@ -59,7 +58,7 @@ public class AsmGen {
         RegGetter regGetter = new RegGetterImpl(irBlocks);
 
         // 如果mov的立即数不是imm12，则替换成ldr,改为从内存中加载
-        asmBuilder.hookMovIfNotImm12(holder);
+        asmBuilder.hookIfNotImmXX(holder, regGetter);
         for (IRBlock irBlock : irBlocks) {
             AsmConvertOrganizer.process(asmBuilder,regGetter,funcSymbol,holder, irBlock);
         }
@@ -201,6 +200,10 @@ public class AsmGen {
                         }
                     }
                 }
+            }else if(dataAndIndex.getKey() instanceof FunctionDataHolder.ImmFuncData)
+            {
+                FunctionDataHolder.ImmFuncData dataItem = (FunctionDataHolder.ImmFuncData) dataAndIndex.getKey();
+                builder.word(dataItem.imm32);
             }
         }
 
