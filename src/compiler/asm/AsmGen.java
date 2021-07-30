@@ -179,10 +179,9 @@ public class AsmGen {
         builder.align(2);
         builder.label();
         int indexInFunc = 0;
-        for (Map.Entry<FunctionDataHolder.FuncData, Integer> dataAndIndex : holder.getDataAndIndex()) {
-            int index = dataAndIndex.getValue();
-            if (dataAndIndex.getKey() instanceof FunctionDataHolder.SymbolFuncData) {
-                ValueSymbol symbol = ((FunctionDataHolder.SymbolFuncData) dataAndIndex.getKey()).symbol;
+        for (FunctionDataHolder.FuncData data : holder.getAllFuncData()) {
+            if (data instanceof FunctionDataHolder.SymbolFuncData) {
+                ValueSymbol symbol = ((FunctionDataHolder.SymbolFuncData) data).symbol;
                 if (symbol.isGlobalSymbol()) {
                     if(symbol instanceof HasInitSymbol)
                     {
@@ -200,9 +199,9 @@ public class AsmGen {
                         }
                     }
                 }
-            }else if(dataAndIndex.getKey() instanceof FunctionDataHolder.ImmFuncData)
+            }else if(data instanceof FunctionDataHolder.ImmFuncData)
             {
-                FunctionDataHolder.ImmFuncData dataItem = (FunctionDataHolder.ImmFuncData) dataAndIndex.getKey();
+                FunctionDataHolder.ImmFuncData dataItem = (FunctionDataHolder.ImmFuncData) data;
                 builder.word(dataItem.imm32);
             }
         }

@@ -17,24 +17,37 @@ public class FunctionDataHolder {
 
     // 只能加不能删
     private Map<FuncData,Integer> datas=new HashMap<>();
+    private List<FuncData> dataList = new ArrayList<>();
 
     int currentIndex = 0;
     public void addData(ValueSymbol symbol)
     {
-        datas.put(new SymbolFuncData(symbol),currentIndex++);
+        SymbolFuncData symbolFuncData = new SymbolFuncData(symbol);
+        dataList.add(currentIndex,symbolFuncData);
+        datas.put(symbolFuncData,currentIndex++);
     }
 
     public void addData(int imm)
     {
-        datas.put(new ImmFuncData(imm),currentIndex++);
-
+        ImmFuncData immFuncData = new ImmFuncData(imm);
+        dataList.add(currentIndex,immFuncData);
+        datas.put(immFuncData,currentIndex++);
     }
 
-    public Set<Map.Entry<FuncData,Integer>> getDataAndIndex()
+    /*public Set<Map.Entry<FuncData,Integer>> getDataAndIndex()
     {
         return datas.entrySet();
+    }*/
+
+    public List<FuncData> getAllFuncData()
+    {
+        return dataList;
     }
 
+    public int getDataItemNum()
+    {
+        return datas.size();
+    }
 
 
     public void addAndLoadFromFuncData(AsmBuilder builder,int num,Reg rd)
