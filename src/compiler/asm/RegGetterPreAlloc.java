@@ -13,7 +13,6 @@ public class RegGetterPreAlloc extends RegGetter{
         return null;
     }
 
-    @Override
     public void setReg(InterRepresent ir, AddressOrData address, Reg register) {
 
     }
