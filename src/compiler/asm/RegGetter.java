@@ -13,6 +13,7 @@ public abstract class RegGetter {
      //public abstract void setReg(InterRepresent ir,AddressOrData address,Reg register);
      public abstract Map<AddressRWInfo, Reg> getMapOfIR(InterRepresent ir);
      protected abstract boolean isFreeReg(Reg reg);
+     protected abstract boolean isFreeRegIgnoreCurrentIR(Reg reg);
      public abstract void stepToNextIR();
      /**
       * 获取空闲的寄存器
@@ -21,7 +22,7 @@ public abstract class RegGetter {
      private Reg getFreeReg(int index) {
           int i = 0;
           for (Reg register : usableRegs) {
-               if (isFreeReg(register)){
+               if (isFreeRegIgnoreCurrentIR(register)){
                     if(i==index)
                          return register;
                     i++;
@@ -34,7 +35,7 @@ public abstract class RegGetter {
           return getFreeReg(0);
      }
 
-     private Reg[] usableRegs = {
+     protected Reg[] usableRegs = {
              Regs.R4,
              Regs.R5,
              Regs.R6,
@@ -59,7 +60,7 @@ public abstract class RegGetter {
      public Reg getTmpRegister(Function<Reg, Boolean> filter, int index) {
           int i = 0;
           for (Reg register : usableRegs) {
-               if (isFreeReg(register) & filter.apply(register)){
+               if (isFreeRegIgnoreCurrentIR(register) & filter.apply(register)){
                     if(i==index)
                          return register;
                     i++;
@@ -68,7 +69,7 @@ public abstract class RegGetter {
           return null;
      }
 
-     public List<Reg> getUsingRegister()
+     public List<Reg> getUsingReg()
      {
           List<Reg> regs = new ArrayList<>();
           for (int i = 0; i < usableRegs.length; i++) {
@@ -78,6 +79,12 @@ public abstract class RegGetter {
 
           return regs;
      }
+
+     /**
+      * 获取所有接下来还要使用的IR
+      */
+     public abstract List<Reg> getUsingRegNext();
+
      /**
       * 获取临时寄存器，保证在下条IR前释放
       */

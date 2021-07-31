@@ -63,7 +63,7 @@ public class CallConverter extends AsmConverter{
 
 
         List<Reg> usingRegister =
-                regGetter.getUsingRegister().stream().filter(r->{
+                regGetter.getUsingRegNext().stream().filter(r->{
                     int id = r.getId();
                     return id>3;
                 }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
@@ -77,16 +77,18 @@ public class CallConverter extends AsmConverter{
 
         builder.bl(targetFun instanceof FuncSymbol ?((FuncSymbol)targetFun).getAsmLabel():
                            targetFun.getFuncName());
-        if (callIr.returnResult != null) {
-            Reg result = regGetter.getReg(callIr,callIr.returnResult);
-            builder.mov(result,Regs.R0);
-            //regGetter.setReg(callIr,callIr.returnResult,Regs.R0);
-        }
+
         if(usingRegister.size()>0)
         {
             Reg tmp = regGetter.getTmpRegister();
             dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
             builder.ldm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
+        }
+
+        if (callIr.returnResult != null) {
+            Reg result = regGetter.getReg(callIr,callIr.returnResult);
+            builder.mov(result,Regs.R0);
+            //regGetter.setReg(callIr,callIr.returnResult,Regs.R0);
         }
 
         return 1;

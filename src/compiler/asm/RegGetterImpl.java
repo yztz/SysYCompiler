@@ -4,10 +4,7 @@ import compiler.genir.IRBlock;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.InterRepresent;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RegGetterImpl extends RegGetter {
     private final Map<Reg, AddressRWInfo> regDesc = new HashMap<>();
@@ -41,12 +38,16 @@ public class RegGetterImpl extends RegGetter {
             }
         }
     }
+
+    /**
+     * 这条IR结束后就要释放的
+     */
     HashSet<Reg> readyToReleaseReg = new HashSet<>();
+    /**
+     * 当前IR使用的
+     */
     HashSet<Reg> usingRegThisIR = new HashSet<>();
-    private void readyToRelease(Reg reg)
-    {
-        readyToReleaseReg.add(reg);
-    }
+
     public void stepToNextIR()
     {
         for (Reg reg : readyToReleaseReg) {
@@ -54,6 +55,21 @@ public class RegGetterImpl extends RegGetter {
         }
         readyToReleaseReg.clear();
         usingRegThisIR.clear();
+    }
+
+    /**
+     * 获取接下来还要继续使用的寄存器
+     */
+    @Override
+    public List<Reg> getUsingRegNext() {
+        List<Reg> regs=new ArrayList<>();
+        for (Reg reg : usableRegs) {
+            if(isFreeReg(reg) || readyToReleaseReg.contains(reg))
+                continue;
+            regs.add(reg);
+        }
+
+        return regs;
     }
 /*    private static final String[] GENERAL_REG = {"R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12",};
     private static final String[] SPECIAL_REG = {"R13", "R14", "R15",};*/
@@ -81,9 +97,12 @@ public class RegGetterImpl extends RegGetter {
             }
 
             if (null == ref.nextRef) {  // 不存在引用则释放reg
-                //readyToRelease(register);
+                readyToReleaseReg.add(register);
                 regDesc.put(register, null);
+            }else{
+                readyToReleaseReg.remove(register);
             }
+
             usingRegThisIR.add(register);
             return register;
         }
@@ -156,7 +175,13 @@ public class RegGetterImpl extends RegGetter {
 
 
 
-    protected boolean isFreeReg(Reg register) {
+    protected boolean isFreeReg(Reg register) { //todo 上下两个函数，名字反了
+        return (!regDesc.containsKey(register) || regDesc.get(register) == null)
+                /*&& !usingRegThisIR.contains(register)*/;
+    }
+
+    protected boolean isFreeRegIgnoreCurrentIR(Reg register)
+    {
         return (!regDesc.containsKey(register) || regDesc.get(register) == null)
                 && !usingRegThisIR.contains(register);
     }
