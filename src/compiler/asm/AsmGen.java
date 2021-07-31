@@ -301,6 +301,13 @@ public class AsmGen {
             }
         }
 
+        AsmBuilder builder=new AsmBuilder();
+        builder.align(2).label("reg_addr").word("reg");
+
+        builder.bss().align(2);
+        builder.label("reg");
+        builder.space(15*4);
+        sections.add(builder.getSection());
         return sections;
     }
 

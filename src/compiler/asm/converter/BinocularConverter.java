@@ -132,7 +132,9 @@ public class BinocularConverter extends AsmConverter{
                 builder.mov(Regs.R1,rn);
             }
             builder.bl("__aeabi_idiv");
-            regGetter.setReg(ir, bIR.target, Regs.R0);
+            Reg target = regGetter.getReg(ir, bIR.target);
+            builder.mov(target,Regs.R0);
+            //regGetter.setReg(ir, bIR.target, Regs.R0);
         }else if(bIR.OP== BinocularRepre.Opcodes.MOD)
         {
             //除法用__aeabi_idivmod
@@ -153,7 +155,9 @@ public class BinocularConverter extends AsmConverter{
                 builder.mov(Regs.R1,rn);
             }
             builder.bl("__aeabi_idivmod");
-            regGetter.setReg(ir, bIR.target, Regs.R1);
+            //regGetter.setReg(ir, bIR.target, Regs.R1);
+            Reg target = regGetter.getReg(ir, bIR.target);
+            builder.mov(target,Regs.R1);
         }
         else{
 

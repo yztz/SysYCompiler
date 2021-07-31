@@ -62,16 +62,31 @@ public class CallConverter extends AsmConverter{
         }
 
 
-        /*List<Reg> usingRegister =
-                regGetter.getUsingRegister().stream().sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
+        List<Reg> usingRegister =
+                regGetter.getUsingRegister().stream().filter(r->{
+                    int id = r.getId();
+                    return id>3;
+                }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
+
         if(usingRegister.size()>0)
-            builder.push(usingRegister,false);*/
+        {
+            Reg tmp = regGetter.getTmpRegister();
+            builder.ldr(tmp,"reg_addr",0);
+            builder.stm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
+        }
+
         builder.bl(targetFun instanceof FuncSymbol ?((FuncSymbol)targetFun).getAsmLabel():
                            targetFun.getFuncName());
-        /*if(usingRegister.size()>0)
-            builder.pop(usingRegister,false);*/
         if (callIr.returnResult != null) {
-            regGetter.setReg(callIr,callIr.returnResult,Regs.R0);
+            Reg result = regGetter.getReg(callIr,callIr.returnResult);
+            builder.mov(result,Regs.R0);
+            //regGetter.setReg(callIr,callIr.returnResult,Regs.R0);
+        }
+        if(usingRegister.size()>0)
+        {
+            Reg tmp = regGetter.getTmpRegister();
+            builder.ldr(tmp,"reg_addr",0);
+            builder.ldm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
         }
 
         return 1;

@@ -7,8 +7,10 @@ import compiler.genir.code.InterRepresent;
 import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.VarSymbol;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class InitVarConverter extends AsmConverter{
     @Override
@@ -44,9 +46,9 @@ public class InitVarConverter extends AsmConverter{
                 for (int i = 0; i < regs.length; i++) {
                     regs[i] = regGetter.getTmpRegister(i+1);
                 }
-                builder.ldm(AsmBuilder.LSAddressMode.NONE, addr, regs);
+                builder.ldm(AsmBuilder.LSAddressMode.NONE, addr, Arrays.stream(regs).collect(Collectors.toList()));
                 builder.sub(addr, Regs.FP, -AsmUtil.getSymbolOffsetFp(varSymbol));
-                builder.stm(AsmBuilder.LSAddressMode.NONE, addr , regs);
+                builder.stm(AsmBuilder.LSAddressMode.NONE, addr , Arrays.stream(regs).collect(Collectors.toList()));
             }
         }else{ //不是数组
             Reg tmp = regGetter.getTmpRegister();

@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 public abstract class RegGetter {
      public abstract Reg getReg(InterRepresent ir, AddressOrData address);
-     public abstract void setReg(InterRepresent ir,AddressOrData address,Reg register);
+     //public abstract void setReg(InterRepresent ir,AddressOrData address,Reg register);
      public abstract Map<AddressRWInfo, Reg> getMapOfIR(InterRepresent ir);
      protected abstract boolean isFreeReg(Reg reg);
      public abstract void stepToNextIR();

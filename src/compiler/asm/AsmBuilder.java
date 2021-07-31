@@ -3,7 +3,6 @@ package compiler.asm;
 import compiler.asm.operand.*;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -200,7 +199,7 @@ public class AsmBuilder {
             if(!AsmUtil.imm8m(rsi.immData))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                ldr(tmp,rsi.immData);
+                ldrEq(tmp, rsi.immData);
                 //dataHolder.addAndLoadFromFuncData(this,rsi.immData,tmp);
                 return new RegShiftRegOperand(rsi.op,rsi.regM,tmp);
             }
@@ -212,7 +211,7 @@ public class AsmBuilder {
             if(!AsmUtil.imm8m(rsi.imm8m))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                ldr(tmp,rsi.imm8m);
+                ldrEq(tmp, rsi.imm8m);
                 //dataHolder.addAndLoadFromFuncData(this,rsi.imm8m,tmp);
                 return new RegOperand(tmp);
             }
@@ -273,7 +272,7 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg tmp = regGetter.getTmpRegister();
-                ldr(tmp,offset);
+                ldrEq(tmp, offset);
                 return mem(op,size,rd,rn,tmp,false,ShiftOp.LSL,0,saveOffset,postOffset);
             }
         }
@@ -323,9 +322,14 @@ public class AsmBuilder {
     /**
      * ldr伪指令,如果可以直接用mov，就用mov，不行的话就把imm放进常量池里，通过ldr加载
      */
-    public AsmBuilder ldr(Reg rd,int imm)
+    public AsmBuilder ldrEq(Reg rd, int imm)
     {
         return addInstruction("ldr",rd.getText(),String.format("=%d",imm));
+    }
+
+    public AsmBuilder ldrEq(Reg rd,String label)
+    {
+        return addInstruction("ldr",rd.getText(),String.format("=%s",label));
     }
 
     public AsmBuilder sdr(Reg rd,Reg rn,int offset)
@@ -369,11 +373,11 @@ public class AsmBuilder {
         return addInstruction("pop", String.format("{%s}", regList));
     }
 
-    public AsmBuilder ldm(LSAddressMode mode, Reg rd, Reg[] regsTarget) {
+    public AsmBuilder ldm(LSAddressMode mode, Reg rd, List<Reg> regsTarget) {
         return lsm("ldm", mode, rd, regsTarget);
     }
 
-    public AsmBuilder stm(LSAddressMode mode, Reg rd, Reg[] regsTarget) {
+    public AsmBuilder stm(LSAddressMode mode, Reg rd, List<Reg> regsTarget) {
         return lsm("stm", mode, rd, regsTarget);
     }
 
@@ -392,7 +396,7 @@ public class AsmBuilder {
         {
             if(!AsmUtil.imm12(imm12))
             {
-                ldr(rd,imm12);
+                ldrEq(rd, imm12);
                 //dataHolder.addAndLoadFromFuncData(this,imm12,rd);
                 return this;
             }
@@ -414,7 +418,7 @@ public class AsmBuilder {
             if(!AsmUtil.imm12(imm12))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                ldr(tmp,imm12);
+                ldrEq(tmp, imm12);
                 //dataHolder.addAndLoadFromFuncData(this,imm12,tmp);
                 return add(rd,rn,tmp);
             }
@@ -437,7 +441,7 @@ public class AsmBuilder {
             if(!AsmUtil.imm12(imm12))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                ldr(tmp,imm12);
+                ldrEq(tmp, imm12);
                 //dataHolder.addAndLoadFromFuncData(this,imm12,tmp);
                 return sub(rd,rn,tmp);
             }
@@ -471,8 +475,8 @@ public class AsmBuilder {
     /**
      * @return
      */
-    private AsmBuilder lsm(String op, LSAddressMode mode, Reg rd, Reg[] regsTarget) {
-        String regList = Arrays.stream(regsTarget).map(Reg::getText).collect(Collectors.joining(","));
+    private AsmBuilder lsm(String op, LSAddressMode mode, Reg rd, List<Reg> regsTarget) {
+        String regList = regsTarget.stream().map(Reg::getText).collect(Collectors.joining(","));
         return addInstruction(String.format("%s%s", op, mode.getText()), rd.getText(), String.format("{%s}", regList));
     }
 

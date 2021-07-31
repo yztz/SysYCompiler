@@ -81,8 +81,8 @@ public class RegGetterImpl extends RegGetter {
             }
 
             if (null == ref.nextRef) {  // 不存在引用则释放reg
-                readyToRelease(register);
-                //regDesc.put(register, null);
+                //readyToRelease(register);
+                regDesc.put(register, null);
             }
             usingRegThisIR.add(register);
             return register;
@@ -91,8 +91,7 @@ public class RegGetterImpl extends RegGetter {
         return null;
     }
 
-    @Override
-    public void setReg(InterRepresent ir, AddressOrData address,Reg register) {
+    /*public void setReg(InterRepresent ir, AddressOrData address,Reg register) {
         Map<AddressRWInfo, Reference> refMap = ir.refMap;
         for (AddressRWInfo key : refMap.keySet()) {
             if(key.address!=address)
@@ -111,7 +110,7 @@ public class RegGetterImpl extends RegGetter {
                 readyToRelease(register);
             }
         }
-    }
+    }*/
 
     @Override
     public Map<AddressRWInfo, Reg> getMapOfIR(InterRepresent ir) {
