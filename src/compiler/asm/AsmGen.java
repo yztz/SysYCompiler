@@ -11,6 +11,7 @@ import compiler.symboltable.*;
 import compiler.symboltable.function.FuncSymbol;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AsmGen {
     SymbolTableHost symbolTableHost;
@@ -54,6 +55,7 @@ public class AsmGen {
         AsmBuilder asmBuilder = new AsmBuilder(funcSymbol.getAsmLabel());
 
         List<IRBlock> irBlocks = divideIntoBlock(irFunction);
+        optimizeIrOrder(irBlocks);
 
         RegGetter regGetter = new RegGetterImpl(irBlocks);
 
@@ -217,6 +219,7 @@ public class AsmGen {
         return builder.getSection();
     }
 
+
     public List<AsmSection> genStaticData() {
         List<AsmSection> sections = new ArrayList<>();
 
@@ -298,6 +301,45 @@ public class AsmGen {
         builder.size(label, varSymbol.getByteSize());
 
         sections.add(builder.getSection());
+    }
+
+
+    public void optimizeIrOrder(List<IRBlock> irBlocks)
+    {
+        for (IRBlock irBlock : irBlocks) {
+            List<InterRepresent> irs = irBlock.irs;
+            HashSet<InterRepresent> irHasMoved=new HashSet<>();
+            for (int i = 0; i < irs.size(); i++) {
+                InterRepresent ir = irs.get(i);
+
+                Collection<AddressRWInfo> allOutput = ir.getAllAddressRWInfo().stream().filter(
+                        info->info.isWrite
+                ).collect(Collectors.toList());
+                if(allOutput.size()==0)
+                    continue;
+
+                int j = i+1;
+                for(;j<irs.size();j++)
+                {
+                    InterRepresent irAfter = irs.get(j);
+                    Collection<AddressRWInfo> allUse = irAfter.getAllAddressRWInfo().stream().filter(
+                            info->!info.isWrite
+                    ).collect(Collectors.toList());
+                    if(allUse.size()==0)
+                        continue;
+                    if(allOutput.stream().anyMatch(allUse::contains))
+                    {
+                        break;
+                    }
+                }
+                if(j-i>1 && !irHasMoved.contains(ir))
+                {
+                    irHasMoved.add(ir);
+                    irBlock.moveDown(i, j-1);
+                    i--;
+                }
+            }
+        }
     }
 
     /**

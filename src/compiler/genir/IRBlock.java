@@ -25,6 +25,13 @@ public class IRBlock extends IRCollection {
 
     public List<InterRepresent> irs = new ArrayList<>();
 
+    public void moveDown(int originIndex, int targetIndex)
+    {
+        InterRepresent ir = irs.get(originIndex);
+        irs.remove(originIndex);
+        irs.add(targetIndex,ir);
+    }
+
     @Override
     public int getLineOccupied() {
         return irs.size();
