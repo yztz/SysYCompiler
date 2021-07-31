@@ -81,8 +81,8 @@ public class RegGetterImpl extends RegGetter {
             }
 
             if (null == ref.nextRef) {  // 不存在引用则释放reg
-                //readyToRelease(register);
-                regDesc.put(register, null);
+                readyToRelease(register);
+                //regDesc.put(register, null);
             }
             usingRegThisIR.add(register);
             return register;
