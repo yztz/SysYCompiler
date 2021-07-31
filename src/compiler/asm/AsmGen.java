@@ -309,8 +309,10 @@ public class AsmGen {
         for (IRBlock irBlock : irBlocks) {
             List<InterRepresent> irs = irBlock.irs;
             HashSet<InterRepresent> irHasMoved=new HashSet<>();
-            for (int i = 0; i < irs.size(); i++) {
+            for (int i = 1; i < irs.size(); i++) {
                 InterRepresent ir = irs.get(i);
+                if(!(ir instanceof LoadRepresent))
+                    continue;
 
                 Collection<AddressRWInfo> allOutput = ir.getAllAddressRWInfo().stream().filter(
                         info->info.isWrite
@@ -319,9 +321,15 @@ public class AsmGen {
                     continue;
 
                 int j = i+1;
+                boolean skip = false;
                 for(;j<irs.size();j++)
                 {
                     InterRepresent irAfter = irs.get(j);
+                    if(irAfter instanceof GotoRepresent)
+                    {
+                        skip = true;
+                        break;
+                    }
                     Collection<AddressRWInfo> allUse = irAfter.getAllAddressRWInfo().stream().filter(
                             info->!info.isWrite
                     ).collect(Collectors.toList());
@@ -332,6 +340,8 @@ public class AsmGen {
                         break;
                     }
                 }
+                if(skip)
+                    continue;
                 if(j-i>1 && !irHasMoved.contains(ir))
                 {
                     irHasMoved.add(ir);
