@@ -8,6 +8,7 @@ import compiler.symboltable.function.AbstractFuncSymbol;
 import compiler.symboltable.function.FuncSymbol;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CallConverter extends AsmConverter{
     @Override
@@ -61,13 +62,14 @@ public class CallConverter extends AsmConverter{
         }
 
 
-        List<Reg> usingRegister = regGetter.getUsingRegister();
+        /*List<Reg> usingRegister =
+                regGetter.getUsingRegister().stream().sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
         if(usingRegister.size()>0)
-            builder.push(usingRegister,false);
+            builder.push(usingRegister,false);*/
         builder.bl(targetFun instanceof FuncSymbol ?((FuncSymbol)targetFun).getAsmLabel():
                            targetFun.getFuncName());
-        if(usingRegister.size()>0)
-            builder.pop(usingRegister,false);
+        /*if(usingRegister.size()>0)
+            builder.pop(usingRegister,false);*/
         if (callIr.returnResult != null) {
             regGetter.setReg(callIr,callIr.returnResult,Regs.R0);
         }
