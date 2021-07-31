@@ -1,0 +1,23 @@
+int fun(int a,int b,int c,int d,int e,int f,int g,int h,int i,int j,int k,int l,int m,int n,int o,int p,
+int a1,int b1,int c1,int d1,int e1,int f1,int g1,int h1,int i1,int j1,int k1,int l1,int m1,int n1,int o1,int p1,
+int a2,int b2,int c12,int d12,int e12,int f12,int g12,int h12,int i12,int j12,int k12,int l12,int m12,int n12,int o12,int p12,
+int a3,int b3,int c2,int d2,int e2,int f2,int g2,int h2,int i2,int j2,int k2,int l2,int m2,int n2,int o2,int p2,
+int a4,int b4,int c3,int d3,int e3,int f3,int g3,int h3,int i3,int j3,int k3,int l3,int m3,int n3,int o3,int p3,
+int a5,int b5,int c4,int d4,int e4,int f4,int g4,int h4,int i4,int j4,int k4,int l4,int m4,int n4,int o4,int p4,
+int a6,int b6,int c5,int d5,int e5,int f5,int g5,int h5,int i5,int j5,int k5,int l5,int m5,int n5,int o5,int p5,
+int a7,int b7,int c6,int d6,int e6,int f6,int g6,int h6,int i6,int j6,int k6,int l6,int m6,int n6,int o6,int p6,
+int a8,int b8,int c7,int d7,int e7,int f7,int g7,int h7,int i7,int j7,int k7,int l7,int m7,int n7,int o7,int p7,
+int a9,int b9,int c8,int d8,int e8,int f8,int g8,int h8,int i8,int j8,int k8,int l8,int m8,int n8,int o8,int p8,
+int a10,int b0,int c9,int d9,int e9,int f9,int g9,int h9,int i9,int j9,int k9,int l9,int m9,int n9,int o9,int p9,
+int a11,int b10,int c10,int d10,int e10,int f10,int g10,int h10,int i10,int j10,int k10,int l10,int m10,int n10,int o10,int p10,
+int a12,int b11,int c11,int d11,int e11,int f11,int g11,int h11,int i11,int j11,int k11,int l11,int m11,int n11,int o11,int p11)
+{
+    return a11+b8+c3+d9+j8+e7+m12+o5+h5+f6;
+}
+
+int main() {
+
+
+
+  return 0;
+}

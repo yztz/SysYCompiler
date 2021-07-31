@@ -61,9 +61,13 @@ public class CallConverter extends AsmConverter{
         }
 
 
-
+        List<Reg> usingRegister = regGetter.getUsingRegister();
+        if(usingRegister.size()>0)
+            builder.push(usingRegister,false);
         builder.bl(targetFun instanceof FuncSymbol ?((FuncSymbol)targetFun).getAsmLabel():
                            targetFun.getFuncName());
+        if(usingRegister.size()>0)
+            builder.pop(usingRegister,false);
         if (callIr.returnResult != null) {
             regGetter.setReg(callIr,callIr.returnResult,Regs.R0);
         }

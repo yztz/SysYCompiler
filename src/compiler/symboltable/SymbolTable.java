@@ -2,6 +2,7 @@ package compiler.symboltable;
 
 
 import compiler.ConstDef;
+import compiler.genir.code.AddressOrData;
 import org.antlr.v4.runtime.Token;
 
 import java.util.Collection;
@@ -45,10 +46,10 @@ public class SymbolTable {
         appendOffset(symbol.length*ConstDef.INT_SIZE);
         return symbol;
     }
-    public void addParam(Token token)
+    public ParamSymbol addParam(Token token)
     {
         if(domain.getFunc()==null)
-            return;
+            return null;
 
         ParamSymbol symbol = new ParamSymbol(token);
         symbols.put(token.getText(), symbol);
@@ -56,12 +57,13 @@ public class SymbolTable {
         appendOffset(ConstDef.INT_SIZE); //参数都是4字节的（数组是指针）
 
         domain.getFunc().paramSymbols.add(symbol);
+        return symbol;
     }
 
-    public void addParamArray(Token token, int[] dim)
+    public ParamSymbol addParamArray(Token token, AddressOrData[] dim)
     {
         if(domain.getFunc()==null)
-            return;
+            return null;
 
         ParamSymbol symbol = new ParamSymbol(token,dim,true);
         symbols.put(token.getText(), symbol);
@@ -69,6 +71,7 @@ public class SymbolTable {
         appendOffset(ConstDef.INT_SIZE);
 
         domain.getFunc().paramSymbols.add(symbol);
+        return symbol;
     }
     public ConstSymbol addConst(Token token,int constValue)
     {

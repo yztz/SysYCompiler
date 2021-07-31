@@ -301,11 +301,13 @@ public class SysExpCalListener implements SysYListener {
                     return;
                 }
             }
-            if (symbolTableHost.searchSymbol(ctx.domain, lValCtx.Identifier().getSymbol()) == null) {
+            HasInitSymbol symbol = (HasInitSymbol) symbolTableHost.searchSymbol(ctx.scope, lValCtx.Identifier().getSymbol(),
+                                                                 s->s instanceof HasInitSymbol);
+            if (symbol == null) {
                 return;
             }
 
-            ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
+            ListenerUtil.SymbolWithOffset<HasInitSymbol> symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbol, lValCtx);
             if(symbolAndOffset==null)
             {
                 System.err.println("Can't find symbol:"+ctx.lVal().Identifier().getSymbol().getText());

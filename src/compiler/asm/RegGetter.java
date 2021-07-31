@@ -3,6 +3,8 @@ package compiler.asm;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.InterRepresent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -66,6 +68,16 @@ public abstract class RegGetter {
           return null;
      }
 
+     public List<Reg> getUsingRegister()
+     {
+          List<Reg> regs = new ArrayList<>();
+          for (int i = 0; i < usableRegs.length; i++) {
+               if(!isFreeReg(usableRegs[i]))
+                    regs.add(usableRegs[i]);
+          }
+
+          return regs;
+     }
      /**
       * 获取临时寄存器，保证在下条IR前释放
       */

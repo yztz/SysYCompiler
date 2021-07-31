@@ -79,8 +79,8 @@ public class RegGetterImpl extends RegGetter {
             }
 
             if (null == ref.nextRef) {  // 不存在引用则释放reg
-                readyToRelease(register);
-
+                //readyToRelease(register);
+                regDesc.put(register, null);
             }
             return register;
         }
@@ -96,7 +96,11 @@ public class RegGetterImpl extends RegGetter {
                 continue;
             Reference ref = refMap.get(key);
 
-
+            if(varDesc.containsKey(key))
+            {
+                Reg reg = varDesc.get(key);
+                regDesc.put(reg,null);
+            }
             regDesc.put(register, key);
             varDesc.put(key, register);
 

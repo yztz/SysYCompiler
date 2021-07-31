@@ -3,15 +3,11 @@ package compiler.symboltable;
 import antlr.SysYListener;
 import antlr.SysYParser;
 import compiler.genir.code.AddressOrData;
-import compiler.genir.code.ListenerUtil;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 public class SysVarListener implements SysYListener {
 
@@ -112,7 +108,7 @@ public class SysVarListener implements SysYListener {
 
     @Override
     public void exitVarDecl(SysYParser.VarDeclContext ctx) {
-        SymbolTable currentSymbolTable = ctx.domain.symbolTable;
+        SymbolTable currentSymbolTable = ctx.scope.symbolTable;
         List<SysYParser.VarDefContext> varDefs = ctx.varDef();
         for (SysYParser.VarDefContext varDefCtx : varDefs) {
             TerminalNode identifier = varDefCtx.Identifier();

@@ -7,6 +7,7 @@ import compiler.asm.operand.RegShiftImmOperand;
 import compiler.asm.operand.ShiftOp;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.LAddrRepresent;
+import compiler.symboltable.HasInitSymbol;
 import compiler.symboltable.ParamSymbol;
 import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.ValueSymbol;
@@ -25,7 +26,7 @@ public class LAddrConverter extends AsmConverter{
         LAddrRepresent retIr = (LAddrRepresent) ir;
         Reg rd = regGetter.getReg(retIr, retIr.target);
         ValueSymbol symbol = retIr.valueSymbol;
-        if(symbol.isGlobalSymbol())
+        if(symbol instanceof HasInitSymbol && ((HasInitSymbol)symbol).isGlobalSymbol())
         {
             int offsetInFuncData = dataHolder.getIndexInFuncData(symbol)* ConstDef.WORD_SIZE;
             builder.ldr(rd, AsmUtil.getFuncDataLabel(funcSymbol), offsetInFuncData);

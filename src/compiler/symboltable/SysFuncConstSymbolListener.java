@@ -128,25 +128,33 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
         Token funcName = ctx.Identifier().getSymbol();
 
         currentFunc = funcSymbolTable.addFunc(funcName, paramNum, returnType);
+
+        pushNewScope();
+    }
+
+    private void pushNewScope()
+    {
+        SymbolDomain scope;
+        if (blockStack.empty()) {
+            scope = symbolTableHost.createSymbolDomain(null, currentFunc);
+        }else{
+            SymbolDomain topDomain = blockStack.peek();
+            scope = symbolTableHost.createSymbolDomain(topDomain, currentFunc);
+        }
+        blockStack.push(scope);
+        currentSymbolTable = scope.symbolTable;
     }
 
     @Override
     public void enterBlock(SysYParser.BlockContext ctx) {
-        SymbolDomain domain;
-        if (blockStack.empty()) {
-            domain = symbolTableHost.createSymbolDomain(null, currentFunc);
-        }else{
-            SymbolDomain topDomain = blockStack.peek();
-            domain = symbolTableHost.createSymbolDomain(topDomain, currentFunc);
-        }
-        blockStack.push(domain);
-        currentSymbolTable = domain.symbolTable;
+
 
         if(ctx.getParent() instanceof SysYParser.FuncDefContext)
         {
             SysYParser.FuncDefContext parentIfCtx = (SysYParser.FuncDefContext)ctx.getParent();
             if(parentIfCtx.funcFParams()==null)
                 return;
+
             // 如果父节点是函数定义，那么把函数参数添加到符号表
             // 不在enterFuncDef中进行这项操作是因为新的symboltable和domain还没生成
             for (int i = 0; i < parentIfCtx.funcFParams().funcFParam().size(); i++) {
@@ -156,20 +164,22 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
                 if(paramCtx.LeftBracket().size()==0 || paramCtx.RightBracket().size()==0) //没有[], 不是数组型参数
                     currentSymbolTable.addParam(identifier.getSymbol());
                 else{ //是数组
-                    int[] dims= new int[paramCtx.exp().size()+1];
-                    dims[0] = -1; //-1表示未知, 第一个方括号内没有参数
+                    AddressOrData[] dims= new AddressOrData[paramCtx.exp().size()+1];
+                    dims[0] = null; //-1表示未知, 第一个方括号内没有参数
                     for (int expIndex = 0; expIndex < paramCtx.exp().size(); expIndex++) {
                         if (paramCtx.exp(expIndex).result!=null&&
                                 paramCtx.exp(expIndex).result.isData) {
-                            dims[expIndex+1] = paramCtx.exp(expIndex).result.item;
+                            dims[expIndex+1] = new AddressOrData(true,paramCtx.exp(expIndex).result.item);
                         }else{
-                            dims[expIndex+1] = -1;
-                            System.err.println("Array size must be constant");
+                            dims[expIndex+1] = null;
+                            //System.err.println("Array size must be constant");
                         }
                     }
                     currentSymbolTable.addParamArray(identifier.getSymbol(), dims);
                 }
             }
+        }else{
+            pushNewScope();
         }
     }
 
@@ -179,7 +189,6 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
         SymbolDomain domain = blockStack.peek();
         currentSymbolTable = domain.symbolTable;
     }
-
 
     @Override
     public void exitExp(SysYParser.ExpContext ctx) {
@@ -196,7 +205,12 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
                     return;
                 }
             }
-            ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
+            HasInitSymbol symbol = (HasInitSymbol)symbolTableHost.searchSymbol(ctx.scope, lValCtx.Identifier().getSymbol(),
+                                                              s->s instanceof HasInitSymbol);
+            if(symbol==null)
+                return;
+            ListenerUtil.SymbolWithOffset<HasInitSymbol> symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbol,
+                                                                                               lValCtx);
             if(symbolAndOffset==null)
             {
                 //System.err.println("Can't find symbol:"+ctx.lVal().Identifier().getSymbol().getText());
@@ -221,7 +235,7 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
     public void exitEveryRule(ParserRuleContext parserRuleContext) {
         if(parserRuleContext instanceof SysYParser.DomainedContext)
         {
-            ((SysYParser.DomainedContext)parserRuleContext).domain =blockStack.peek();
+            ((SysYParser.DomainedContext)parserRuleContext).scope =blockStack.peek();
         }
     }
 }

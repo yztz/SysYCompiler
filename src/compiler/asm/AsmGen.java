@@ -185,14 +185,9 @@ public class AsmGen {
         for (FunctionDataHolder.FuncData data : holder.getAllFuncData()) {
             if (data instanceof FunctionDataHolder.SymbolFuncData) {
                 ValueSymbol symbol = ((FunctionDataHolder.SymbolFuncData) data).symbol;
-                if (symbol.isGlobalSymbol()) {
-                    if(symbol instanceof HasInitSymbol)
-                    {
-                        HasInitSymbol init = (HasInitSymbol) symbol;
-                        builder.word(init.asmDataLabel);
-                    }else{
-                        builder.space(ConstDef.WORD_SIZE);
-                    }
+                if (symbol instanceof HasInitSymbol && ((HasInitSymbol)symbol).isGlobalSymbol()) {
+                    HasInitSymbol init = (HasInitSymbol) symbol;
+                    builder.word(init.asmDataLabel);
                 }else{
                     if (symbol instanceof HasInitSymbol) {
                         HasInitSymbol varSymbol = (HasInitSymbol) symbol;

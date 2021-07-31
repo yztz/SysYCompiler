@@ -124,7 +124,7 @@ public class SysYParser extends Parser {
 	}
 
 	public static class DomainedContext extends ParserRuleContext{
-		public SymbolDomain domain;
+		public SymbolDomain scope;
 		public DomainedContext() {
 		}
 

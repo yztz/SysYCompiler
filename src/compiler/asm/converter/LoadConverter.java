@@ -33,7 +33,7 @@ public class LoadConverter extends LSConverter {
         }
         if(!flag)
             return super.process(AsmBuilder.Mem.LDR, builder, regGetter, (LSRepresent) ir,funcSymbol, dataHolder,
-                             regGetter.getReg(ir, ((LSRepresent) ir).target));
+                                 ()->regGetter.getReg(ir, ((LSRepresent) ir).target));
         else
             return 1;
     }

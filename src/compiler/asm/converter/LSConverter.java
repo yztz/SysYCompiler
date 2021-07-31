@@ -4,21 +4,24 @@ import compiler.ConstDef;
 import compiler.asm.*;
 import compiler.asm.operand.ShiftOp;
 import compiler.genir.code.LSRepresent;
+import compiler.symboltable.HasInitSymbol;
 import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.ParamSymbol;
 import compiler.symboltable.ValueSymbol;
+
+import java.util.function.Supplier;
 
 public abstract class LSConverter extends AsmConverter {
 
 
     public int process(AsmBuilder.Mem op, AsmBuilder builder, RegGetter regGetter, LSRepresent ir,
-                       FuncSymbol funcSymbol,FunctionDataHolder data,Reg rd) {
+                       FuncSymbol funcSymbol, FunctionDataHolder data, Supplier<Reg> rdGetter) {
         ValueSymbol valueSymbol = ir.valueSymbol;
 
         if(!(valueSymbol instanceof ParamSymbol) || !valueSymbol.isArray())
         {
             Reg baseAddrReg;
-            if(valueSymbol.isGlobalSymbol()) //是全局变量
+            if(valueSymbol instanceof HasInitSymbol && ((HasInitSymbol)valueSymbol).isGlobalSymbol()) //是全局变量
             {
                 /*int offsetInFuncData = valueSymbol.getIndexInFunctionData(funcSymbol)* ConstDef.WORD_SIZE;
                 baseAddrReg = regGetter.getTmpRegister();
@@ -33,17 +36,17 @@ public abstract class LSConverter extends AsmConverter {
                     if(ir.offset!=null)
                         offset = AsmUtil.getSymbolArrayIndexOffset(ir.offset.item);
 
-                    builder.mem(op, null, rd, baseAddrReg,
+                    builder.mem(op, null, rdGetter.get(), baseAddrReg,
                                 offset, false, false);
                 }else{
 
                     //int offsetFPWord = AsmUtil.getSymbolOffset(valueSymbol)/ ConstDef.WORD_SIZE;
                     Reg rm = regGetter.getReg(ir,ir.offset);
                     //builder.add(rm,rm,offsetFPWord);
-                    builder.mem(op, null, rd, baseAddrReg,
+                    builder.mem(op, null, rdGetter.get(), baseAddrReg,
                                 rm, false, ShiftOp.LSL, 2, false, false);
                 }
-            }else{
+            }else{ //局部变量，非数组参数
                 baseAddrReg = Regs.FP;
                 if(ir.offset==null || ir.offset.isData)
                 {
@@ -53,14 +56,14 @@ public abstract class LSConverter extends AsmConverter {
                     else
                         offset = AsmUtil.getSymbolOffsetFp(valueSymbol, ir.offset.item);
 
-                    builder.mem(op, null, rd, baseAddrReg,
+                    builder.mem(op, null, rdGetter.get(), baseAddrReg,
                                 offset, false, false);
                 }else{
 
                     int offsetFPWord = AsmUtil.getSymbolOffsetFp(valueSymbol)/ ConstDef.WORD_SIZE;
                     Reg rm = regGetter.getReg(ir,ir.offset);
                     builder.add(rm,rm,offsetFPWord);
-                    builder.mem(op, null, rd, baseAddrReg,
+                    builder.mem(op, null, rdGetter.get(), baseAddrReg,
                                 rm, false, ShiftOp.LSL, 2, false, false);
                 }
             }
@@ -78,7 +81,7 @@ public abstract class LSConverter extends AsmConverter {
                 {
                     offsetArray = ir.offset.item*ConstDef.WORD_SIZE;
                 }
-                builder.mem(op, null, rd, tmp,
+                builder.mem(op, null, rdGetter.get(), tmp,
                             offsetArray, false, false);
             }else{
                 int offsetFP = AsmUtil.getSymbolOffsetFp(valueSymbol);
@@ -92,7 +95,7 @@ public abstract class LSConverter extends AsmConverter {
                     System.err.println("Base address reg equal to offset address :"+ir);
                 }
 
-                builder.mem(op, null, rd, tmp,
+                builder.mem(op, null, rdGetter.get(), tmp,
                             rm, false, ShiftOp.LSL, 2, false, false);
             }
         }

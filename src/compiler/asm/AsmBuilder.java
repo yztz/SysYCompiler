@@ -3,6 +3,8 @@ package compiler.asm;
 import compiler.asm.operand.*;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
@@ -340,7 +342,16 @@ public class AsmBuilder {
     }
 
     public AsmBuilder push(Reg[] regs, boolean lr) {
-        String regList = Arrays.stream(regs).map(Reg::getText).collect(Collectors.joining(","));
+        /*String regList = Arrays.stream(regs).map(Reg::getText).collect(Collectors.joining(","));
+        if (lr) {
+            return addInstruction("push", String.format("{%s,lr}", regList));
+        }
+        return addInstruction("push", String.format("{%s}", regList));*/
+        return push(Arrays.asList(regs), lr);
+    }
+
+    public AsmBuilder push(List<Reg> regs, boolean lr) {
+        String regList = regs.stream().map(Reg::getText).collect(Collectors.joining(","));
         if (lr) {
             return addInstruction("push", String.format("{%s,lr}", regList));
         }
@@ -348,7 +359,10 @@ public class AsmBuilder {
     }
 
     public AsmBuilder pop(Reg[] regs, boolean pc) {
-        String regList = Arrays.stream(regs).map(Reg::getText).collect(Collectors.joining(","));
+        return pop(Arrays.asList(regs), pc);
+    }
+    public AsmBuilder pop(List<Reg> regs, boolean pc) {
+        String regList = regs.stream().map(Reg::getText).collect(Collectors.joining(","));
         if (pc) {
             return addInstruction("pop", String.format("{%s,pc}", regList));
         }

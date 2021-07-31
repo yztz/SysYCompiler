@@ -8,6 +8,7 @@ import compiler.symboltable.function.FuncSymbol;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class SaveConverter extends LSConverter {
     @Override
@@ -19,15 +20,16 @@ public class SaveConverter extends LSConverter {
     public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         SaveRepresent saveIR = (SaveRepresent)ir;
 
-        Reg rd;
+        Supplier<Reg> rdGetter;
         if(saveIR.target.isData)
         {
-            rd = regGetter.getTmpRegister(1);
+            Reg rd = regGetter.getTmpRegister(1);
             builder.mov(rd,saveIR.target.item);
+            rdGetter = ()->rd;
         }else{
-            rd = regGetter.getReg(ir, saveIR.target);
+            rdGetter = ()->regGetter.getReg(ir, saveIR.target);
         }
 
-        return super.process(AsmBuilder.Mem.STR, builder, regGetter, (LSRepresent) ir,funcSymbol,dataHolder,rd);
+        return super.process(AsmBuilder.Mem.STR, builder, regGetter, (LSRepresent) ir,funcSymbol,dataHolder,rdGetter);
     }
 }

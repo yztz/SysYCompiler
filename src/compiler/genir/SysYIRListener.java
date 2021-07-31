@@ -13,7 +13,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import compiler.symboltable.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -119,7 +118,7 @@ public class SysYIRListener implements SysYListener {
             _currentCollection.startSection("declare symbol");
         }
         for (SysYParser.VarDefContext varDefCtx : ctx.varDef()) {
-            VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,varDefCtx.Identifier().getSymbol());
+            VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.scope, varDefCtx.Identifier().getSymbol());
             //varDefCtx.irGroup = new IRGroup("Init variable:"+symbol.symbolToken.getText());
         }
     }
@@ -145,7 +144,7 @@ public class SysYIRListener implements SysYListener {
     public void exitVarDef(SysYParser.VarDefContext ctx) {
         if(ctx.initVal()!=null)
         {
-            VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,ctx.Identifier().getSymbol());
+            VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.scope, ctx.Identifier().getSymbol());
 
             symbol.initIR = _currentCollection;
             _currentCollection = irCollectionStack.pop();
@@ -174,7 +173,7 @@ public class SysYIRListener implements SysYListener {
         if(ctx.exp()!=null)
         {
             AddressOrData initResult = ctx.exp().result;
-            VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.domain,ctx.ident);
+            VarSymbol symbol = symbolTableHost.searchVarSymbol(ctx.scope, ctx.ident);
 
             SaveRepresent ir = InterRepresentFactory.createSaveRepresent(symbol, new AddressOrData(true, ctx.symbolOffset),
                                                                          initResult);
@@ -229,12 +228,28 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterFuncFParam(SysYParser.FuncFParamContext ctx) {
-
+        irCollectionStack.push(_currentCollection);
+        _currentCollection = new IRCollection();
     }
 
     @Override
     public void exitFuncFParam(SysYParser.FuncFParamContext ctx) {
+        TerminalNode identifier = ctx.Identifier();
+        ParamSymbol symbol = symbolTableHost.searchParamSymbol(ctx.scope, identifier.getSymbol());
+        symbol.irToCalDimSize = _currentCollection;
+        if(ctx.exp()!=null && ctx.exp().size()>0)
+        {
+            if(symbol.dimensions==null)
+                symbol.dimensions=new AddressOrData[ctx.exp().size()+1];
+            for (int i = 0; i < ctx.exp().size(); i++) {
+                symbol.dimensions[i+1] = ctx.exp(i).result;
+            }
+        }else{
+            symbol.dimensions=new AddressOrData[]{new AddressOrData(true,1)};
+        }
 
+
+        _currentCollection = irCollectionStack.pop();
     }
 
     @Override
@@ -299,14 +314,40 @@ public class SysYIRListener implements SysYListener {
         AddressOrData sourceResult = ctx.exp().result;
 
         SysYParser.LValContext lValCtx = ctx.lVal();
-        ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
+        ValueSymbol targetSymbol = symbolTableHost.searchSymbol(ctx.scope, lValCtx.Identifier().getSymbol());
 
-        for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
-            _currentCollection.addCode(ir);
+        SaveRepresent saveRepresent;
+        ListenerUtil.SymbolWithOffset<? extends ValueSymbol> symbolAndOffset;
+        if(targetSymbol instanceof HasInitSymbol)
+        {
+            symbolAndOffset =
+                    ListenerUtil.getSymbolAndOffset((HasInitSymbol) targetSymbol,lValCtx);
+
+            for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
+                _currentCollection.addCode(ir);
+            }
+
+
+        }else if(targetSymbol instanceof ParamSymbol)
+        {
+            ParamSymbol paramSymbol = (ParamSymbol) targetSymbol;
+            symbolAndOffset =
+                    ListenerUtil.getSymbolAndOffset(paramSymbol, lValCtx);
+
+            _currentCollection.addCodes(paramSymbol.irToCalDimSize);
+
+            for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
+                _currentCollection.addCode(ir);
+            }
+        }else{
+            return ;
         }
 
-        SaveRepresent saveRepresent = InterRepresentFactory.createSaveRepresent(symbolAndOffset.symbol
+        saveRepresent = InterRepresentFactory.createSaveRepresent(symbolAndOffset.symbol
                 , symbolAndOffset.offsetResult, sourceResult);
+
+
+
         _currentCollection.addCode(saveRepresent);
 
         if(ctx.lVal().startStmt!=null){
@@ -593,14 +634,31 @@ public class SysYIRListener implements SysYListener {
         }else if(ctx.lVal()!=null) //左值，变量
         {
             SysYParser.LValContext lValCtx = ctx.lVal();
-            ListenerUtil.SymbolWithOffset symbolAndOffset = ListenerUtil.getSymbolAndOffset(symbolTableHost, lValCtx);
-            if(symbolAndOffset!=null)
+            ValueSymbol symbol = symbolTableHost.searchSymbol(ctx.scope, lValCtx.Identifier().getSymbol());
+            if(symbol!=null)
             {
-                //是数组，并且没有下标表达式，则取地址
-
-                if(/*!(symbolAndOffset.symbol instanceof ParamSymbol) &&*/ symbolAndOffset.symbol.isArray() &&
-                        (lValCtx.exp()==null||lValCtx.exp().size()<symbolAndOffset.symbol.dimensions.length))
+                ListenerUtil.SymbolWithOffset<? extends ValueSymbol> symbolAndOffset;
+                int dimLength = 0;
+                if(symbol instanceof HasInitSymbol) //是变量常量，不是参数
                 {
+
+                    /*ListenerUtil.SymbolWithOffset<HasInitSymbol> */symbolAndOffset =
+                            ListenerUtil.getSymbolAndOffset((HasInitSymbol) symbol,lValCtx);
+                    dimLength =((HasInitSymbol)symbol).dimensions.length;
+
+                }else if(symbol instanceof ParamSymbol)//是参数
+                {
+                    ParamSymbol paramSymbol=(ParamSymbol) symbol;
+                    /*ListenerUtil.SymbolWithOffset<ParamSymbol> */symbolAndOffset =
+                            ListenerUtil.getSymbolAndOffset(paramSymbol,lValCtx);
+                    dimLength = paramSymbol.dimensions.length;
+
+                }else{
+                    return;
+                }
+                if(symbolAndOffset.symbol.isArray() &&
+                        (lValCtx.exp()==null||lValCtx.exp().size()<dimLength))
+                {//是数组，并且没有下标下标的数量小于定义时的数量，则取地址
                     for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                         _currentCollection.addCode(ir);
                     }
@@ -611,6 +669,11 @@ public class SysYIRListener implements SysYListener {
                     ctx.result = lAddrRepresent.target;
                     ctx.startStmt=new InterRepresentHolder(lAddrRepresent);
                 }else{ //否则则取对应值
+                    if(symbol instanceof ParamSymbol)//Param支持动态dimSize
+                    {
+                        _currentCollection.addCodes(((ParamSymbol) symbol).irToCalDimSize);
+                    }
+
                     for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                         _currentCollection.addCode(ir);
                     }
@@ -624,7 +687,6 @@ public class SysYIRListener implements SysYListener {
                         ctx.startStmt=new InterRepresentHolder(loadRepresent);
                     }
                 }
-
             }
         }else{
             ctx.result=ctx.exp().result;

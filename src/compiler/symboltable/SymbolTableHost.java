@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.Token;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class SymbolTableHost {
     public SymbolTable getGlobalSymbolTable()
@@ -66,6 +67,52 @@ public class SymbolTableHost {
         return result;
     }
 
+    public ParamSymbol searchParamSymbol(SymbolDomain startDomain, Token symbolToken)
+    {
+        String ident = symbolToken.getText();
+        SymbolDomain domain = startDomain;
+        ParamSymbol result = null;
+        while (domain!=null)
+        {
+            if (domain.symbolTable.containSymbol(ident)) {
+                ValueSymbol varSymbol = domain.symbolTable.getSymbol(ident);
+                if(varSymbol instanceof ParamSymbol &&varSymbol.symbolToken.getStartIndex()<=symbolToken.getStartIndex())
+                //检查是否在使用前定义
+                {
+                    result=(ParamSymbol) varSymbol;
+                    break;
+                }
+            }
+
+            domain=domain.fatherDomain;
+        }
+
+        return result;
+    }
+    public ValueSymbol searchSymbol(SymbolDomain startDomain,
+    Token symbolToken, Function<ValueSymbol,Boolean> filter)
+    {
+        String ident = symbolToken.getText();
+        SymbolDomain domain = startDomain;
+        ValueSymbol result = null;
+        while (domain!=null)
+        {
+            if (domain.symbolTable.containSymbol(ident)) {
+                ValueSymbol varSymbol = domain.symbolTable.getSymbol(ident);
+                if(varSymbol.symbolToken.getStartIndex()<=symbolToken.getStartIndex() &&
+                        (filter==null || filter.apply(varSymbol)))
+                //检查是否在使用前定义
+                {
+                    result=varSymbol;
+                    break;
+                }
+            }
+
+            domain=domain.fatherDomain;
+        }
+
+        return result;
+    }
     public ValueSymbol searchSymbol(SymbolDomain startDomain, Token symbolToken)
     {
         String ident = symbolToken.getText();
