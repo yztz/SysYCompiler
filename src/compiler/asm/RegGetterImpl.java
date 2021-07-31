@@ -42,6 +42,7 @@ public class RegGetterImpl extends RegGetter {
         }
     }
     HashSet<Reg> readyToReleaseReg = new HashSet<>();
+    HashSet<Reg> usingRegThisIR = new HashSet<>();
     private void readyToRelease(Reg reg)
     {
         readyToReleaseReg.add(reg);
@@ -52,6 +53,7 @@ public class RegGetterImpl extends RegGetter {
             regDesc.put(reg, null);
         }
         readyToReleaseReg.clear();
+        usingRegThisIR.clear();
     }
 /*    private static final String[] GENERAL_REG = {"R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12",};
     private static final String[] SPECIAL_REG = {"R13", "R14", "R15",};*/
@@ -82,6 +84,7 @@ public class RegGetterImpl extends RegGetter {
                 //readyToRelease(register);
                 regDesc.put(register, null);
             }
+            usingRegThisIR.add(register);
             return register;
         }
 
@@ -155,7 +158,8 @@ public class RegGetterImpl extends RegGetter {
 
 
     protected boolean isFreeReg(Reg register) {
-        return !regDesc.containsKey(register) || regDesc.get(register) == null;
+        return (!regDesc.containsKey(register) || regDesc.get(register) == null)
+                && !usingRegThisIR.contains(register);
     }
 
     @Override

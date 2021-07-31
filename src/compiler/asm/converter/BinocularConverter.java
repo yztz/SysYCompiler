@@ -164,8 +164,8 @@ public class BinocularConverter extends AsmConverter{
                 rd = regGetter.getReg(bIR, bIR.sourceFirst);
                 rn = regGetter.getReg(bIR, bIR.sourceSecond);
             }else if(!bIR.sourceFirst.isData) { //右边的是立即数
-                rd = regGetter.getReg(bIR, bIR.sourceFirst);
                 rn = regGetter.getTmpRegister();
+                rd = regGetter.getReg(bIR, bIR.sourceFirst);
                 builder.mov(rn, bIR.sourceSecond.item);
             }else{
                 rd = regGetter.getTmpRegister();
