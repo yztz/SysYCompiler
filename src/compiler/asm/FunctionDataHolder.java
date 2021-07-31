@@ -2,6 +2,7 @@ package compiler.asm;
 
 import compiler.ConstDef;
 import compiler.genir.code.AddressOrData;
+import compiler.symboltable.HasInitSymbol;
 import compiler.symboltable.ValueSymbol;
 import compiler.symboltable.function.FuncSymbol;
 
@@ -20,6 +21,11 @@ public class FunctionDataHolder {
     private List<FuncData> dataList = new ArrayList<>();
 
     int currentIndex = 0;
+    public void addData(FuncData data)
+    {
+        dataList.add(data);
+        datas.put(data,currentIndex++);
+    }
     public void addData(ValueSymbol symbol)
     {
         SymbolFuncData symbolFuncData = new SymbolFuncData(symbol);
@@ -55,7 +61,12 @@ public class FunctionDataHolder {
         addData(num);
         loadFromFuncData(builder,num,rd);
     }
-
+    public void loadFromFuncData(AsmBuilder builder,FuncData data,Reg rd)
+    {
+        int index = getIndexInFuncData(data);
+        int offsetInFuncData = index* ConstDef.WORD_SIZE;
+        builder.ldr(rd,AsmUtil.getFuncDataLabel(funcSymbol),offsetInFuncData);
+    }
     public void loadFromFuncData(AsmBuilder builder,int num,Reg rd)
     {
         int index = getIndexInFuncData(num);
@@ -69,7 +80,10 @@ public class FunctionDataHolder {
         int offsetInFuncData = index* ConstDef.WORD_SIZE;
         builder.ldr(rd,AsmUtil.getFuncDataLabel(funcSymbol),offsetInFuncData);
     }
-
+    public int getIndexInFuncData(FuncData data)
+    {
+        return datas.getOrDefault(data,0);
+    }
     public int getIndexInFuncData(int num)
     {
         return datas.getOrDefault(new ImmFuncData(num),0);
@@ -99,9 +113,32 @@ public class FunctionDataHolder {
         public int hashCode() {
             return Objects.hash(symbol);
         }
-    }
-    public static class FuncData{
 
+        @Override
+        public void genData(AsmBuilder builder) {
+
+            if (symbol instanceof HasInitSymbol && ((HasInitSymbol)symbol).isGlobalSymbol()) {
+                HasInitSymbol init = (HasInitSymbol) symbol;
+                builder.word(init.asmDataLabel);
+            }else{
+                if (symbol instanceof HasInitSymbol) {
+                    HasInitSymbol varSymbol = (HasInitSymbol) symbol;
+                    if(AsmUtil.isNeedInitInDataSection(varSymbol))
+                    {
+                        builder.word(varSymbol.asmDataLabel);
+                    }else if(varSymbol.initValues!=null && varSymbol.initValues.length>0){
+                        builder.word(varSymbol.initValues[0]);
+                    }else{
+                        builder.space(ConstDef.WORD_SIZE);
+                    }
+                }else{
+                    builder.space(ConstDef.WORD_SIZE);
+                }
+            }
+        }
+    }
+    public abstract static class FuncData{
+        public abstract void genData(AsmBuilder builder);
     }
     public static class ImmFuncData extends FuncData{
         int imm32;
@@ -121,6 +158,29 @@ public class FunctionDataHolder {
         @Override
         public int hashCode() {
             return Objects.hash(imm32);
+        }
+
+        @Override
+        public void genData(AsmBuilder builder) {
+            builder.word(imm32);
+        }
+    }
+
+    public static class RegFuncData extends FuncData{
+        public static final String regDataLabel = "._reg";
+        private static RegFuncData instance = null;
+        public static RegFuncData getInstance(){
+            if(instance==null)
+                instance=new RegFuncData();
+
+            return instance;
+        }
+
+        private RegFuncData(){}
+
+        @Override
+        public void genData(AsmBuilder builder) {
+            builder.word(regDataLabel);
         }
     }
 }

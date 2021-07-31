@@ -174,6 +174,7 @@ public class AsmGen {
                 }
             }
         }
+        holder.addData(FunctionDataHolder.RegFuncData.getInstance());
     }
 
     public AsmSection genFunctionData(FuncSymbol funcSymbol,IRFunction irFunction,FunctionDataHolder holder)
@@ -183,7 +184,8 @@ public class AsmGen {
         builder.label();
         int indexInFunc = 0;
         for (FunctionDataHolder.FuncData data : holder.getAllFuncData()) {
-            if (data instanceof FunctionDataHolder.SymbolFuncData) {
+            data.genData(builder);
+            /*if (data instanceof FunctionDataHolder.SymbolFuncData) {
                 ValueSymbol symbol = ((FunctionDataHolder.SymbolFuncData) data).symbol;
                 if (symbol instanceof HasInitSymbol && ((HasInitSymbol)symbol).isGlobalSymbol()) {
                     HasInitSymbol init = (HasInitSymbol) symbol;
@@ -209,45 +211,8 @@ public class AsmGen {
                 builder.word(dataItem.imm32);
             }else{
                 builder.space(ConstDef.WORD_SIZE);
-            }
+            }*/
         }
-
-        /*for (ValueSymbol symbol : symbolTableHost.getGlobalSymbolTable().getAllSymbol()) {
-            if(!usedSymbol.contains(symbol))
-                continue;
-
-            if(symbol instanceof HasInitSymbol)
-            {
-                HasInitSymbol init = (HasInitSymbol) symbol;
-
-                builder.word(init.asmDataLabel);
-                init.setIndexInFunctionData(indexInFunc++,funcSymbol);
-            }
-        }
-
-        for (SymbolTable table : symbolTableHost.symbolTableMap.values()) {
-            SymbolDomain domain = table.getDomain();
-
-            if(funcSymbol!=domain.getFunc())
-                continue;
-
-            for (ValueSymbol symbol : table.getAllSymbol()) {
-                if (symbol instanceof VarSymbol) {
-                    VarSymbol varSymbol = (VarSymbol) symbol;
-                    if(AsmUtil.isNeedInitInDataSection(varSymbol))
-                    {
-                        builder.word(AsmUtil.getVarLabel(funcSymbol, domain, varSymbol));
-                        varSymbol.setIndexInFunctionData(indexInFunc++,funcSymbol);
-                    }else if(varSymbol.initValues!=null && varSymbol.initValues.length>0){
-                        builder.word(varSymbol.initValues[0]);
-                        varSymbol.setIndexInFunctionData(indexInFunc++,funcSymbol);
-                    }
-
-                } else if (symbol instanceof ConstSymbol) {
-
-                }
-            }
-        }*/
 
         return builder.getSection();
     }
@@ -302,11 +267,11 @@ public class AsmGen {
         }
 
         AsmBuilder builder=new AsmBuilder();
-        builder.align(2).label("reg_addr").word("reg");
+        //builder.align(2).label("reg_addr").word("reg");
 
         builder.bss().align(2);
-        builder.label("reg");
-        builder.space(15*4);
+        builder.label(FunctionDataHolder.RegFuncData.regDataLabel);
+        builder.space(15*ConstDef.WORD_SIZE);
         sections.add(builder.getSection());
         return sections;
     }
