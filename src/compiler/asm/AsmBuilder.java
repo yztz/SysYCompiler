@@ -212,8 +212,8 @@ public class AsmBuilder {
             if(!AsmUtil.imm8m(rsi.immData))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                ldrEq(tmp, rsi.immData);
-                //dataHolder.addAndLoadFromFuncData(this,rsi.immData,tmp);
+                //ldrEq(tmp, rsi.immData);
+                dataHolder.addAndLoadFromFuncData(this,rsi.immData,tmp);
                 return new RegShiftRegOperand(rsi.op,rsi.regM,tmp);
             }
         }
@@ -224,8 +224,8 @@ public class AsmBuilder {
             if(!AsmUtil.imm8m(rsi.imm8m))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                ldrEq(tmp, rsi.imm8m);
-                //dataHolder.addAndLoadFromFuncData(this,rsi.imm8m,tmp);
+                //ldrEq(tmp, rsi.imm8m);
+                dataHolder.addAndLoadFromFuncData(this,(int)rsi.imm8m,tmp);
                 return new RegOperand(tmp);
             }
         }
@@ -261,7 +261,8 @@ public class AsmBuilder {
             if(!AsmUtil.imm8m(imm8m))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                ldrEq(tmp,imm8m);
+                //ldrEq(tmp,imm8m);
+                dataHolder.addAndLoadFromFuncData(this,(int) imm8m,rd);
                 return regOperand(RegOperandOP.CMP, rd, new RegOperand(tmp));
             }
         }
@@ -323,8 +324,9 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg tmp = regGetter.getTmpRegister();
-                ldrEq(tmp, offset);
-                return mem(op,size,rd,rn,tmp,false,ShiftOp.LSL,0,saveOffset,postOffset);
+                //ldrEq(tmp, offset);
+                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),rd);
+                return mem(op,size,rd,rn,tmp,offset<0,ShiftOp.LSL,0,saveOffset,postOffset);
             }
         }
 
@@ -369,7 +371,8 @@ public class AsmBuilder {
                 Reg baseReg = regGetter.getTmpRegister();
                 Reg offsetReg = regGetter.getTmpRegister(1);
                 ldr(baseReg,label,0);
-                ldrEq(offsetReg,Math.abs(offset));
+                //ldrEq(offsetReg,Math.abs(offset));
+                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),rd);
                 return mem(Mem.LDR,null,rd,baseReg,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
@@ -400,7 +403,8 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                ldrEq(offsetReg,Math.abs(offset));
+                //ldrEq(offsetReg,Math.abs(offset));
+                dataHolder.addAndLoadFromFuncData(this,(int) offset,rd);
                 return mem(Mem.LDR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
@@ -413,7 +417,8 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                ldrEq(offsetReg,Math.abs(offset));
+                //ldrEq(offsetReg,Math.abs(offset));
+                dataHolder.addAndLoadFromFuncData(this,(int) offset,rd);
                 return mem(Mem.STR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
@@ -466,17 +471,17 @@ public class AsmBuilder {
         return regOperand(RegOperandOP.MOV, rd, new RegOperand(rn));
     }
 
-    public AsmBuilder mov(Reg rd, long imm12) {
+    public AsmBuilder mov(Reg rd, long imm8m) {
         if(_hookIfNotImmXX)
         {
-            if(!AsmUtil.imm12(imm12))
+            if(!AsmUtil.imm8m(imm8m))
             {
-                ldrEq(rd, imm12);
-                //dataHolder.addAndLoadFromFuncData(this,imm12,rd);
+                //ldrEq(rd, imm8m);
+                dataHolder.addAndLoadFromFuncData(this,(int) imm8m,rd);
                 return this;
             }
         }
-        return addInstruction(RegOperandOP.MOV.getText(), rd.getText(), String.format("#%d", imm12));
+        return addInstruction(RegOperandOP.MOV.getText(), rd.getText(), String.format("#%d", imm8m));
     }
 
     public AsmBuilder add(Reg rd, Reg rn, Operand operand) {
@@ -487,18 +492,18 @@ public class AsmBuilder {
         return regRegOperand(RegRegOperandOP.ADD, rd, rn, new RegOperand(rm));
     }
 
-    public AsmBuilder add(Reg rd, Reg rn, long imm12) {
+    public AsmBuilder add(Reg rd, Reg rn, long imm8m) {
         if(_hookIfNotImmXX)
         {
-            if(!AsmUtil.imm12(imm12))
+            if(!AsmUtil.imm8m(imm8m))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                ldrEq(tmp, imm12);
-                //dataHolder.addAndLoadFromFuncData(this,imm12,tmp);
+                //ldrEq(tmp, imm8m);
+                dataHolder.addAndLoadFromFuncData(this,(int)imm8m,tmp);
                 return add(rd,rn,tmp);
             }
         }
-        return addInstruction(RegRegOperandOP.ADD.getText(), rd.getText(), rn.getText(), toImm(imm12));
+        return addInstruction(RegRegOperandOP.ADD.getText(), rd.getText(), rn.getText(), toImm(imm8m));
     }
 
     public AsmBuilder sub(Reg rd, Reg rn, Operand operand) {
@@ -510,18 +515,18 @@ public class AsmBuilder {
         return regRegOperand(RegRegOperandOP.SUB, rd, rn, new RegOperand(rm));
     }
 
-    public AsmBuilder sub(Reg rd, Reg rn, long imm12) {
+    public AsmBuilder sub(Reg rd, Reg rn, long imm8m) {
         if(_hookIfNotImmXX)
         {
-            if(!AsmUtil.imm12(imm12))
+            if(!AsmUtil.imm8m(imm8m))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                ldrEq(tmp, imm12);
-                //dataHolder.addAndLoadFromFuncData(this,imm12,tmp);
+                //ldrEq(tmp, imm8m);
+                dataHolder.addAndLoadFromFuncData(this,(int) imm8m,tmp);
                 return sub(rd,rn,tmp);
             }
         }
-        return addInstruction(RegRegOperandOP.SUB.getText(), rd.getText(), rn.getText(), toImm(imm12));
+        return addInstruction(RegRegOperandOP.SUB.getText(), rd.getText(), rn.getText(), toImm(imm8m));
     }
 
     public AsmBuilder commit(String commit)
