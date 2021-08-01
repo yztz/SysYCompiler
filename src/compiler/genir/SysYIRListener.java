@@ -326,7 +326,15 @@ public class SysYIRListener implements SysYListener {
             for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                 _currentCollection.addCode(ir);
             }
-
+            if(lValCtx.startStmt==null)
+            {
+                if(symbolAndOffset.irToCalculateOffset.size()>0)
+                {
+                    lValCtx.startStmt = new InterRepresentHolder(
+                            symbolAndOffset.irToCalculateOffset.get(0)
+                    );
+                }
+            }
 
         }else if(targetSymbol instanceof ParamSymbol)
         {
@@ -339,6 +347,19 @@ public class SysYIRListener implements SysYListener {
             for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                 _currentCollection.addCode(ir);
             }
+            if(lValCtx.startStmt==null)
+            {
+                if(paramSymbol.irToCalDimSize.flatIR().size()>0)
+                {
+                    lValCtx.startStmt = new InterRepresentHolder(paramSymbol.irToCalDimSize.getFirst());
+                }else if(symbolAndOffset.irToCalculateOffset.size()>0)
+                {
+                    lValCtx.startStmt = new InterRepresentHolder(
+                            symbolAndOffset.irToCalculateOffset.get(0)
+                    );
+                }
+            }
+
         }else{
             return ;
         }
@@ -659,6 +680,14 @@ public class SysYIRListener implements SysYListener {
                 if(symbolAndOffset.symbol.isArray() &&
                         (lValCtx.exp()==null||lValCtx.exp().size()<dimLength))
                 {//是数组，并且没有下标下标的数量小于定义时的数量，则取地址
+
+                    if(symbol instanceof ParamSymbol)//是参数
+                    {
+                        ParamSymbol paramSymbol = (ParamSymbol) symbol;
+                        if(paramSymbol.irToCalDimSize.flatIR().size()>0)
+                            _currentCollection.addCodes(paramSymbol.irToCalDimSize);
+                    }
+
                     for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
                         _currentCollection.addCode(ir);
                     }
@@ -667,7 +696,19 @@ public class SysYIRListener implements SysYListener {
                     );
                     _currentCollection.addCode(lAddrRepresent);
                     ctx.result = lAddrRepresent.target;
-                    ctx.startStmt=new InterRepresentHolder(lAddrRepresent);
+
+                    if (lValCtx.startStmt!=null) {
+                        ctx.startStmt=lValCtx.startStmt;
+                    }else{
+                        if(symbol instanceof ParamSymbol && ((ParamSymbol) symbol).irToCalDimSize.flatIR().size()>0)
+                        {
+                            ctx.startStmt=new InterRepresentHolder(((ParamSymbol) symbol).irToCalDimSize.getFirst());
+                        } else if(symbolAndOffset.irToCalculateOffset.size()>0)
+                            ctx.startStmt=new InterRepresentHolder(symbolAndOffset.irToCalculateOffset.get(0));
+                        else
+                            ctx.startStmt=new InterRepresentHolder(lAddrRepresent);
+                    }
+
                 }else{ //否则则取对应值
                     if(symbol instanceof ParamSymbol)//Param支持动态dimSize
                     {
@@ -681,10 +722,14 @@ public class SysYIRListener implements SysYListener {
                             , symbolAndOffset.offsetResult);
                     _currentCollection.addCode(loadRepresent);
                     ctx.result = loadRepresent.target;
+
                     if (lValCtx.startStmt!=null) {
                         ctx.startStmt=lValCtx.startStmt;
                     }else{
-                        ctx.startStmt=new InterRepresentHolder(loadRepresent);
+                        if(symbolAndOffset.irToCalculateOffset.size()>0)
+                            ctx.startStmt=new InterRepresentHolder(symbolAndOffset.irToCalculateOffset.get(0));
+                        else
+                            ctx.startStmt=new InterRepresentHolder(loadRepresent);
                     }
                 }
             }
