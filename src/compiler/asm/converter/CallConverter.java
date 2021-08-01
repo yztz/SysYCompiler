@@ -71,7 +71,8 @@ public class CallConverter extends AsmConverter{
         if(usingRegister.size()>0)
         {
             Reg tmp = regGetter.getTmpRegister();
-            dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
+            //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
+            builder.add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
             builder.stm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
         }
 
@@ -81,7 +82,8 @@ public class CallConverter extends AsmConverter{
         if(usingRegister.size()>0)
         {
             Reg tmp = regGetter.getTmpRegister();
-            dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
+            //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
+            builder.add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
             builder.ldm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
         }
 

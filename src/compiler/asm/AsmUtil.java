@@ -82,13 +82,20 @@ public class AsmUtil {
         return getSymbolOffset(symbol) + getSymbolArrayIndexOffset(arrayIndex);
     }
 
+    //这些区域用来保存寄存器数据
+    public static final int REG_DATA_LEN = 32;
     public static int getSymbolOffsetFp(ValueSymbol symbol)
     {
-        return getSymbolOffset(symbol)-2* ConstDef.WORD_SIZE;
+        return getSymbolOffset(symbol)-2* ConstDef.WORD_SIZE- REG_DATA_LEN;
     }
     public static int getSymbolOffsetFp(ValueSymbol symbol, int arrayIndex)
     {
-        return getSymbolOffset(symbol,arrayIndex) -2* ConstDef.WORD_SIZE;
+        return getSymbolOffset(symbol,arrayIndex) -2* ConstDef.WORD_SIZE - REG_DATA_LEN;
+    }
+
+    public static int getRegOffsetFP()
+    {
+        return -REG_DATA_LEN -2* ConstDef.WORD_SIZE;
     }
 
     public static int getParamOffsetCalledFp(int index)
@@ -127,7 +134,7 @@ public class AsmUtil {
         return false;
     }
 
-    public static boolean imm12(int x)
+    public static boolean imm12(long x)
     {
         return (x&0xfffff000) == 0;
     }
