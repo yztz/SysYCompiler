@@ -74,7 +74,7 @@ public class AsmConvertOrganizer {
                     break;
                 }
 
-                /*if(builder.totalLineNum()>996)
+                if(builder.totalLineNum()>996)
                 {
                     asmSections.add(builder.getSectionAndStartNew());
                     if (holder.getDataItemNum()>0) {
@@ -83,7 +83,7 @@ public class AsmConvertOrganizer {
                     }
                     // 如果mov的立即数不是imm12，则替换成ldr,改为从内存中加载
                     builder.hookIfNotImmXX(holder, regGetter);
-                }*/
+                }
             }
         }
 
