@@ -2,6 +2,7 @@ package compiler.asm.converter;
 
 import compiler.asm.*;
 import compiler.genir.IRBlock;
+import compiler.genir.code.InitVarRepresent;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.LAddrRepresent;
 import compiler.genir.code.LSRepresent;
@@ -46,7 +47,10 @@ public class AsmConvertOrganizer {
             List<InterRepresent> flatIRList = irBlock.flatIR();
             for (int j = 0; j < flatIRList.size(); j++) {
                 InterRepresent ir = flatIRList.get(j);
-
+                if(ir instanceof InitVarRepresent)
+                {
+                    holder.addData(((InitVarRepresent) ir).varSymbol);
+                }
                 if(ir instanceof LSRepresent)
                 {
                     holder.addData(((LSRepresent) ir).valueSymbol);
