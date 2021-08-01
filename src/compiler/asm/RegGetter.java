@@ -101,7 +101,7 @@ public class RegGetter {
             return register;
         }
 
-        return null;
+        return Regs.R0;
     }
 
     public Map<AddressRWInfo, Reg> getMapOfIR(InterRepresent ir) {
