@@ -7,6 +7,8 @@ import compiler.genir.IRFunction;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.GotoRepresent;
 import compiler.genir.code.InterRepresentHolder;
+import compiler.genir.code.ListenerUtil;
+import compiler.symboltable.ValueSymbol;
 import compiler.symboltable.initvalue.ArrayInitValue;
 import compiler.symboltable.initvalue.InitValue;
 import org.antlr.v4.runtime.*;
@@ -1891,6 +1893,7 @@ public class SysYParser extends Parser {
 	}
 
 	public static class LValContext extends DomainedContext {
+		public ListenerUtil.SymbolWithOffset<? extends ValueSymbol> symbolAndOffset;
 		public InterRepresentHolder startStmt;
 		public TerminalNode Identifier() { return getToken(SysYParser.Identifier, 0); }
 		public List<TerminalNode> LeftBracket() { return getTokens(SysYParser.LeftBracket); }
