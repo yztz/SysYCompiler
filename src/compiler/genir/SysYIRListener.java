@@ -314,10 +314,58 @@ public class SysYIRListener implements SysYListener {
         AddressOrData sourceResult = ctx.exp().result;
 
         SysYParser.LValContext lValCtx = ctx.lVal();
-        //ValueSymbol targetSymbol = symbolTableHost.searchSymbol(ctx.scope, lValCtx.Identifier().getSymbol());
+        ValueSymbol targetSymbol = symbolTableHost.searchSymbol(ctx.scope, lValCtx.Identifier().getSymbol());
 
-        SaveRepresent saveRepresent = InterRepresentFactory.createSaveRepresent(lValCtx.symbolAndOffset.symbol
-                , lValCtx.symbolAndOffset.offsetResult, sourceResult);
+        SaveRepresent saveRepresent;
+        ListenerUtil.SymbolWithOffset<? extends ValueSymbol> symbolAndOffset;
+        if(targetSymbol instanceof HasInitSymbol)
+        {
+            symbolAndOffset =
+                    ListenerUtil.getSymbolAndOffset((HasInitSymbol) targetSymbol,lValCtx);
+
+            for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
+                _currentCollection.addCode(ir);
+            }
+            if(lValCtx.startStmt==null)
+            {
+                if(symbolAndOffset.irToCalculateOffset.size()>0)
+                {
+                    lValCtx.startStmt = new InterRepresentHolder(
+                            symbolAndOffset.irToCalculateOffset.get(0)
+                    );
+                }
+            }
+
+        }else if(targetSymbol instanceof ParamSymbol)
+        {
+            ParamSymbol paramSymbol = (ParamSymbol) targetSymbol;
+            symbolAndOffset =
+                    ListenerUtil.getSymbolAndOffset(paramSymbol, lValCtx);
+
+            _currentCollection.addCodes(paramSymbol.irToCalDimSize);
+
+            for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
+                _currentCollection.addCode(ir);
+            }
+            if(lValCtx.startStmt==null)
+            {
+                if(paramSymbol.irToCalDimSize.flatIR().size()>0)
+                {
+                    lValCtx.startStmt = new InterRepresentHolder(paramSymbol.irToCalDimSize.getFirst());
+                }else if(symbolAndOffset.irToCalculateOffset.size()>0)
+                {
+                    lValCtx.startStmt = new InterRepresentHolder(
+                            symbolAndOffset.irToCalculateOffset.get(0)
+                    );
+                }
+            }
+
+        }else{
+            return ;
+        }
+
+        saveRepresent = InterRepresentFactory.createSaveRepresent(symbolAndOffset.symbol
+                , symbolAndOffset.offsetResult, sourceResult);
 
 
 
@@ -590,51 +638,6 @@ public class SysYIRListener implements SysYListener {
                 break;
             }
         }
-        ValueSymbol targetSymbol = symbolTableHost.searchSymbol(ctx.scope, ctx.Identifier().getSymbol());
-
-        if(targetSymbol instanceof HasInitSymbol)
-        {
-            ctx.symbolAndOffset =
-                    ListenerUtil.getSymbolAndOffset((HasInitSymbol) targetSymbol,ctx);
-
-            for (InterRepresent ir : ctx.symbolAndOffset.irToCalculateOffset) {
-                _currentCollection.addCode(ir);
-            }
-            if(ctx.startStmt==null)
-            {
-                if(ctx.symbolAndOffset.irToCalculateOffset.size()>0)
-                {
-                    ctx.startStmt = new InterRepresentHolder(
-                            ctx.symbolAndOffset.irToCalculateOffset.get(0)
-                    );
-                }
-            }
-
-        }else if(targetSymbol instanceof ParamSymbol)
-        {
-            ParamSymbol paramSymbol = (ParamSymbol) targetSymbol;
-            ctx.symbolAndOffset =
-                    ListenerUtil.getSymbolAndOffset(paramSymbol, ctx);
-
-            _currentCollection.addCodes(paramSymbol.irToCalDimSize);
-
-            for (InterRepresent ir : ctx.symbolAndOffset.irToCalculateOffset) {
-                _currentCollection.addCode(ir);
-            }
-            if(ctx.startStmt==null)
-            {
-                if(paramSymbol.irToCalDimSize.flatIR().size()>0)
-                {
-                    ctx.startStmt = new InterRepresentHolder(paramSymbol.irToCalDimSize.getFirst());
-                }else if(ctx.symbolAndOffset.irToCalculateOffset.size()>0)
-                {
-                    ctx.startStmt = new InterRepresentHolder(
-                            ctx.symbolAndOffset.irToCalculateOffset.get(0)
-                    );
-                }
-            }
-
-        }
     }
 
     @Override
@@ -652,44 +655,84 @@ public class SysYIRListener implements SysYListener {
         }else if(ctx.lVal()!=null) //左值，变量
         {
             SysYParser.LValContext lValCtx = ctx.lVal();
-            ValueSymbol symbol = lValCtx.symbolAndOffset.symbol;//symbolTableHost.searchSymbol(ctx.scope, lValCtx
-            // .Identifier().getSymbol());
-            ListenerUtil.SymbolWithOffset<? extends ValueSymbol> symbolAndOffset = lValCtx.symbolAndOffset;
-
-            int dimLength = 0;
-            if(symbol instanceof HasInitSymbol) //是变量常量，不是参数
+            ValueSymbol symbol = symbolTableHost.searchSymbol(ctx.scope, lValCtx.Identifier().getSymbol());
+            if(symbol!=null)
             {
-                dimLength =((HasInitSymbol)symbol).dimensions.length;
-            }else if(symbol instanceof ParamSymbol)//是参数
-            {
-                ParamSymbol paramSymbol=(ParamSymbol) symbol;
-                dimLength = paramSymbol.dimensions.length;
-            }
+                ListenerUtil.SymbolWithOffset<? extends ValueSymbol> symbolAndOffset;
+                int dimLength = 0;
+                if(symbol instanceof HasInitSymbol) //是变量常量，不是参数
+                {
 
-                ctx.startStmt = lValCtx.startStmt;
+                    /*ListenerUtil.SymbolWithOffset<HasInitSymbol> */symbolAndOffset =
+                            ListenerUtil.getSymbolAndOffset((HasInitSymbol) symbol,lValCtx);
+                    dimLength =((HasInitSymbol)symbol).dimensions.length;
 
-                if (symbolAndOffset.symbol.isArray() && (lValCtx.exp() == null || lValCtx.exp().size() < dimLength)) {//是数组，并且没有下标下标的数量小于定义时的数量，则取地址
+                }else if(symbol instanceof ParamSymbol)//是参数
+                {
+                    ParamSymbol paramSymbol=(ParamSymbol) symbol;
+                    /*ListenerUtil.SymbolWithOffset<ParamSymbol> */symbolAndOffset =
+                            ListenerUtil.getSymbolAndOffset(paramSymbol,lValCtx);
+                    dimLength = paramSymbol.dimensions.length;
 
-                    LAddrRepresent lAddrRepresent = InterRepresentFactory.createLAddrRepresent(symbolAndOffset.symbol,
-                                                                                               symbolAndOffset.offsetResult);
+                }else{
+                    return;
+                }
+                if(symbolAndOffset.symbol.isArray() &&
+                        (lValCtx.exp()==null||lValCtx.exp().size()<dimLength))
+                {//是数组，并且没有下标下标的数量小于定义时的数量，则取地址
+
+                    if(symbol instanceof ParamSymbol)//是参数
+                    {
+                        ParamSymbol paramSymbol = (ParamSymbol) symbol;
+                        if(paramSymbol.irToCalDimSize.flatIR().size()>0)
+                            _currentCollection.addCodes(paramSymbol.irToCalDimSize);
+                    }
+
+                    for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
+                        _currentCollection.addCode(ir);
+                    }
+                    LAddrRepresent lAddrRepresent = InterRepresentFactory.createLAddrRepresent(
+                            symbolAndOffset.symbol, symbolAndOffset.offsetResult
+                    );
                     _currentCollection.addCode(lAddrRepresent);
                     ctx.result = lAddrRepresent.target;
 
-                    if (ctx.startStmt == null) {
-                        ctx.startStmt = new InterRepresentHolder(lAddrRepresent);
+                    if (lValCtx.startStmt!=null) {
+                        ctx.startStmt=lValCtx.startStmt;
+                    }else{
+                        if(symbol instanceof ParamSymbol && ((ParamSymbol) symbol).irToCalDimSize.flatIR().size()>0)
+                        {
+                            ctx.startStmt=new InterRepresentHolder(((ParamSymbol) symbol).irToCalDimSize.getFirst());
+                        } else if(symbolAndOffset.irToCalculateOffset.size()>0)
+                            ctx.startStmt=new InterRepresentHolder(symbolAndOffset.irToCalculateOffset.get(0));
+                        else
+                            ctx.startStmt=new InterRepresentHolder(lAddrRepresent);
                     }
 
-                } else { //否则则取对应值
+                }else{ //否则则取对应值
+                    if(symbol instanceof ParamSymbol)//Param支持动态dimSize
+                    {
+                        _currentCollection.addCodes(((ParamSymbol) symbol).irToCalDimSize);
+                    }
 
-                    LoadRepresent loadRepresent = InterRepresentFactory.createLoadRepresent(symbolAndOffset.symbol,
-                                                                                            symbolAndOffset.offsetResult);
+                    for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
+                        _currentCollection.addCode(ir);
+                    }
+                    LoadRepresent loadRepresent = InterRepresentFactory.createLoadRepresent(symbolAndOffset.symbol
+                            , symbolAndOffset.offsetResult);
                     _currentCollection.addCode(loadRepresent);
                     ctx.result = loadRepresent.target;
 
-                    if (lValCtx.startStmt == null) {
-                        ctx.startStmt = new InterRepresentHolder(loadRepresent);
+                    if (lValCtx.startStmt!=null) {
+                        ctx.startStmt=lValCtx.startStmt;
+                    }else{
+                        if(symbolAndOffset.irToCalculateOffset.size()>0)
+                            ctx.startStmt=new InterRepresentHolder(symbolAndOffset.irToCalculateOffset.get(0));
+                        else
+                            ctx.startStmt=new InterRepresentHolder(loadRepresent);
                     }
                 }
+            }
         }else{
             ctx.result=ctx.exp().result;
             ctx.startStmt = ctx.exp().startStmt;
