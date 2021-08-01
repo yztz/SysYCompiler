@@ -10,7 +10,7 @@ import java.util.function.Function;
 public class RegGetter {
     private final Map<Reg, AddressRWInfo> regDesc = new HashMap<>();
     private final Map<AddressRWInfo, Reg> varDesc = new HashMap<>();
-    protected Reg[] usableRegs = {Regs.R4, Regs.R5, Regs.R6, Regs.R7, Regs.R8, Regs.R9, Regs.R10, Regs.R12, Regs.R0, Regs.R1, Regs.R2, Regs.R3};
+    protected Reg[] usableRegs = {Regs.R4, Regs.R5, Regs.R6, Regs.R7, Regs.R8, Regs.R9, Regs.R10, Regs.R12/*, Regs.R0, Regs.R1, Regs.R2, Regs.R3*/};
     /**
      * 这条IR结束后就要释放的
      */
