@@ -29,7 +29,7 @@ public class LAddrConverter extends AsmConverter{
         if(symbol instanceof HasInitSymbol && ((HasInitSymbol)symbol).isGlobalSymbol())
         {
             int offsetInFuncData = dataHolder.getIndexInFuncData(symbol)* ConstDef.WORD_SIZE;
-            builder.ldr(rd, AsmUtil.getFuncDataLabel(funcSymbol), offsetInFuncData);
+            builder.ldr(rd, dataHolder.getLabel(), offsetInFuncData);
             if(retIr.offset.isData && retIr.offset.item!=0)
             {
                 builder.add(rd,rd,new ImmOperand(retIr.offset.item*ConstDef.WORD_SIZE));

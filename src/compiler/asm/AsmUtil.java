@@ -63,10 +63,7 @@ public class AsmUtil {
     {
         return (varSymbol instanceof VarSymbol && ((VarSymbol) varSymbol).hasConstInitValue) && varSymbol.initValues instanceof ArrayInitValue;
     }
-    public static String getFuncDataLabel(FuncSymbol funcSymbol)
-    {
-        return String.format(".%s.data",funcSymbol.getFuncName());
-    }
+
 
     public static long getSymbolArrayIndexOffset(long arrayIndex)
     {

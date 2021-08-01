@@ -29,16 +29,18 @@ public class AsmGen {
             if (ir instanceof IRFunction) {
                 IRFunction irFunction = (IRFunction)ir;
                 FuncSymbol funcSymbol = irFunction.funcSymbol;
-                FunctionDataHolder holder = new FunctionDataHolder(funcSymbol);
+                //FunctionDataHolder holder = new FunctionDataHolder(funcSymbol);
 
-                prepareFunctionData(funcSymbol, irFunction, holder);
+                //prepareFunctionData(funcSymbol, irFunction, holder);
 
-                AsmSection funcSection = genFunction(irFunction,holder);
+                List<AsmSection> funcSections = genFunction(irFunction);
+                for (AsmSection section : funcSections) {
+                    section.getText(builder);
+                }
+                //AsmSection dataSection = genFunctionData(funcSymbol, irFunction,holder);
 
-                AsmSection dataSection = genFunctionData(funcSymbol, irFunction,holder);
-
-                funcSection.getText(builder);
-                dataSection.getText(builder);
+                //funcSection.getText(builder);
+                //dataSection.getText(builder);
             }
         }
 
@@ -49,81 +51,26 @@ public class AsmGen {
         return builder.toString();
     }
 
-    public AsmSection genFunction(IRFunction irFunction,FunctionDataHolder holder) {
+    public List<AsmSection> genFunction(IRFunction irFunction) {
         FuncSymbol funcSymbol = irFunction.funcSymbol;
         prepareInformation(funcSymbol,irFunction);
 
-        AsmBuilder asmBuilder = new AsmBuilder(funcSymbol.getAsmLabel());
+
 
         List<IRBlock> irBlocks = divideIntoBlock(irFunction);
         optimizeIrOrder(irBlocks);
 
         RegGetter regGetter = new RegGetter(irBlocks);
 
-        // 如果mov的立即数不是imm12，则替换成ldr,改为从内存中加载
-        asmBuilder.hookIfNotImmXX(holder, regGetter);
 
-        //执行bl指令前，将使用中的寄存器入栈，完成后出栈恢复
-        // 不统一处理，手动控制
-        //asmBuilder.hookBLProtectReg(regGetter);
+        List<AsmSection> codeSections = new LinkedList<>();
+        codeSections.addAll(AsmConvertOrganizer.process(regGetter,funcSymbol, irBlocks));
 
-        for (IRBlock irBlock : irBlocks) {
-            AsmConvertOrganizer.process(asmBuilder,regGetter,funcSymbol,holder, irBlock);
-        }
 
-        AsmSection midSection = asmBuilder.startNew();
-        //开始新的AsmSection,生成函数的开头
-        //把开头放在这里生成，是因为我们需要知道代码中是否修改了lr寄存器
-        asmBuilder.text().align(2).global().arch("armv7-a").fpu("vfp").type(AsmBuilder.Type.Function).label();
-        genFunctionGenericStart(asmBuilder, funcSymbol,regGetter);
-        AsmSection headSection = asmBuilder.startNew();
-
-        asmBuilder.setSection(midSection); //继续之前的代码，生成结尾
-        genFunctionGenericEnd(asmBuilder, funcSymbol);
-
-        //开头加上后边的部分，生成完整的代码
-        headSection.add(midSection);
-        return headSection;
+        return codeSections;
     }
 
-    //现场保护等
-    public void genFunctionGenericStart(AsmBuilder asmBuilder, FuncSymbol funcSymbol,RegGetter regGetter) {
 
-        if (asmBuilder.isLrModified()) {
-            asmBuilder.push(new Reg[]{Regs.FP}, true).add(Regs.FP, Regs.SP, 4).sub(Regs.SP, Regs.SP,
-                                                                                  funcSymbol.getStackFrameSize()+4);
-        } else {
-            //str fp,[sp,#-4]!
-            //add fp,sp,#0,
-            //sub sp,sp,#20
-            asmBuilder.mem(AsmBuilder.Mem.STR, null, Regs.FP, Regs.SP, -4, true, false);
-            asmBuilder.add(Regs.FP, Regs.SP, 0);
-            asmBuilder.sub(Regs.SP, Regs.SP, funcSymbol.getStackFrameSize() + 4);
-        }
-
-        for (int i = 0; i < Math.min(4,funcSymbol.getParamNum()); i++) {
-            asmBuilder.str(Regs.REGS[i], Regs.FP, AsmUtil.getSymbolOffsetFp(funcSymbol.paramSymbols.get(i)));
-        }
-        for(int i = funcSymbol.getParamNum()-1;i>=4;i--)
-        {
-            Reg tmp = regGetter.getTmpRegister();
-            asmBuilder.ldr(tmp, Regs.FP, AsmUtil.getParamOffsetCalledFp(i));
-            asmBuilder.str(tmp, Regs.FP, AsmUtil.getSymbolOffsetFp(funcSymbol.paramSymbols.get(i)));
-        }
-    }
-
-    //函数返回之类的指令
-    public void genFunctionGenericEnd(AsmBuilder asmBuilder, FuncSymbol funcSymbol) {
-
-        asmBuilder.label(funcSymbol.getAsmEndLabel());
-        if (asmBuilder.isLrModified()) {
-            asmBuilder.sub(Regs.SP, Regs.FP, 4).pop(new Reg[]{Regs.FP}, true);
-        } else {
-            //恢复sp,fp,跳转回调用处
-            asmBuilder.add(Regs.SP, Regs.FP, 0).mem(AsmBuilder.Mem.LDR, null, Regs.FP, Regs.SP, 4, false, true).bx(
-                    Regs.LR);
-        }
-    }
 
     public void prepareInformation(FuncSymbol funcSymbol,IRFunction irFunction)
     {
@@ -145,7 +92,7 @@ public class AsmGen {
         funcSymbol.setStackFrameSize(frameSize+AsmUtil.REG_DATA_LEN);
     }
 
-    public void prepareFunctionData(FuncSymbol funcSymbol,IRFunction irFunction,FunctionDataHolder holder)
+    /*public void prepareFunctionData(FuncSymbol funcSymbol,IRFunction irFunction,FunctionDataHolder holder)
     {
         HashSet<ValueSymbol> usedSymbol = new HashSet<>();
         for (InterRepresent ir : irFunction.flatIR()) {
@@ -183,47 +130,19 @@ public class AsmGen {
             }
         }
         //holder.addData(FunctionDataHolder.RegFuncData.getInstance());
-    }
+    }*/
 
-    public AsmSection genFunctionData(FuncSymbol funcSymbol,IRFunction irFunction,FunctionDataHolder holder)
+   /* public AsmSection genFunctionData(FuncSymbol funcSymbol,IRFunction irFunction,FunctionDataHolder holder)
     {
         AsmBuilder builder = new AsmBuilder(AsmUtil.getFuncDataLabel(funcSymbol));
         builder.align(2);
         builder.label();
-        int indexInFunc = 0;
         for (FunctionDataHolder.FuncData data : holder.getAllFuncData()) {
             data.genData(builder);
-            /*if (data instanceof FunctionDataHolder.SymbolFuncData) {
-                ValueSymbol symbol = ((FunctionDataHolder.SymbolFuncData) data).symbol;
-                if (symbol instanceof HasInitSymbol && ((HasInitSymbol)symbol).isGlobalSymbol()) {
-                    HasInitSymbol init = (HasInitSymbol) symbol;
-                    builder.word(init.asmDataLabel);
-                }else{
-                    if (symbol instanceof HasInitSymbol) {
-                        HasInitSymbol varSymbol = (HasInitSymbol) symbol;
-                        if(AsmUtil.isNeedInitInDataSection(varSymbol))
-                        {
-                            builder.word(varSymbol.asmDataLabel);
-                        }else if(varSymbol.initValues!=null && varSymbol.initValues.length>0){
-                            builder.word(varSymbol.initValues[0]);
-                        }else{
-                            builder.space(ConstDef.WORD_SIZE);
-                        }
-                    }else{
-                        builder.space(ConstDef.WORD_SIZE);
-                    }
-                }
-            }else if(data instanceof FunctionDataHolder.ImmFuncData)
-            {
-                FunctionDataHolder.ImmFuncData dataItem = (FunctionDataHolder.ImmFuncData) data;
-                builder.word(dataItem.imm32);
-            }else{
-                builder.space(ConstDef.WORD_SIZE);
-            }*/
         }
 
         return builder.getSection();
-    }
+    }*/
 
 
     public List<AsmSection> genStaticData() {

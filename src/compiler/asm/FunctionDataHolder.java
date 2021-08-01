@@ -7,16 +7,32 @@ import compiler.symboltable.ValueSymbol;
 import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.initvalue.SingleInitValue;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class FunctionDataHolder {
 
     private final FuncSymbol funcSymbol;
-
-    public FunctionDataHolder(FuncSymbol funcSymbol) {
-        this.funcSymbol = funcSymbol;
+    private final int id;
+    private final String label;
+    public int getId() {
+        return id;
     }
 
+    public FunctionDataHolder(FuncSymbol funcSymbol, int id) {
+        this.funcSymbol = funcSymbol;
+        this.id = id;
+        label = getFuncDataLabel(funcSymbol,id);
+    }
+    private static String getFuncDataLabel(FuncSymbol funcSymbol,int id)
+    {
+        return String.format(".%s.data.%d",funcSymbol.getFuncName(),id);
+    }
+
+    public String getLabel() {
+        return label;
+    }
     // 只能加不能删
     private Map<FuncData,Integer> datas=new HashMap<>();
     private List<FuncData> dataList = new ArrayList<>();
@@ -30,6 +46,8 @@ public class FunctionDataHolder {
     public void addData(ValueSymbol symbol)
     {
         SymbolFuncData symbolFuncData = new SymbolFuncData(symbol);
+        if(datas.containsKey(symbolFuncData)) //不重复添加
+            return;
         dataList.add(currentIndex,symbolFuncData);
         datas.put(symbolFuncData,currentIndex++);
     }
@@ -37,6 +55,8 @@ public class FunctionDataHolder {
     public void addData(int imm)
     {
         ImmFuncData immFuncData = new ImmFuncData(imm);
+        if(datas.containsKey(immFuncData)) //不重复添加
+            return;
         dataList.add(currentIndex,immFuncData);
         datas.put(immFuncData,currentIndex++);
     }
@@ -66,20 +86,20 @@ public class FunctionDataHolder {
     {
         int index = getIndexInFuncData(data);
         int offsetInFuncData = index* ConstDef.WORD_SIZE;
-        builder.ldr(rd,AsmUtil.getFuncDataLabel(funcSymbol),offsetInFuncData);
+        builder.ldr(rd,label,offsetInFuncData);
     }
     public void loadFromFuncData(AsmBuilder builder,int num,Reg rd)
     {
         int index = getIndexInFuncData(num);
         int offsetInFuncData = index* ConstDef.WORD_SIZE;
-        builder.ldr(rd,AsmUtil.getFuncDataLabel(funcSymbol),offsetInFuncData);
+        builder.ldr(rd,label,offsetInFuncData);
     }
 
     public void loadFromFuncData(AsmBuilder builder,ValueSymbol symbol,Reg rd)
     {
         int index = getIndexInFuncData(symbol);
         int offsetInFuncData = index* ConstDef.WORD_SIZE;
-        builder.ldr(rd,AsmUtil.getFuncDataLabel(funcSymbol),offsetInFuncData);
+        builder.ldr(rd,label,offsetInFuncData);
     }
     public int getIndexInFuncData(FuncData data)
     {

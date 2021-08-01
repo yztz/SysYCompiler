@@ -39,6 +39,10 @@ public class AsmBuilder {
         this.regGetter = regGetter;
     }
 
+    public int totalLineNum()
+    {
+        return building.statements.size();
+    }
     /*public void hookBLProtectReg(RegGetter regGetter)
     {
         _hookBLProtectReg = true;
@@ -534,7 +538,7 @@ public class AsmBuilder {
         building = section;
     }
 
-    public AsmSection startNew() {
+    public AsmSection getSectionAndStartNew() {
         AsmSection ended = building;
         building = new AsmSection();
         return ended;
