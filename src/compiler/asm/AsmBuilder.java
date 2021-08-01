@@ -3,6 +3,7 @@ package compiler.asm;
 import compiler.asm.operand.*;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ public class AsmBuilder {
         building = new AsmSection();
     }
     private boolean _hookIfNotImmXX = false;
+    //private boolean _hookBLProtectReg = false;
     private FunctionDataHolder dataHolder;
     private RegGetter regGetter;
 
@@ -36,6 +38,13 @@ public class AsmBuilder {
         this.dataHolder = dataHolder;
         this.regGetter = regGetter;
     }
+
+    /*public void hookBLProtectReg(RegGetter regGetter)
+    {
+        _hookBLProtectReg = true;
+        this.regGetter = regGetter;
+    }*/
+
     public static String toImm(long imm) {
         return String.format("#%d", imm);
     }
@@ -266,7 +275,35 @@ public class AsmBuilder {
 
     public AsmBuilder bl(String label) {
         lrModified = true;
-        return addInstruction("bl", label);
+        /*if(_hookBLProtectReg)
+        {
+            List<Reg> usingRegister =
+                    regGetter.getUsingRegNext().stream().filter(r->{
+                        int id = r.getId();
+                        return id>3;
+                    }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
+
+            if(usingRegister.size()>0)
+            {
+                Reg tmp = regGetter.getTmpRegister();
+                //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
+                add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
+                stm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
+                regGetter.releaseReg(tmp);
+            }
+            addInstruction("bl", label);
+            if(usingRegister.size()>0)
+            {
+                Reg tmp = regGetter.getTmpRegister();
+                //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
+                add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
+                ldm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
+                regGetter.releaseReg(tmp);
+            }
+            return this;
+        }else{*/
+            return addInstruction("bl", label);
+        /*}*/
     }
 
     public AsmBuilder bx(Reg reg) {

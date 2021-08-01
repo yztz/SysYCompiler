@@ -72,30 +72,34 @@ public class CallConverter extends AsmConverter{
                     return id>3;
                 }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
 
-        if(usingRegister.size()>0)
+        /*if(usingRegister.size()>0)
         {
             Reg tmp = regGetter.getTmpRegister();
             //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
             builder.add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
             builder.stm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
-        }
+        }*/
+        AsmUtil.protectRegs(builder,regGetter,usingRegister);
 
         builder.bl(targetFun instanceof FuncSymbol ?((FuncSymbol)targetFun).getAsmLabel():
                            targetFun.getFuncName());
-
-        if(usingRegister.size()>0)
-        {
-            Reg tmp = regGetter.getTmpRegister();
-            //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
-            builder.add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
-            builder.ldm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
-        }
 
         if (callIr.returnResult != null) {
             Reg result = regGetter.getReg(callIr,callIr.returnResult);
             builder.mov(result,Regs.R0);
             //regGetter.setReg(callIr,callIr.returnResult,Regs.R0);
         }
+
+        AsmUtil.recoverRegs(builder,regGetter,usingRegister);
+        /*if(usingRegister.size()>0)
+        {
+            Reg tmp = regGetter.getTmpRegister();
+            //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
+            builder.add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
+            builder.ldm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
+        }*/
+
+
 
         return 1;
     }

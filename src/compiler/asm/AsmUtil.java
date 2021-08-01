@@ -177,4 +177,28 @@ public class AsmUtil {
         }
         return result;
     }
+
+    public static void protectRegs(AsmBuilder builder,RegGetter regGetter,List<Reg> regs)
+    {
+        if(regs.size()>0)
+        {
+            Reg tmp = regGetter.getTmpRegister();
+            //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
+            builder.add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
+            builder.stm(AsmBuilder.LSAddressMode.NONE,tmp,regs);
+            regGetter.releaseReg(tmp);
+        }
+    }
+
+    public static void recoverRegs(AsmBuilder builder,RegGetter regGetter,List<Reg> regs)
+    {
+        if(regs.size()>0)
+        {
+            Reg tmp = regGetter.getTmpRegister();
+            //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
+            builder.add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
+            builder.ldm(AsmBuilder.LSAddressMode.NONE,tmp,regs);
+            regGetter.releaseReg(tmp);
+        }
+    }
 }

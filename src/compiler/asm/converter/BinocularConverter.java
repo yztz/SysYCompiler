@@ -8,7 +8,9 @@ import compiler.genir.code.InterRepresent;
 import compiler.symboltable.function.FuncSymbol;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BinocularConverter extends AsmConverter{
     @Override
@@ -112,10 +114,10 @@ public class BinocularConverter extends AsmConverter{
 
                 }
             }
-        }else if(bIR.OP== BinocularRepre.Opcodes.DIV)
+        }else if(bIR.OP== BinocularRepre.Opcodes.DIV || bIR.OP== BinocularRepre.Opcodes.MOD)
         {
             //除法用__aeabi_idiv
-            if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData) //都不是立即数
+            if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData ) //都不是立即数
             {
                 Reg rd = regGetter.getReg(bIR, bIR.sourceFirst);
                 Reg rn = regGetter.getReg(bIR, bIR.sourceSecond);
@@ -131,11 +133,29 @@ public class BinocularConverter extends AsmConverter{
                 builder.mov(Regs.R0,bIR.sourceFirst.item);
                 builder.mov(Regs.R1,rn);
             }
-            builder.bl("__aeabi_idiv");
+
             Reg target = regGetter.getReg(ir, bIR.target);
-            builder.mov(target,Regs.R0);
+            List<Reg> usingRegister =
+                    regGetter.getUsingRegNext().stream().filter(r->{
+                        int id = r.getId();
+                        return id>1 && target!=r;
+                    }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
+
+            AsmUtil.protectRegs(builder,regGetter,usingRegister);
+
+            if(bIR.OP== BinocularRepre.Opcodes.DIV)
+            {
+                builder.bl("__aeabi_idiv");
+                builder.mov(target,Regs.R0);
+            }
+            else{
+                builder.bl("__aeabi_idivmod");
+                builder.mov(target,Regs.R1);
+            }
+
+            AsmUtil.recoverRegs(builder,regGetter,usingRegister);
             //regGetter.setReg(ir, bIR.target, Regs.R0);
-        }else if(bIR.OP== BinocularRepre.Opcodes.MOD)
+        }/*else if(bIR.OP== BinocularRepre.Opcodes.MOD)
         {
             //除法用__aeabi_idivmod
             if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData) //都不是立即数
@@ -154,11 +174,24 @@ public class BinocularConverter extends AsmConverter{
                 builder.mov(Regs.R0,bIR.sourceFirst.item);
                 builder.mov(Regs.R1,rn);
             }
+
+            Reg target = regGetter.getReg(ir, bIR.target);
+
+            List<Reg> usingRegister =
+                    regGetter.getUsingRegNext().stream().filter(r->{
+                        int id = r.getId();
+                        return id>1 && target!=r; //排除掉target，不然恢复的时候会把几所结果覆盖掉
+                    }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
+
+            AsmUtil.protectRegs(builder,regGetter,usingRegister);
+
             builder.bl("__aeabi_idivmod");
             //regGetter.setReg(ir, bIR.target, Regs.R1);
-            Reg target = regGetter.getReg(ir, bIR.target);
+
             builder.mov(target,Regs.R1);
-        }
+
+            AsmUtil.recoverRegs(builder,regGetter,usingRegister);
+        }*/
         else{
 
 
@@ -185,9 +218,6 @@ public class BinocularConverter extends AsmConverter{
                     break;
                 case DIV:
                     op = AsmBuilder.TripleRegOP.SDIV;
-                    break;
-                case MOD:
-                    // todo 貌似没有取余的指令
                     break;
             }
             builder.tripleReg(op, reg, rd, rn);

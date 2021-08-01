@@ -62,6 +62,11 @@ public class AsmGen {
 
         // 如果mov的立即数不是imm12，则替换成ldr,改为从内存中加载
         asmBuilder.hookIfNotImmXX(holder, regGetter);
+
+        //执行bl指令前，将使用中的寄存器入栈，完成后出栈恢复
+        // 不统一处理，手动控制
+        //asmBuilder.hookBLProtectReg(regGetter);
+
         for (IRBlock irBlock : irBlocks) {
             AsmConvertOrganizer.process(asmBuilder,regGetter,funcSymbol,holder, irBlock);
         }
