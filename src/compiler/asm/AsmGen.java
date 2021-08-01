@@ -58,7 +58,7 @@ public class AsmGen {
         List<IRBlock> irBlocks = divideIntoBlock(irFunction);
         optimizeIrOrder(irBlocks);
 
-        RegGetter regGetter = new RegGetterImpl(irBlocks);
+        RegGetter regGetter = new RegGetter(irBlocks);
 
         // 如果mov的立即数不是imm12，则替换成ldr,改为从内存中加载
         asmBuilder.hookIfNotImmXX(holder, regGetter);
@@ -258,7 +258,8 @@ public class AsmGen {
                 if (symbol instanceof HasInitSymbol) {
                     HasInitSymbol varSymbol = (HasInitSymbol) symbol;
 
-                    if (varSymbol instanceof VarSymbol && !((VarSymbol) varSymbol).hasConstInitValue) {
+                    if (varSymbol instanceof VarSymbol && !((VarSymbol) varSymbol).hasConstInitValue
+                        || !AsmUtil.isNeedInitInDataSection(varSymbol)) {
                         continue;
                     }
 

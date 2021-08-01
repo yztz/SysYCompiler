@@ -323,13 +323,13 @@ public class AsmBuilder {
     public AsmBuilder ldr(Reg rd, String label, long offset) {
         if(_hookIfNotImmXX)
         {
-            if(!AsmUtil.imm12(offset))
+            if(offset>4095 || offset< -4095)
             {
                 Reg baseReg = regGetter.getTmpRegister();
                 Reg offsetReg = regGetter.getTmpRegister(1);
                 ldr(baseReg,label,0);
-                ldrEq(offsetReg,offset);
-                return mem(Mem.LDR,null,rd,baseReg,offsetReg,false,ShiftOp.LSL,0,false,false);
+                ldrEq(offsetReg,Math.abs(offset));
+                return mem(Mem.LDR,null,rd,baseReg,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
         return addInstruction("ldr", rd.getText(),
@@ -356,11 +356,11 @@ public class AsmBuilder {
     public AsmBuilder ldr(Reg rd, Reg rn, long offset) {
         if(_hookIfNotImmXX)
         {
-            if(!AsmUtil.imm12(offset))
+            if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                ldrEq(offsetReg,offset);
-                return mem(Mem.LDR,null,rd,rn,offsetReg,false,ShiftOp.LSL,0,false,false);
+                ldrEq(offsetReg,Math.abs(offset));
+                return mem(Mem.LDR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
         return mem(Mem.LDR, null, rd, rn, offset, false, false);
@@ -369,11 +369,11 @@ public class AsmBuilder {
     public AsmBuilder str(Reg rd, Reg rn, long offset) {
         if(_hookIfNotImmXX)
         {
-            if(!AsmUtil.imm12(offset))
+            if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                ldrEq(offsetReg,offset);
-                return mem(Mem.STR,null,rd,rn,offsetReg,false,ShiftOp.LSL,0,false,false);
+                ldrEq(offsetReg,Math.abs(offset));
+                return mem(Mem.STR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
         return mem(Mem.STR, null, rd, rn, offset, false, false);

@@ -5,18 +5,19 @@ import compiler.genir.code.AddressOrData;
 import compiler.genir.code.InterRepresent;
 
 import java.util.*;
+import java.util.function.Function;
 
-public class RegGetterImpl extends RegGetter {
-    private final Map<Reg, AddressRWInfo> regDesc = new HashMap<>();
+public class RegGetterImpl {
+    /*private final Map<Reg, AddressRWInfo> regDesc = new HashMap<>();
     private final Map<AddressRWInfo, Reg> varDesc = new HashMap<>();
 
     public RegGetterImpl(List<IRBlock> irBlocks) {
         calNextRef(irBlocks);
     }
 
-    /**
+    *//**
      * 计算变量的下次引用与活跃度
-     */
+     *//*
     public void calNextRef(List<IRBlock> irBlocks) {
         for (IRBlock block : irBlocks) {
             Map<AddressRWInfo, Reference> refTable = new HashMap<>();
@@ -39,13 +40,13 @@ public class RegGetterImpl extends RegGetter {
         }
     }
 
-    /**
+    *//**
      * 这条IR结束后就要释放的
-     */
+     *//*
     HashSet<Reg> readyToReleaseReg = new HashSet<>();
-    /**
+    *//**
      * 当前IR使用的
-     */
+     *//*
     HashSet<Reg> usingRegThisIR = new HashSet<>();
 
     public void stepToNextIR()
@@ -57,9 +58,9 @@ public class RegGetterImpl extends RegGetter {
         usingRegThisIR.clear();
     }
 
-    /**
+    *//**
      * 获取接下来还要继续使用的寄存器
-     */
+     *//*
     @Override
     public List<Reg> getUsingRegNext() {
         List<Reg> regs=new ArrayList<>();
@@ -71,8 +72,8 @@ public class RegGetterImpl extends RegGetter {
 
         return regs;
     }
-/*    private static final String[] GENERAL_REG = {"R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12",};
-    private static final String[] SPECIAL_REG = {"R13", "R14", "R15",};*/
+*//*    private static final String[] GENERAL_REG = {"R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12",};
+    private static final String[] SPECIAL_REG = {"R13", "R14", "R15",};*//*
 
     public Reg getReg(InterRepresent ir, AddressOrData address)
     {
@@ -110,7 +111,7 @@ public class RegGetterImpl extends RegGetter {
         return null;
     }
 
-    /*public void setReg(InterRepresent ir, AddressOrData address,Reg register) {
+    *//*public void setReg(InterRepresent ir, AddressOrData address,Reg register) {
         Map<AddressRWInfo, Reference> refMap = ir.refMap;
         for (AddressRWInfo key : refMap.keySet()) {
             if(key.address!=address)
@@ -129,7 +130,7 @@ public class RegGetterImpl extends RegGetter {
                 readyToRelease(register);
             }
         }
-    }*/
+    }*//*
 
     @Override
     public Map<AddressRWInfo, Reg> getMapOfIR(InterRepresent ir) {
@@ -177,7 +178,7 @@ public class RegGetterImpl extends RegGetter {
 
     protected boolean isFreeReg(Reg register) { //todo 上下两个函数，名字反了
         return (!regDesc.containsKey(register) || regDesc.get(register) == null)
-                /*&& !usingRegThisIR.contains(register)*/;
+                *//*&& !usingRegThisIR.contains(register)*//*;
     }
 
     protected boolean isFreeRegIgnoreCurrentIR(Reg register)
@@ -186,8 +187,27 @@ public class RegGetterImpl extends RegGetter {
                 && !usingRegThisIR.contains(register);
     }
 
+    *//**
+     * 获取临时寄存器，保证在下条IR前释放
+     *//*
+    public Reg getTmpRegister(int index) {
+        return getFreeReg(index);
+    }
+
+    public Reg getTmpRegister(Function<Reg, Boolean> filter, int index) {
+        int i = 0;
+        for (Reg register : usableRegs) {
+            if (isFreeRegIgnoreCurrentIR(register) & filter.apply(register)){
+                if(i==index)
+                    return register;
+                i++;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void releaseAll() {
         regDesc.replaceAll((r, v) -> null);
-    }
+    }*/
 }

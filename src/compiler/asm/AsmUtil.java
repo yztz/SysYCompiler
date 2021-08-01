@@ -137,7 +137,10 @@ public class AsmUtil {
 
     public static boolean imm12(long x)
     {
-        return (x&0xfffff000) == 0;
+        if(x>=0)
+            return (((int)x)&0xfffff000) == 0;
+        else
+            return (((int)x)&0xfffff000) == 0xfffff000;
     }
 
     public static void dealIfNotImm12(int num, Reg rd, AsmBuilder builder, FunctionDataHolder dataHolder)

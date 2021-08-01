@@ -31,10 +31,12 @@ public class CallConverter extends AsmConverter{
                 if (param.isData) {
                     rd = regGetter.getTmpRegister();
                     builder.mov(rd,param.item);
+                    regGetter.releaseReg(rd);
                 }else{
                     rd = regGetter.getReg(ir,param);
                 }
                 builder.str(rd,Regs.SP,(paramStackLen - stackOffset - 1) *4);
+                regGetter.releaseRegIfNoRef(rd);
                 stackOffset++;
             }
 
@@ -56,7 +58,9 @@ public class CallConverter extends AsmConverter{
                     }*/
                     builder.mov(Regs.REGS[i],param.item);
                 }else{
-                    builder.mov(Regs.REGS[i],regGetter.getReg(ir,param));
+                    Reg reg = regGetter.getReg(ir, param);
+                    builder.mov(Regs.REGS[i], reg);
+                    regGetter.releaseRegIfNoRef(reg);
                 }
             }
         }

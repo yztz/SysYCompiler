@@ -93,7 +93,7 @@ public class SysVarListener implements SysYListener {
             //没有初始值，不要执行下面的
             if(varDefCtx.initVal()==null) continue;
 
-            if (varDefCtx.constExp() == null) //不是数组
+            if (varDefCtx.constExp() == null || varDefCtx.constExp().isEmpty()) //不是数组
             {
                 varDefCtx.initVal().dimensions = new long[]{1};
                 varDefCtx.initVal().initValues = new SingleInitValue();
