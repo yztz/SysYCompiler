@@ -3,6 +3,7 @@ package compiler.symboltable;
 
 import compiler.ConstDef;
 import compiler.genir.code.AddressOrData;
+import compiler.symboltable.initvalue.InitValue;
 import org.antlr.v4.runtime.Token;
 
 import java.util.Collection;
@@ -31,7 +32,7 @@ public class SymbolTable {
      * 向符号表中登记符号
      * @param token 符号
      */
-    public VarSymbol addVarArray(Token token, int[] dimensions, int[] initValues) //类型只有一个int
+    public VarSymbol addVarArray(Token token, long[] dimensions, InitValue initValues) //类型只有一个int
     {
         VarSymbol symbol = new VarSymbol(getCurrentOffset(), token, dimensions, initValues,true);
         symbols.put(token.getText(), symbol);
@@ -39,9 +40,9 @@ public class SymbolTable {
         return symbol;
     }
 
-    public VarSymbol addVar(Token token, int[] initValues) //类型只有一个int
+    public VarSymbol addVar(Token token, InitValue val) //类型只有一个int
     {
-        VarSymbol symbol = new VarSymbol(getCurrentOffset(), token, initValues);
+        VarSymbol symbol = new VarSymbol(getCurrentOffset(), token, val);
         symbols.put(token.getText(), symbol);
         appendOffset(symbol.length*ConstDef.INT_SIZE);
         return symbol;
@@ -73,24 +74,24 @@ public class SymbolTable {
         domain.getFunc().paramSymbols.add(symbol);
         return symbol;
     }
-    public ConstSymbol addConst(Token token,int constValue)
+    public ConstSymbol addConst(Token token,InitValue constValue)
     {
         ConstSymbol symbol = new ConstSymbol(constValue,token);
         symbols.put(token.getText(), symbol);
         return symbol;
     }
 
-    public ConstSymbol addConstArray(Token token, int[] dim, int[] constValues)
+    public ConstSymbol addConstArray(Token token, long[] dim, InitValue constValues)
     {
         ConstSymbol symbol = new ConstSymbol(constValues, token,dim,true);
         symbols.put(token.getText(), symbol);
         return symbol;
     }
-    private int getCurrentOffset()
+    private long getCurrentOffset()
     {
         return domain.getTotalOffset();
     }
-    private void appendOffset(int byteSize)
+    private void appendOffset(long byteSize)
     {
         domain.appendTotalOffset(byteSize);
     }

@@ -22,7 +22,7 @@ public class UnaryConverter extends AsmConverter{
     public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         UnaryRepre uIR = (UnaryRepre) ir;
         if (uIR.source.isData) { //是立即数，在IR生成阶段这个应该就被处理掉了
-            int result = uIR.source.item;
+            int result = (int)uIR.source.item;
             switch (uIR.OP) {
 
                 case MINUS:

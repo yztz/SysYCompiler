@@ -4,6 +4,8 @@ import antlr.SysYParser;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.ListenerUtil;
 import compiler.symboltable.function.FuncSymbol;
+import compiler.symboltable.initvalue.ArrayInitValue;
+import compiler.symboltable.initvalue.SingleInitValue;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -35,13 +37,13 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
             TerminalNode identifier = defCtx.Identifier();
             if(defCtx.constExp()==null || defCtx.constExp().isEmpty()) //不是数组
             {
-                defCtx.constInitVal().initValues = new int[1];
-                defCtx.constInitVal().dimensions= new int[]{1};
+                defCtx.constInitVal().initValues = new SingleInitValue();
+                defCtx.constInitVal().dimensions= new long[]{1};
             }
             else{ //是数组
                 defCtx.constInitVal().dimensions = getDimsFromConstExp(defCtx.constExp());
-                int length = getLengthFromDimensions(defCtx.constInitVal().dimensions);
-                defCtx.constInitVal().initValues = new int[length];
+                long length = ListenerUtil.getLengthFromDimensions(defCtx.constInitVal().dimensions);
+                defCtx.constInitVal().initValues = new ArrayInitValue(length);
             }
             defCtx.constInitVal().whichDim = 1;
             defCtx.constInitVal().ident = identifier.getSymbol();
@@ -55,7 +57,7 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
             TerminalNode identifier = defCtx.Identifier();
             if(defCtx.constExp()==null || defCtx.constExp().size()==0) //不是数组
             {
-                currentSymbolTable.addConst(identifier.getSymbol(),defCtx.constInitVal().initValues[0]);
+                currentSymbolTable.addConst(identifier.getSymbol(),defCtx.constInitVal().initValues);
             }
             else{ //是数组
                 currentSymbolTable.addConstArray(identifier.getSymbol(),defCtx.constInitVal().dimensions,
@@ -72,7 +74,7 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
         {
             dimSize*=ctx.dimensions[i];
         }
-        int symbolOffset = ctx.symbolOffset;
+        long symbolOffset = ctx.symbolOffset;
         for (int i = 0; i < ctx.constInitVal().size(); i++) {
             SysYParser.ConstInitValContext childInitVal = ctx.constInitVal().get(i);
             childInitVal.ident = ctx.ident;
@@ -95,19 +97,9 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
         {
             AddressOrData initResult = ctx.constExp().result;
             if (initResult.isData) {
-                ctx.initValues[ctx.symbolOffset]=initResult.item;
+                ctx.initValues.add(ctx.symbolOffset,(int) initResult.item);
             }
         }
-    }
-
-
-    private int getLengthFromDimensions(int[] dimensions)
-    {
-        int length = 1;
-        for (int dim : dimensions) {
-            length*=dim;
-        }
-        return length;
     }
 
 
@@ -223,7 +215,7 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
             {
                 ctx.result =
                         new AddressOrData (true,
-                                           ((ConstSymbol) symbolAndOffset.symbol).initValues[symbolAndOffset.offsetResult.item]);
+                                           (symbolAndOffset.symbol).initValues.get(symbolAndOffset.offsetResult.item));
             }
         }else if(ctx.exp()!=null) {
             ctx.result = ctx.exp().result;

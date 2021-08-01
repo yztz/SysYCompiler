@@ -1,33 +1,35 @@
 package compiler.symboltable;
 
+import compiler.symboltable.initvalue.InitValue;
+import compiler.symboltable.initvalue.SingleInitValue;
 import org.antlr.v4.runtime.Token;
 
 public abstract class HasInitSymbol extends ValueSymbol{
 
-    public int[] dimensions;
-    protected int length = 0;
-    protected int byteSize = 0;
+    public long[] dimensions;
+    protected long length = 0;
+    protected long byteSize = 0;
     public boolean isGlobal = false;
 
     // 初始数据在汇编的中的标签
     public String asmDataLabel = null;
 
-    public int[] initValues;
+    public InitValue initValues;
 
-    public HasInitSymbol(Token symbolToken,int[] initValues) {
+    public HasInitSymbol(Token symbolToken,InitValue initVal) {
         super(symbolToken);
-        this.initValues= initValues;
-        dimensions=new int[]{1};
+        this.initValues= initVal;
+        dimensions=new long[]{1};
         length = 1;
         byteSize=4;
     }
 
-    public HasInitSymbol(Token symbolToken, int[] dimensions, boolean isArray,int[] initValues) {
+    public HasInitSymbol(Token symbolToken, long[] dimensions, boolean isArray, InitValue initValues) {
         super(symbolToken, isArray);
         this.initValues= initValues;
         this.dimensions = dimensions;
         length = 1;
-        for (int dimSize : dimensions) {
+        for (long dimSize : dimensions) {
             length *=dimSize;
         }
         byteSize=length*4;
@@ -35,24 +37,14 @@ public abstract class HasInitSymbol extends ValueSymbol{
 
     public boolean isAllZero()
     {
-        if(initValues==null) return true;
-        for (int i = 0; i < initValues.length; i++) {
-            if(initValues[i]!=0)
-                return false;
-        }
-        return true;
+        return initValues.isAllZero();
     }
 
-    public int getZeroTailLength()
+    public long getZeroTailLength()
     {
         if(initValues==null) return getLength();
-        int length = 0;
-        for (int i = initValues.length - 1; i >= 0; i--) {
-            if(initValues[i]!=0)
-                break;
-            length++;
-        }
-        return length;
+
+        return getLength() - initValues.getLastNonZeroPos()-1;
     }
 
     public boolean isGlobalSymbol()
@@ -63,14 +55,14 @@ public abstract class HasInitSymbol extends ValueSymbol{
     /**
      * 展开后的一维长度
      */
-    public int getLength() {
+    public long getLength() {
         return length;
     }
 
     /**
      * 总共占用多少字节
      */
-    public int getByteSize() {
+    public long getByteSize() {
         return byteSize;
     }
 

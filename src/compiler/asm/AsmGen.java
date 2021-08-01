@@ -9,6 +9,7 @@ import compiler.genir.IRUnion;
 import compiler.genir.code.*;
 import compiler.symboltable.*;
 import compiler.symboltable.function.FuncSymbol;
+import compiler.symboltable.initvalue.InitValue;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -286,10 +287,10 @@ public class AsmGen {
 
         if(varSymbol.initValues!=null && !varSymbol.isAllZero())
         {
-            int zeroTailLength = varSymbol.getZeroTailLength();
-            int[] initValues = varSymbol.initValues;
-            for (int i = 0; i < initValues.length - zeroTailLength; i++) {
-                int initValue = initValues[i];
+            long zeroTailLength = varSymbol.getZeroTailLength();
+            InitValue initValues = varSymbol.initValues;
+            for (long i = 0; i <= initValues.getLastNonZeroPos(); i++) {
+                int initValue = initValues.get(i);
                 builder.word(initValue);
             }
             if(zeroTailLength!=0)

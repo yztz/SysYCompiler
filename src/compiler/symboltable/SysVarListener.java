@@ -3,6 +3,10 @@ package compiler.symboltable;
 import antlr.SysYListener;
 import antlr.SysYParser;
 import compiler.genir.code.AddressOrData;
+import compiler.genir.code.ListenerUtil;
+import compiler.symboltable.initvalue.ArrayInitValue;
+import compiler.symboltable.initvalue.InitValue;
+import compiler.symboltable.initvalue.SingleInitValue;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -91,14 +95,16 @@ public class SysVarListener implements SysYListener {
 
             if (varDefCtx.constExp() == null) //不是数组
             {
-                varDefCtx.initVal().dimensions = new int[]{1};
-                varDefCtx.initVal().initValues = new int[1];
+                varDefCtx.initVal().dimensions = new long[]{1};
+                varDefCtx.initVal().initValues = new SingleInitValue();
+                varDefCtx.initVal().initValueLen = 1;
             }
             else{ //是数组
-                int[] dims = getDimsFromConstExp(varDefCtx.constExp());
+                long[] dims = ListenerUtil.getDimsFromConstExp(varDefCtx.constExp());
                 varDefCtx.initVal().dimensions = dims;
-                int length = getLengthFromDimensions(dims);
-                varDefCtx.initVal().initValues = new int[length];
+                long length = ListenerUtil.getLengthFromDimensions(dims);
+                varDefCtx.initVal().initValues = new ArrayInitValue(length);
+                varDefCtx.initVal().initValueLen = length;
             }
             varDefCtx.initVal().ident= identifier.getSymbol();
             varDefCtx.initVal().symbolOffset=0;
@@ -113,8 +119,7 @@ public class SysVarListener implements SysYListener {
         for (SysYParser.VarDefContext varDefCtx : varDefs) {
             TerminalNode identifier = varDefCtx.Identifier();
 
-            int[] initValues = null;
-            int[] dimensions = null;
+            InitValue initValues = null;
             if(varDefCtx.initVal()!=null)
             {
                 initValues = varDefCtx.initVal().initValues;
@@ -125,7 +130,7 @@ public class SysVarListener implements SysYListener {
                 // 遍历完成，记录数据
                 varSymbol = currentSymbolTable.addVar(identifier.getSymbol(), initValues);
             }else{
-                int[] dims = getDimsFromConstExp(varDefCtx.constExp());
+                long[] dims = ListenerUtil.getDimsFromConstExp(varDefCtx.constExp());
                 // 遍历完成，记录数据
                 varSymbol = currentSymbolTable.addVarArray(identifier.getSymbol(), dims, initValues);
             }
@@ -138,27 +143,8 @@ public class SysVarListener implements SysYListener {
             }
         }
     }
-    private int getLengthFromDimensions(int[] dimensions)
-    {
-        int length = 1;
-        for (int dim : dimensions) {
-            length*=dim;
-        }
-        return length;
-    }
-    private int[] getDimsFromConstExp(List<SysYParser.ConstExpContext> expCtxList) {
-        int[] dims= new int[expCtxList.size()];
-        for (int i = 0; i < expCtxList.size(); i++) {
-            if (expCtxList.get(i).result!=null&&
-                    expCtxList.get(i).result.isData) {
-                dims[i]= expCtxList.get(i).result.item;
-            }else{
-                dims[i]=1;
-                System.err.println("Array size must be constant");
-            }
-        }
-        return dims;
-    }
+
+
 
     @Override
     public void enterVarDef(SysYParser.VarDefContext ctx) {
@@ -178,7 +164,7 @@ public class SysVarListener implements SysYListener {
         {
             dimSize*=ctx.dimensions[i];
         }
-        int symbolOffset = ctx.symbolOffset;
+        long symbolOffset = ctx.symbolOffset;
         for (int i = 0; i < ctx.initVal().size(); i++) {
             SysYParser.InitValContext childInitVal = ctx.initVal().get(i);
             childInitVal.ident = ctx.ident;
@@ -202,7 +188,7 @@ public class SysVarListener implements SysYListener {
         {
             AddressOrData initResult = ctx.exp().result;
             if (initResult!=null && initResult.isData) {
-                ctx.initValues[ctx.symbolOffset]=initResult.item;
+                ctx.initValues.add(ctx.symbolOffset,(int)initResult.item);
             }else{
                 hasConstInitVal = false;
             }

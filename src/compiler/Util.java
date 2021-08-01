@@ -15,7 +15,7 @@ public class Util {
         return ints;
     }
 
-    public static int getIntFromStr(String num)
+    public static long getIntFromStr(String num)
     {
         boolean neg = false;
         if(num.startsWith("-"))
@@ -28,12 +28,12 @@ public class Util {
         }
         if(num.startsWith("0x") || num.startsWith("0X"))
         {
-            return (int)Long.parseLong(num.toLowerCase(Locale.ROOT).replace("0x", ""), 16);
+            return Long.parseLong(num.toLowerCase(Locale.ROOT).replace("0x", ""), 16);
         }else if(num.startsWith("0") && num.length()>1)
         {
-            return (int)Long.parseLong(num.toLowerCase(Locale.ROOT).substring(1),8);
+            return Long.parseLong(num.toLowerCase(Locale.ROOT).substring(1),8);
         }
-        int i = (int)Long.parseLong(num);
+        long i = Long.parseLong(num);
         return neg?-i:i;
     }
 }

@@ -29,7 +29,7 @@ public class InitVarConverter extends AsmConverter{
         if(AsmUtil.isNeedInitInDataSection(varSymbol))//数据在数据区,funcData里保存的是地址
         {
 
-            if(varSymbol.initValues.length>4) //大于4个，用memcpy
+            if(varSymbol.initValues.getLength()>4) //大于4个，用memcpy
             {
                 /*Reg src = regGetter.getTmpRegister(0);
                 Reg des = regGetter.getTmpRegister(1);*/
@@ -42,7 +42,7 @@ public class InitVarConverter extends AsmConverter{
                 Reg addr = regGetter.getTmpRegister(0);
                 builder.ldr(addr,funcDataLabel,offsetInFuncData);
 
-                Reg[] regs = new Reg[varSymbol.initValues.length];
+                Reg[] regs = new Reg[(int) varSymbol.initValues.getLength()];
                 for (int i = 0; i < regs.length; i++) {
                     regs[i] = regGetter.getTmpRegister(i+1);
                 }
@@ -53,7 +53,7 @@ public class InitVarConverter extends AsmConverter{
         }else{ //不是数组
             Reg tmp = regGetter.getTmpRegister();
             builder.ldr(tmp,funcDataLabel,offsetInFuncData);
-            builder.sdr(tmp, Regs.FP, AsmUtil.getSymbolOffsetFp(varSymbol));
+            builder.str(tmp, Regs.FP, AsmUtil.getSymbolOffsetFp(varSymbol));
         }
 
         return 1;

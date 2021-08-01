@@ -5,6 +5,7 @@ import compiler.genir.code.AddressOrData;
 import compiler.symboltable.HasInitSymbol;
 import compiler.symboltable.ValueSymbol;
 import compiler.symboltable.function.FuncSymbol;
+import compiler.symboltable.initvalue.SingleInitValue;
 
 import java.util.*;
 
@@ -126,8 +127,8 @@ public class FunctionDataHolder {
                     if(AsmUtil.isNeedInitInDataSection(varSymbol))
                     {
                         builder.word(varSymbol.asmDataLabel);
-                    }else if(varSymbol.initValues!=null && varSymbol.initValues.length>0){
-                        builder.word(varSymbol.initValues[0]);
+                    }else if(varSymbol.initValues instanceof SingleInitValue){
+                        builder.word(varSymbol.initValues.get(0));
                     }else{
                         builder.space(ConstDef.WORD_SIZE);
                     }

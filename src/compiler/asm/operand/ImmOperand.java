@@ -1,9 +1,9 @@
 package compiler.asm.operand;
 
 public class ImmOperand extends Operand {
-    public int imm8m;
+    public long imm8m;
 
-    public ImmOperand(int imm8m) {
+    public ImmOperand(long imm8m) {
         this.imm8m = imm8m;
     }
 

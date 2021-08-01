@@ -320,7 +320,7 @@ public class SysExpCalListener implements SysYListener {
             {
                 ctx.result =
                         new AddressOrData (true,
-                                           ((ConstSymbol) symbolAndOffset.symbol).initValues[symbolAndOffset.offsetResult.item]);
+                                           symbolAndOffset.symbol.initValues.get(symbolAndOffset.offsetResult.item));
             }
         }
     }
@@ -354,7 +354,7 @@ public class SysExpCalListener implements SysYListener {
     public void exitSignExpr(SysYParser.SignExprContext ctx) {
         if(ctx.unaryExp().result!=null && ctx.unaryExp().result.isData)
         {
-            int unaryResult = ctx.unaryExp().result.item;
+            long unaryResult = ctx.unaryExp().result.item;
             if(ctx.Plus()!=null)
             {
                 ctx.result=new AddressOrData(true, unaryResult>0?unaryResult:-unaryResult);
@@ -386,7 +386,7 @@ public class SysExpCalListener implements SysYListener {
             ctx.result=ctx.unaryExp().result;
         else if(ctx.mulExp().result!=null && ctx.unaryExp().result!=null &&
                 ctx.mulExp().result.isData && ctx.unaryExp().result.isData){
-            int r=0;
+            long r=0;
             if(ctx.Star()!=null)
             {
                 r=ctx.mulExp().result.item *ctx.unaryExp().result.item;
@@ -412,7 +412,7 @@ public class SysExpCalListener implements SysYListener {
             ctx.result=ctx.mulExp().result;
         else if(ctx.mulExp().result!=null && ctx.addExp().result!=null &&
                 ctx.mulExp().result.isData && ctx.addExp().result.isData){
-            int r=0;
+            long r=0;
             if(ctx.Plus()!=null)
             {
                 r=ctx.mulExp().result.item +ctx.addExp().result.item;

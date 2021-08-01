@@ -35,14 +35,14 @@ public class LAddrConverter extends AsmConverter{
                 builder.add(rd,rd,new ImmOperand(retIr.offset.item*ConstDef.WORD_SIZE));
             }
         }else if(symbol instanceof ParamSymbol){ //todo 这么处理好吗
-            int offsetFP = AsmUtil.getSymbolOffsetFp(symbol);
+            long offsetFP = AsmUtil.getSymbolOffsetFp(symbol);
             if(retIr.offset.isData)
             {
                 offsetFP+=(retIr.offset.item*ConstDef.WORD_SIZE);
             }
             builder.ldr(rd,Regs.FP,offsetFP); // 读取地址
         }else{
-            int symbolOffsetFp = AsmUtil.getSymbolOffsetFp(symbol);
+            long symbolOffsetFp = AsmUtil.getSymbolOffsetFp(symbol);
             if(retIr.offset.isData)
             {
                 symbolOffsetFp+=(retIr.offset.item*ConstDef.WORD_SIZE);

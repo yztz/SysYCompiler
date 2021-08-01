@@ -29,8 +29,8 @@ public class SymbolDomain {
         return id;
     }
 
-    int totalOffset = 0;
-    public int getTotalOffset()
+    long totalOffset = 0;
+    public long getTotalOffset()
     {
         if(getFunc()==null)
             return totalOffset;
@@ -38,7 +38,7 @@ public class SymbolDomain {
         return getFunc().totalSymbolOffset;
     }
 
-    public void appendTotalOffset(int offset)
+    public void appendTotalOffset(long offset)
     {
         if(getFunc()==null)
         {

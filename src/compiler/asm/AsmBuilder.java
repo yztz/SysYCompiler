@@ -36,7 +36,7 @@ public class AsmBuilder {
         this.dataHolder = dataHolder;
         this.regGetter = regGetter;
     }
-    public static String toImm(int imm) {
+    public static String toImm(long imm) {
         return String.format("#%d", imm);
     }
 
@@ -93,11 +93,11 @@ public class AsmBuilder {
         return addDirective("bss");
     }
 
-    public AsmBuilder comm(String label,int byteSize) {
+    public AsmBuilder comm(String label,long byteSize) {
         return addDirective("comm",label,String.valueOf(byteSize));
     }
 
-    public AsmBuilder space(int byteSize) {
+    public AsmBuilder space(long byteSize) {
         return addDirective("space",String.valueOf(byteSize));
     }
 
@@ -156,7 +156,7 @@ public class AsmBuilder {
 
     //========================汇编指令部分===================================
 
-    public AsmBuilder size(String targetLabel, int size) {
+    public AsmBuilder size(String targetLabel, long size) {
         return addDirective("size", targetLabel, String.valueOf(size));
     }
     public AsmBuilder addInstruction(String op, String r1, String r2, String r3, String r4) {
@@ -242,7 +242,17 @@ public class AsmBuilder {
         return regOperand(RegOperandOP.CMP, rd, new RegOperand(rn));
     }
 
-    public AsmBuilder cmp(Reg rd, int imm8m) {
+    public AsmBuilder cmp(Reg rd, long imm8m) {
+        if(_hookIfNotImmXX)
+        {
+            if(!AsmUtil.imm8m(imm8m))
+            {
+                Reg tmp = regGetter.getTmpRegister();
+                ldrEq(tmp,imm8m);
+                return regOperand(RegOperandOP.CMP, rd, new RegOperand(tmp));
+            }
+        }
+
         return regOperand(RegOperandOP.CMP, rd, new ImmOperand(imm8m));
     }
 
@@ -264,7 +274,7 @@ public class AsmBuilder {
     }
 
     // -------------------- 内存读写-----------------------------------
-    public AsmBuilder mem(Mem op, Size size, Reg rd, Reg rn, int offset, boolean saveOffset, boolean postOffset) {
+    public AsmBuilder mem(Mem op, Size size, Reg rd, Reg rn, long offset, boolean saveOffset, boolean postOffset) {
         String s = size == null ? "" : size.getText();
 
         if(_hookIfNotImmXX)
@@ -310,7 +320,18 @@ public class AsmBuilder {
         }
     }
 
-    public AsmBuilder ldr(Reg rd, String label, int offset) {
+    public AsmBuilder ldr(Reg rd, String label, long offset) {
+        if(_hookIfNotImmXX)
+        {
+            if(!AsmUtil.imm12(offset))
+            {
+                Reg baseReg = regGetter.getTmpRegister();
+                Reg offsetReg = regGetter.getTmpRegister(1);
+                ldr(baseReg,label,0);
+                ldrEq(offsetReg,offset);
+                return mem(Mem.LDR,null,rd,baseReg,offsetReg,false,ShiftOp.LSL,0,false,false);
+            }
+        }
         return addInstruction("ldr", rd.getText(),
                               offset == 0 ?
                                       label :
@@ -322,7 +343,7 @@ public class AsmBuilder {
     /**
      * ldr伪指令,如果可以直接用mov，就用mov，不行的话就把imm放进常量池里，通过ldr加载
      */
-    public AsmBuilder ldrEq(Reg rd, int imm)
+    public AsmBuilder ldrEq(Reg rd, long imm)
     {
         return addInstruction("ldr",rd.getText(),String.format("=%d",imm));
     }
@@ -332,16 +353,29 @@ public class AsmBuilder {
         return addInstruction("ldr",rd.getText(),String.format("=%s",label));
     }
 
-    public AsmBuilder sdr(Reg rd,Reg rn,int offset)
-    {
-        return mem(Mem.STR,null,rd,rn,offset,false,false);
-    }
-
-    public AsmBuilder ldr(Reg rd, Reg rn, int offset) {
+    public AsmBuilder ldr(Reg rd, Reg rn, long offset) {
+        if(_hookIfNotImmXX)
+        {
+            if(!AsmUtil.imm12(offset))
+            {
+                Reg offsetReg = regGetter.getTmpRegister(0);
+                ldrEq(offsetReg,offset);
+                return mem(Mem.LDR,null,rd,rn,offsetReg,false,ShiftOp.LSL,0,false,false);
+            }
+        }
         return mem(Mem.LDR, null, rd, rn, offset, false, false);
     }
 
-    public AsmBuilder str(Reg rd, Reg rn, int offset) {
+    public AsmBuilder str(Reg rd, Reg rn, long offset) {
+        if(_hookIfNotImmXX)
+        {
+            if(!AsmUtil.imm12(offset))
+            {
+                Reg offsetReg = regGetter.getTmpRegister(0);
+                ldrEq(offsetReg,offset);
+                return mem(Mem.STR,null,rd,rn,offsetReg,false,ShiftOp.LSL,0,false,false);
+            }
+        }
         return mem(Mem.STR, null, rd, rn, offset, false, false);
     }
 
@@ -391,7 +425,7 @@ public class AsmBuilder {
         return regOperand(RegOperandOP.MOV, rd, new RegOperand(rn));
     }
 
-    public AsmBuilder mov(Reg rd, int imm12) {
+    public AsmBuilder mov(Reg rd, long imm12) {
         if(_hookIfNotImmXX)
         {
             if(!AsmUtil.imm12(imm12))
@@ -412,7 +446,7 @@ public class AsmBuilder {
         return regRegOperand(RegRegOperandOP.ADD, rd, rn, new RegOperand(rm));
     }
 
-    public AsmBuilder add(Reg rd, Reg rn, int imm12) {
+    public AsmBuilder add(Reg rd, Reg rn, long imm12) {
         if(_hookIfNotImmXX)
         {
             if(!AsmUtil.imm12(imm12))
@@ -435,7 +469,7 @@ public class AsmBuilder {
         return regRegOperand(RegRegOperandOP.SUB, rd, rn, new RegOperand(rm));
     }
 
-    public AsmBuilder sub(Reg rd, Reg rn, int imm12) {
+    public AsmBuilder sub(Reg rd, Reg rn, long imm12) {
         if(_hookIfNotImmXX)
         {
             if(!AsmUtil.imm12(imm12))

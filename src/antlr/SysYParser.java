@@ -7,6 +7,8 @@ import compiler.genir.IRFunction;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.GotoRepresent;
 import compiler.genir.code.InterRepresentHolder;
+import compiler.symboltable.initvalue.ArrayInitValue;
+import compiler.symboltable.initvalue.InitValue;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATN;
 import org.antlr.v4.runtime.atn.ATNDeserializer;
@@ -184,12 +186,13 @@ public class SysYParser extends Parser {
 	}
 
 	public static class InitValContextBase extends DomainedContext{
-		public int[] initValues;
-		public int symbolOffset;
+		public InitValue initValues;
+		public long symbolOffset;
 		public int whichDim; //第几个维度
-		public int[] dimensions;
+		public long[] dimensions;
 		public Token ident;
 		public boolean hasConstInitValue = false;
+		public long initValueLen = 0;
 		public InitValContextBase() {
 		}
 

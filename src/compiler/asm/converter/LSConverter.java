@@ -32,7 +32,7 @@ public abstract class LSConverter extends AsmConverter {
 
                 if(ir.offset==null || ir.offset.isData)
                 {
-                    int offset = 0;
+                    long offset = 0;
                     if(ir.offset!=null)
                         offset = AsmUtil.getSymbolArrayIndexOffset(ir.offset.item);
 
@@ -50,7 +50,7 @@ public abstract class LSConverter extends AsmConverter {
                 baseAddrReg = Regs.FP;
                 if(ir.offset==null || ir.offset.isData)
                 {
-                    int offset = 0;
+                    long offset = 0;
                     if(ir.offset==null)
                         offset = AsmUtil.getSymbolOffsetFp(valueSymbol);
                     else
@@ -60,7 +60,7 @@ public abstract class LSConverter extends AsmConverter {
                                 offset, false, false);
                 }else{
 
-                    int offsetFPWord = AsmUtil.getSymbolOffsetFp(valueSymbol)/ ConstDef.WORD_SIZE;
+                    long offsetFPWord = AsmUtil.getSymbolOffsetFp(valueSymbol)/ ConstDef.WORD_SIZE;
                     Reg rm = regGetter.getReg(ir,ir.offset);
                     builder.add(rm,rm,offsetFPWord);
                     builder.mem(op, null, rdGetter.get(), baseAddrReg,
@@ -71,12 +71,12 @@ public abstract class LSConverter extends AsmConverter {
 
             if(ir.offset==null || ir.offset.isData)
             {
-                int offsetFP = AsmUtil.getSymbolOffsetFp(valueSymbol);
+                long offsetFP = AsmUtil.getSymbolOffsetFp(valueSymbol);
 
                 Reg tmp = regGetter.getTmpRegister();
                 builder.ldr(tmp,Regs.FP,offsetFP); // 先读取地址
 
-                int offsetArray = 0;
+                long offsetArray = 0;
                 if(ir.offset!=null && ir.offset.item!=0)
                 {
                     offsetArray = ir.offset.item*ConstDef.WORD_SIZE;
@@ -84,7 +84,7 @@ public abstract class LSConverter extends AsmConverter {
                 builder.mem(op, null, rdGetter.get(), tmp,
                             offsetArray, false, false);
             }else{
-                int offsetFP = AsmUtil.getSymbolOffsetFp(valueSymbol);
+                long offsetFP = AsmUtil.getSymbolOffsetFp(valueSymbol);
                 Reg tmp = regGetter.getTmpRegister();
                 builder.ldr(tmp,Regs.FP,offsetFP); // 先读取地址
 

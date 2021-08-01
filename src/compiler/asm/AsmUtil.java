@@ -4,6 +4,7 @@ import compiler.ConstDef;
 import compiler.genir.code.*;
 import compiler.symboltable.*;
 import compiler.symboltable.function.FuncSymbol;
+import compiler.symboltable.initvalue.ArrayInitValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,35 +61,35 @@ public class AsmUtil {
 
     public static boolean isNeedInitInDataSection(HasInitSymbol varSymbol)
     {
-        return (varSymbol instanceof VarSymbol && ((VarSymbol) varSymbol).hasConstInitValue) && varSymbol.initValues.length>1;
+        return (varSymbol instanceof VarSymbol && ((VarSymbol) varSymbol).hasConstInitValue) && varSymbol.initValues instanceof ArrayInitValue;
     }
     public static String getFuncDataLabel(FuncSymbol funcSymbol)
     {
         return String.format(".%s.data",funcSymbol.getFuncName());
     }
 
-    public static int getSymbolArrayIndexOffset(int arrayIndex)
+    public static long getSymbolArrayIndexOffset(long arrayIndex)
     {
         return arrayIndex*ConstDef.WORD_SIZE;
     }
 
-    public static int getSymbolOffset(ValueSymbol symbol)
+    public static long getSymbolOffset(ValueSymbol symbol)
     {
         return -symbol.getOffsetByte() - symbol.getByteSize();
     }
 
-    public static int getSymbolOffset(ValueSymbol symbol, int arrayIndex)
+    public static long getSymbolOffset(ValueSymbol symbol, long arrayIndex)
     {
         return getSymbolOffset(symbol) + getSymbolArrayIndexOffset(arrayIndex);
     }
 
     //这些区域用来保存寄存器数据
     public static final int REG_DATA_LEN = 32;
-    public static int getSymbolOffsetFp(ValueSymbol symbol)
+    public static long getSymbolOffsetFp(ValueSymbol symbol)
     {
         return getSymbolOffset(symbol)-2* ConstDef.WORD_SIZE- REG_DATA_LEN;
     }
-    public static int getSymbolOffsetFp(ValueSymbol symbol, int arrayIndex)
+    public static long getSymbolOffsetFp(ValueSymbol symbol, long arrayIndex)
     {
         return getSymbolOffset(symbol,arrayIndex) -2* ConstDef.WORD_SIZE - REG_DATA_LEN;
     }
@@ -124,7 +125,7 @@ public class AsmUtil {
     /*
      * Checks if immediate value can be converted to imm12(12 bits) value.
      */
-    public static boolean imm8m(int x)
+    public static boolean imm8m(long x)
     {
         int rot;
 

@@ -24,10 +24,10 @@ public class LoadConverter extends LSConverter {
             ConstSymbol symbol = (ConstSymbol) loadIr.valueSymbol;
             if(loadIr.offset==null)
             {
-                builder.mov(regGetter.getReg(ir,loadIr.target),symbol.initValues[0]);
+                builder.mov(regGetter.getReg(ir,loadIr.target),symbol.initValues.get(0));
                 flag = true;
             }else if(loadIr.offset.isData){
-                builder.mov(regGetter.getReg(ir,loadIr.target),symbol.initValues[loadIr.offset.item]);
+                builder.mov(regGetter.getReg(ir,loadIr.target),symbol.initValues.get(loadIr.offset.item));
                 flag = true;
             }
         }

@@ -21,8 +21,8 @@ public class BinocularConverter extends AsmConverter{
         BinocularRepre bIR = (BinocularRepre) ir;
         if (bIR.sourceFirst.isData && bIR.sourceSecond.isData) { //都是立即数，在IR生成阶段这个应该就被处理掉了
             int result = 0;
-            int s1 = bIR.sourceFirst.item;
-            int s2 = bIR.sourceSecond.item;
+            int s1 = (int) bIR.sourceFirst.item;
+            int s2 = (int) bIR.sourceSecond.item;
             switch (bIR.OP) {
 
                 case ADD:
