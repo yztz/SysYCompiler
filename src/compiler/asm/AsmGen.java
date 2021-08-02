@@ -360,7 +360,7 @@ public class AsmGen {
                         if(gotoIR.targetHolder==null)
                             System.exit(161);
                         if(gotoIR.getTargetIR()==null)
-                            System.exit(190+gotoIR.flag);
+                            System.exit(30+gotoIR.flag);
                     }else{
                         String description = irFunction.getDescription(i);
                         if(gotoIR.targetHolder==null)

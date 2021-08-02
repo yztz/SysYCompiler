@@ -438,11 +438,13 @@ public class SysYIRListener implements SysYListener {
         {
             // 回填trueList
             for (GotoRepresent ir : ctx.cond().trueList) {
+                ir.flag = 1;
                 ir.setTargetIR(ctx.stmt(0).getStartStmt().getInterRepresent());
             }
         }else
         {
             for (GotoRepresent ir : ctx.cond().trueList) {
+                ir.flag = 2;
                 _currentCollection.bookVacancy(ir.targetHolder);
             }
         }
@@ -481,11 +483,13 @@ public class SysYIRListener implements SysYListener {
         {
             InterRepresent stmtStartIR = ctx.stmt().getStartStmt().getInterRepresent();
             for (GotoRepresent ir : ctx.cond().trueList) {
+                ir.flag = 3;
                 ir.targetHolder.setInterRepresent(stmtStartIR);
             }
 
         }else{
             for (GotoRepresent ir : ctx.cond().trueList) {
+                ir.flag = 4;
                 ir.targetHolder.setInterRepresent(whileStartIR);
             }
         }
@@ -618,6 +622,7 @@ public class SysYIRListener implements SysYListener {
         }
 
         for (GotoRepresent ir : ctx.trueList) {
+            ir.flag = 5;
                 _currentCollection.bookVacancy(ir.targetHolder);
                 //System.out.println("true "+ir.lineNum);
         }
@@ -929,7 +934,7 @@ public class SysYIRListener implements SysYListener {
     private List<InterRepresent> createIfGotoPair(SysYParser.BranchContextBase ctx, IfGotoRepresent.RelOp relOp,
                                   AddressOrData address1, AddressOrData address2,int flag) {
         IfGotoRepresent ifGoto = new IfGotoRepresent(null, relOp, address1, address2);
-        ifGoto.flag = flag;
+        ifGoto.flag = -1;
         GotoRepresent goTo = new GotoRepresent(null);
         ctx.trueList=new ArrayList<>();
         ctx.falseList=new ArrayList<>();
@@ -1153,6 +1158,7 @@ public class SysYIRListener implements SysYListener {
 
                 // 回填
                 for (GotoRepresent ir : ctx.lAndExp().trueList) {
+                    ir.flag=6;
                     ir.targetHolder=ctx.eqExp().startStmt;
                 }
             }
