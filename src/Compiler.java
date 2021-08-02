@@ -15,10 +15,7 @@ import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.Enumeration;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -26,6 +23,9 @@ import java.util.stream.Collectors;
 public class Compiler {
     public static void main(String[] args)
     {
+        /*String className = getClasses("compiler").stream().map(c->c.getName())
+                .sorted().collect(Collectors.toList()).get(14);
+        System.out.println(className);*/
         String inputFileStr = null;
         String outputFileStr = null;
         boolean optimization = false;
@@ -58,10 +58,21 @@ public class Compiler {
             SymbolTableHost symbolTableHost=new SymbolTableHost();
             FuncSymbolTable funcSymbolTable=new FuncSymbolTable();
             prepareSymbol(tree, walker, symbolTableHost, funcSymbolTable);
-            SysYIRListener irListener = new SysYIRListener(symbolTableHost, funcSymbolTable);
-            walker.walk(irListener, tree);
+            SysYIRListener irListener = null;
+            try {
+                irListener = new SysYIRListener(symbolTableHost, funcSymbolTable);
+                walker.walk(irListener, tree);
+
+            }catch (NullPointerException ne)
+            {
+                System.exit(-8);
+            }catch (Exception e)
+            {
+                System.exit(-9);
+            }
 
             System.out.println(irListener.irUnion.toString());
+
 
             AsmGen asmGen = new AsmGen(symbolTableHost);
             String result = asmGen.generate(irListener.irUnion);
@@ -78,13 +89,14 @@ public class Compiler {
         {
             StackTraceElement stackTraceElement = e.getStackTrace()[0];
 
-            List<Class<?>> compiler = getClasses("compiler").stream().collect(Collectors.toList());
+            List<String> allClass = getClasses("compiler").stream().map(c->c.getName())
+                    .sorted().collect(Collectors.toList());
             /*for (Class<?> aClass : compiler) {
                 System.out.println(aClass.getName());
             }*/
 
-            for (int i = 0; i < compiler.size(); i++) {
-                if (compiler.get(i).getName().equals(stackTraceElement.getClassName())) {
+            for (int i = 0; i < allClass.size(); i++) {
+                if (allClass.get(i).equals(stackTraceElement.getClassName())) {
                     System.exit(i);
                 }
             }
@@ -99,11 +111,6 @@ public class Compiler {
         }
 
         //System.out.println(result);
-    }
-
-    private static Set<Class<?>> classList;
-    static {
-        classList = getClasses("com.esri.rest");
     }
     /**
      * 从包package中获取所有的Class

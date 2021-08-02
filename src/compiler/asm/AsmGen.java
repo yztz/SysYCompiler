@@ -19,6 +19,7 @@ public class AsmGen {
     SymbolTableHost symbolTableHost;
 
     public AsmGen(SymbolTableHost symbolTableHost) {
+        //throw new IOException("试一试");
         this.symbolTableHost = symbolTableHost;
     }
 

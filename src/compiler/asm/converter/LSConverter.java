@@ -32,7 +32,7 @@ public abstract class LSConverter extends AsmConverter {
 
                 if(ir.offset==null || ir.offset.isData)
                 {
-                    long offset = 0;
+                    int offset = 0;
                     if(ir.offset!=null)
                         offset = AsmUtil.getSymbolArrayIndexOffset(ir.offset.item);
 
@@ -50,7 +50,7 @@ public abstract class LSConverter extends AsmConverter {
                 baseAddrReg = Regs.FP;
                 if(ir.offset==null || ir.offset.isData)
                 {
-                    long offset = 0;
+                    int offset = 0;
                     if(ir.offset==null)
                         offset = AsmUtil.getSymbolOffsetFp(valueSymbol);
                     else
@@ -71,12 +71,12 @@ public abstract class LSConverter extends AsmConverter {
 
             if(ir.offset==null || ir.offset.isData)
             {
-                long offsetFP = AsmUtil.getSymbolOffsetFp(valueSymbol);
+                int offsetFP = AsmUtil.getSymbolOffsetFp(valueSymbol);
 
                 Reg tmp = regGetter.getTmpRegister();
                 builder.ldr(tmp,Regs.FP,offsetFP); // 先读取地址
 
-                long offsetArray = 0;
+                int offsetArray = 0;
                 if(ir.offset!=null && ir.offset.item!=0)
                 {
                     offsetArray = ir.offset.item*ConstDef.WORD_SIZE;
@@ -84,7 +84,7 @@ public abstract class LSConverter extends AsmConverter {
                 builder.mem(op, null, rdGetter.get(), tmp,
                             offsetArray, false, false);
             }else{
-                long offsetFP = AsmUtil.getSymbolOffsetFp(valueSymbol);
+                int offsetFP = AsmUtil.getSymbolOffsetFp(valueSymbol);
                 Reg tmp = regGetter.getTmpRegister();
                 builder.ldr(tmp,Regs.FP,offsetFP); // 先读取地址
 
@@ -92,6 +92,7 @@ public abstract class LSConverter extends AsmConverter {
 
                 if(tmp==rm)
                 {
+                    System.exit(-2);
                     System.err.println("Base address reg equal to offset address :"+ir);
                 }
 
