@@ -262,7 +262,7 @@ public class AsmBuilder {
             {
                 Reg tmp = regGetter.getTmpRegister();
                 //ldrEq(tmp,imm8m);
-                dataHolder.addAndLoadFromFuncData(this,(int) imm8m,rd);
+                dataHolder.addAndLoadFromFuncData(this,(int) imm8m,tmp);
                 return regOperand(RegOperandOP.CMP, rd, new RegOperand(tmp));
             }
         }
@@ -325,7 +325,7 @@ public class AsmBuilder {
             {
                 Reg tmp = regGetter.getTmpRegister();
                 //ldrEq(tmp, offset);
-                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),rd);
+                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),tmp);
                 return mem(op,size,rd,rn,tmp,offset<0,ShiftOp.LSL,0,saveOffset,postOffset);
             }
         }
@@ -372,7 +372,7 @@ public class AsmBuilder {
                 Reg offsetReg = regGetter.getTmpRegister(1);
                 ldr(baseReg,label,0);
                 //ldrEq(offsetReg,Math.abs(offset));
-                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),rd);
+                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),offsetReg);
                 return mem(Mem.LDR,null,rd,baseReg,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
@@ -403,8 +403,8 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                ldrEq(offsetReg,Math.abs(offset));
-                //dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),rd);
+                //ldrEq(offsetReg,Math.abs(offset));//把下面这句改成这句，可以让kmp从WA变成segment fault
+                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),offsetReg);
                 return mem(Mem.LDR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
@@ -417,8 +417,8 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                ldrEq(offsetReg,Math.abs(offset));
-                //dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),rd);
+                //ldrEq(offsetReg,Math.abs(offset));
+                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),offsetReg);
                 return mem(Mem.STR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
