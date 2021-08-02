@@ -94,8 +94,15 @@ public class IRCollection {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        int line = 0;
         for (InterRepresent ir : irs) {
-            sb.append(ir.toString()).append("\r\n");
+            sb.append(ir.toString());
+            if(descriptionMap.containsKey(line))
+            {
+                sb.append("\t@").append(descriptionMap.get(line));
+            }
+            line++;
+            sb.append("\r\n");
         }
         return sb.toString();
     }

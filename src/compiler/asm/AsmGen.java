@@ -156,7 +156,7 @@ public class AsmGen {
                 String label = varSymbol.symbolToken.getText();
                 varSymbol.asmDataLabel = label;
                 if((varSymbol instanceof VarSymbol && ((VarSymbol) varSymbol).hasConstInitValue)
-                    || varSymbol instanceof ConstSymbol)
+                    || varSymbol instanceof ConstSymbol || varSymbol.isGlobalSymbol())
                 {
                     buildInitValues(sections, varSymbol, builder, label);
                 }else{
