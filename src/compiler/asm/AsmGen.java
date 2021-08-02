@@ -25,8 +25,16 @@ public class AsmGen {
 
     public String generate(IRUnion irUnion) {
         StringBuilder builder = new StringBuilder();
-
-        List<AsmSection> staticDataSection = genStaticData();
+        List<AsmSection> staticDataSection = null;
+        try {
+            staticDataSection = genStaticData();
+        }catch (NullPointerException ne)
+        {
+            System.exit(-11);
+        }catch (Exception e)
+        {
+            System.exit(-12);
+        }
         for (IRCollection ir : irUnion.getAll()) {
             if (ir instanceof IRFunction) {
                 IRFunction irFunction = (IRFunction)ir;
@@ -55,19 +63,61 @@ public class AsmGen {
 
     public List<AsmSection> genFunction(IRFunction irFunction) {
         FuncSymbol funcSymbol = irFunction.funcSymbol;
-        prepareInformation(funcSymbol,irFunction);
+        try {
+            prepareInformation(funcSymbol,irFunction);
+        }catch (NullPointerException ne)
+        {
+            System.exit(-13);
+        }catch (Exception e)
+        {
+            System.exit(-14);
+        }
 
 
+        List<IRBlock> irBlocks = null;
+        try {
+            irBlocks = divideIntoBlock(irFunction);
+        }catch (NullPointerException ne)
+        {
+            System.exit(-15);
+        }catch (Exception e)
+        {
+            System.exit(-16);
+        }
 
-        List<IRBlock> irBlocks = divideIntoBlock(irFunction);
-        optimizeIrOrder(irBlocks);
-
-        RegGetter regGetter = new RegGetter(irBlocks);
-
+        try {
+            optimizeIrOrder(irBlocks);
+        }catch (NullPointerException ne)
+        {
+            System.exit(-17);
+        }catch (Exception e)
+        {
+            System.exit(-18);
+        }
+        RegGetter regGetter = null;
+        try {
+            regGetter = new RegGetter(irBlocks);
+        }catch (NullPointerException ne)
+        {
+            System.exit(-19);
+        }catch (Exception e)
+        {
+            System.exit(-20);
+        }
 
         List<AsmSection> codeSections = new LinkedList<>();
-        codeSections.addAll(AsmConvertOrganizer.process(regGetter,funcSymbol, irBlocks));
-
+        try {
+            codeSections.addAll(AsmConvertOrganizer.process(regGetter,funcSymbol, irBlocks));
+        }catch (NullPointerException ne)
+        {
+            System.exit(-21);
+        }catch (ArrayIndexOutOfBoundsException e)
+        {
+            System.exit(-22);
+        }catch (Exception e)
+        {
+            System.exit(-23);
+        }
 
         return codeSections;
     }
