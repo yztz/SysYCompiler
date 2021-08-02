@@ -84,7 +84,8 @@ public class RegGetter {
                     regDesc.put(register, key);
                     varDesc.put(key, register);
                 } else {
-                    System.err.println("寄存器分配失败");
+                    System.out.println("寄存器分配失败");
+                    register = Regs.R0;
                 }
             } else {
                 register = varDesc.get(key);
@@ -180,7 +181,7 @@ public class RegGetter {
                 i++;
             }
         }
-        return null;
+        return Regs.R0; // todo 寄存器获取失败
     }
 
     public void releaseAll() {
