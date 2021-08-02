@@ -48,6 +48,10 @@ public class IRCollection {
         descriptionMap.put(getLineOccupied(),description);
     }
 
+    public String getDescription(int lineNum)
+    {
+        return descriptionMap.getOrDefault(lineNum,"");
+    }
 
     public void insertBefore(InterRepresent inserted, InterRepresent benchmark,String description)
     {

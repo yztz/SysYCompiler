@@ -350,19 +350,51 @@ public class AsmGen {
                 if (ir instanceof GotoRepresent) {
                     // goto语句的下一条语句
                     enterPoints.add(codes.get(i + 1));
+
+                    GotoRepresent gotoIR = (GotoRepresent) ir;
                     // 目标语句
-                    enterPoints.add(((GotoRepresent) ir).getTargetIR());
-                    if(((GotoRepresent) ir).targetHolder==null)
-                        System.exit(155);
-                    if(((GotoRepresent) ir).getTargetIR()==null)
-                        System.exit(156);
+                    enterPoints.add((gotoIR).getTargetIR());
+
+                    if(gotoIR instanceof IfGotoRepresent)
+                    {
+                        if(gotoIR.targetHolder==null)
+                            System.exit(161);
+                        if(gotoIR.getTargetIR()==null)
+                            System.exit(162);
+                    }else{
+                        String description = irFunction.getDescription(i);
+                        if(gotoIR.targetHolder==null)
+                        {
+                            if(description.equals("break"))
+                                System.exit(171);
+                            if(description.equals("continue"))
+                                System.exit(173);
+                            if(description.equals("while end"))
+                                System.exit(175);
+
+                            System.exit(177);
+                        }
+
+                        if(gotoIR.getTargetIR()==null)
+                        {
+                            if(description.equals("break"))
+                                System.exit(172);
+                            if(description.equals("continue"))
+                                System.exit(174);
+                            if(description.equals("while end"))
+                                System.exit(176);
+
+                            System.exit(178);
+                        }
+                    }
+
 
                     String label;
                 /*if (ir.hasLabel()) label = ir.getLabel();
                 else {*/
                     label = String.format("%s.%d", funcSymbol.getFuncName(), labelID++);
                     //}
-                    ((GotoRepresent) ir).getTargetIR().setLabel(label);
+                    (gotoIR).getTargetIR().setLabel(label);
                 }
             }
         }catch (NullPointerException e)
