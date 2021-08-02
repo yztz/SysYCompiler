@@ -35,7 +35,7 @@ public class LAddrConverter extends AsmConverter{
                 builder.add(rd,rd,new ImmOperand(retIr.offset.item*ConstDef.WORD_SIZE));
             }
         }else if(symbol instanceof ParamSymbol){ //todo 这么处理好吗
-            long offsetFP = AsmUtil.getSymbolOffsetFp(symbol);
+            int offsetFP = AsmUtil.getSymbolOffsetFp(symbol);
             if(retIr.offset.isData)
             {
                 offsetFP+=(retIr.offset.item*ConstDef.WORD_SIZE);
