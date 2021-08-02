@@ -36,4 +36,10 @@ public class Util {
         int i = (int)Long.parseLong(num);
         return neg?-i:i;
     }
+
+    public static void printStackAndExit(int code,Exception e)
+    {
+        e.printStackTrace();
+        System.exit(code);
+    }
 }

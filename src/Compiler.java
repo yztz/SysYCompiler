@@ -1,5 +1,6 @@
 import antlr.SysYLexer;
 import antlr.SysYParser;
+import compiler.Util;
 import compiler.asm.AsmGen;
 import compiler.genir.SysYIRListener;
 import org.antlr.v4.runtime.CharStream;
@@ -65,10 +66,10 @@ public class Compiler {
 
             }catch (NullPointerException ne)
             {
-                System.exit(-8);
+                Util.printStackAndExit(-8,ne);
             }catch (Exception e)
             {
-                System.exit(-9);
+                Util.printStackAndExit(-9,e);
             }
 
             System.out.println(irListener.irUnion.toString());
@@ -101,7 +102,7 @@ public class Compiler {
                 }
             }
             //System.err.println(stackTraceElement.getClassName());
-            //System.exit(i);
+            //printStackAndExit(i);
             e.printStackTrace();
             try {
                 throw e;

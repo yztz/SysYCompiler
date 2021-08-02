@@ -1,6 +1,7 @@
 package compiler.asm;
 
 import compiler.ConstDef;
+import compiler.Util;
 import compiler.asm.converter.AsmConvertOrganizer;
 import compiler.genir.IRCollection;
 import compiler.genir.IRBlock;
@@ -30,10 +31,10 @@ public class AsmGen {
             staticDataSection = genStaticData();
         }catch (NullPointerException ne)
         {
-            System.exit(-11);
+            Util.printStackAndExit(-11,ne);
         }catch (Exception e)
         {
-            System.exit(-12);
+            Util.printStackAndExit(-12,e);
         }
         for (IRCollection ir : irUnion.getAll()) {
             if (ir instanceof IRFunction) {
@@ -67,10 +68,10 @@ public class AsmGen {
             prepareInformation(funcSymbol,irFunction);
         }catch (NullPointerException ne)
         {
-            System.exit(-13);
+            Util.printStackAndExit(-13,ne);
         }catch (Exception e)
         {
-            System.exit(-14);
+            Util.printStackAndExit(-14,e);
         }
 
 
@@ -79,30 +80,30 @@ public class AsmGen {
             irBlocks = divideIntoBlock(irFunction);
         }catch (NullPointerException ne)
         {
-            System.exit(-15);
+            Util.printStackAndExit(-15,ne);
         }catch (Exception e)
         {
-            System.exit(-16);
+            Util.printStackAndExit(-16,e);
         }
 
         try {
             optimizeIrOrder(irBlocks);
         }catch (NullPointerException ne)
         {
-            System.exit(-17);
+            Util.printStackAndExit(-17,ne);
         }catch (Exception e)
         {
-            System.exit(-18);
+            Util.printStackAndExit(-18,e);
         }
         RegGetter regGetter = null;
         try {
             regGetter = new RegGetter(irBlocks);
         }catch (NullPointerException ne)
         {
-            System.exit(-19);
+            Util.printStackAndExit(-19,ne);
         }catch (Exception e)
         {
-            System.exit(-20);
+            Util.printStackAndExit(-20,e);
         }
 
         List<AsmSection> codeSections = new LinkedList<>();
@@ -110,13 +111,13 @@ public class AsmGen {
             codeSections.addAll(AsmConvertOrganizer.process(regGetter,funcSymbol, irBlocks));
         }catch (NullPointerException ne)
         {
-            System.exit(-21);
+            Util.printStackAndExit(-21,ne);
         }catch (ArrayIndexOutOfBoundsException e)
         {
-            System.exit(-22);
+            Util.printStackAndExit(-22,e);
         }catch (Exception e)
         {
-            System.exit(-23);
+            Util.printStackAndExit(-23,e);
         }
 
         return codeSections;
@@ -343,23 +344,31 @@ public class AsmGen {
         enterPoints.add(codes.get(0));
         int labelID = 0;
 
-        for (int i = 1; i < len; i++) {
-            InterRepresent ir = codes.get(i);
-            if (ir instanceof GotoRepresent) {
-                // goto语句的下一条语句
-                enterPoints.add(codes.get(i + 1));
-                // 目标语句
-                enterPoints.add(((GotoRepresent) ir).getTargetIR());
+        try {
+            for (int i = 1; i < len; i++) {
+                InterRepresent ir = codes.get(i);
+                if (ir instanceof GotoRepresent) {
+                    // goto语句的下一条语句
+                    enterPoints.add(codes.get(i + 1));
+                    // 目标语句
+                    enterPoints.add(((GotoRepresent) ir).getTargetIR());
+                    if(((GotoRepresent) ir).getTargetIR()==null)
+                        System.exit(155);
 
-                String label;
+                    String label;
                 /*if (ir.hasLabel()) label = ir.getLabel();
                 else {*/
                     label = String.format("%s.%d", funcSymbol.getFuncName(), labelID++);
-                //}
-                ((GotoRepresent) ir).getTargetIR().setLabel(label);
+                    //}
+                    ((GotoRepresent) ir).getTargetIR().setLabel(label);
+                }
             }
+        }catch (NullPointerException e)
+        {
+            Util.printStackAndExit(156,e);
         }
 
+        try {
         for (int i = 0; i < codes.size(); i++) {
             InterRepresent ir = codes.get(i);
 
@@ -378,7 +387,10 @@ public class AsmGen {
                 result.add(block);
             }
         }
-
+        }catch (NullPointerException e)
+        {
+            Util.printStackAndExit(157,e);
+        }
         return result;
     }
 }

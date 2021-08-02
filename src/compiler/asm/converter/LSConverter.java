@@ -1,6 +1,7 @@
 package compiler.asm.converter;
 
 import compiler.ConstDef;
+import compiler.Util;
 import compiler.asm.*;
 import compiler.asm.operand.ShiftOp;
 import compiler.genir.code.LSRepresent;
