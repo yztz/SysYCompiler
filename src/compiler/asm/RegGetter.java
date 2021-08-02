@@ -9,8 +9,17 @@ import java.util.function.Function;
 
 public class RegGetter {
     private final Map<Reg, AddressRWInfo> regDesc = new HashMap<>();
-    private final Map<AddressRWInfo, Reg> varDesc = new HashMap<>();
-    protected Reg[] usableRegs = {Regs.R4, Regs.R5, Regs.R6, Regs.R7, Regs.R8, Regs.R9, Regs.R10, Regs.R12, Regs.R0, Regs.R1, Regs.R2, Regs.R3};
+    private final Map<AddressRWInfo, RegOrMem> varDesc = new HashMap<>();
+    protected Reg[] usableRegs = {Regs.R4, Regs.R5, Regs.R6, Regs.R7, Regs.R8, Regs.R9, Regs.R10, Regs.R12/*, Regs.R0, Regs.R1, Regs.R2, Regs.R3*/};
+
+    private boolean hookIfNotEnough;
+    private AsmBuilder builder;
+
+    public void hookIfNotEnough(AsmBuilder builder) {
+        this.hookIfNotEnough = true;
+        this.builder= builder;
+    }
+
     /**
      * 这条IR结束后就要释放的
      */
@@ -22,7 +31,7 @@ public class RegGetter {
     public RegGetter(List<IRBlock> irBlocks) {
         calNextRef(irBlocks);
     }
-
+    private Map<AddressOrData,Integer> refTimes=new HashMap<>();
     /**
      * 计算变量的下次引用与活跃度
      */
@@ -42,6 +51,7 @@ public class RegGetter {
                     } else {
                         // d
                         refTable.put(var, new Reference(ir, true));
+                        refTimes.put(var.address,refTimes.getOrDefault(var.address,0)+1);
                     }
                 });
             }
@@ -82,13 +92,17 @@ public class RegGetter {
                 register = getFreeReg();
                 if (null != register) {
                     regDesc.put(register, key);
-                    varDesc.put(key, register);
+                    varDesc.put(key, new RegOrMem(register));
                 } else {
                     System.out.println("寄存器分配失败");
-                    register = Regs.R0;
+
+                    Optional<Reg> minRefOpt = getUsingReg().stream().min(Comparator.comparingInt(r -> {
+                        AddressRWInfo addressRWInfo = regDesc.get(r);
+                        return refTimes.getOrDefault(addressRWInfo.address, 0);
+                    }));
                 }
             } else {
-                register = varDesc.get(key);
+                register = varDesc.get(key).reg;
             }
 
             if (null == ref.nextRef) {  // 不存在引用则释放reg
@@ -105,7 +119,7 @@ public class RegGetter {
         return Regs.R0;
     }
 
-    public Map<AddressRWInfo, Reg> getMapOfIR(InterRepresent ir) {
+    /*public Map<AddressRWInfo, Reg> getMapOfIR(InterRepresent ir) {
         Map<AddressRWInfo, Reg> ret = new HashMap<>();
 
         Map<AddressRWInfo, Reference> refMap = ir.refMap;
@@ -136,15 +150,7 @@ public class RegGetter {
         }
 
         return ret;
-    }
-
-    public Map<AddressRWInfo, Reg> getVarDesc() {
-        return varDesc;
-    }
-
-    public Map<Reg, AddressRWInfo> getRegDesc() {
-        return regDesc;
-    }
+    }*/
 
 
     public boolean requireReg(Reg reg)
@@ -250,5 +256,20 @@ public class RegGetter {
 
     protected boolean isFreeRegIgnoreCurrentIR(Reg register) {
         return (!regDesc.containsKey(register) || regDesc.get(register) == null) && !usingRegThisIR.contains(register);
+    }
+
+    public static class RegOrMem{
+        boolean inMem = false;
+        Reg reg;
+        int memOffset;
+
+        public RegOrMem(Reg reg) {
+            this.reg = reg;
+        }
+
+        public RegOrMem(int memOffset) {
+            inMem=true;
+            this.memOffset = memOffset;
+        }
     }
 }
