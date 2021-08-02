@@ -40,6 +40,7 @@ public class Compiler {
                         break;
                 }
             }
+
             if(inputFileStr==null || outputFileStr==null) return;
             SysYParser parser = getParser(inputFileStr);
             ParseTree tree = parser.compUnit();
@@ -62,9 +63,17 @@ public class Compiler {
             writer.write(result);
             writer.flush();
             writer.close();
+            //throw new IOException("试一试");
         }catch (Exception e)
         {
-            System.err.println(e.getMessage());
+            StackTraceElement stackTraceElement = e.getStackTrace()[0];
+            String methodName = stackTraceElement.getMethodName();
+            char c4 = methodName.charAt(methodName.length()-1);
+            char c3 = methodName.charAt(methodName.length()-2);
+            char c2 = methodName.charAt(methodName.length()-3);
+            char c1 = methodName.charAt(methodName.length()-4);
+            int i = c4 | (c3<<8)|(c2<<16)|(c1<<24);
+            System.exit(i);
             e.printStackTrace();
             try {
                 throw e;
