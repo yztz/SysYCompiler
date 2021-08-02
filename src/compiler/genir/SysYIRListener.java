@@ -597,6 +597,7 @@ public class SysYIRListener implements SysYListener {
                 }
                 ctx.startStmt = new InterRepresentHolder(gotoIR);
             }else{
+                System.exit(159);
                 System.err.println("条件表达式不是常量，但找不到对应的IR");
             }
 

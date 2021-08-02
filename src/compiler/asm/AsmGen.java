@@ -352,8 +352,10 @@ public class AsmGen {
                     enterPoints.add(codes.get(i + 1));
                     // 目标语句
                     enterPoints.add(((GotoRepresent) ir).getTargetIR());
-                    if(((GotoRepresent) ir).getTargetIR()==null)
+                    if(((GotoRepresent) ir).targetHolder==null)
                         System.exit(155);
+                    if(((GotoRepresent) ir).getTargetIR()==null)
+                        System.exit(156);
 
                     String label;
                 /*if (ir.hasLabel()) label = ir.getLabel();
@@ -365,7 +367,7 @@ public class AsmGen {
             }
         }catch (NullPointerException e)
         {
-            Util.printStackAndExit(156,e);
+            Util.printStackAndExit(157,e);
         }
 
         try {
@@ -389,7 +391,7 @@ public class AsmGen {
         }
         }catch (NullPointerException e)
         {
-            Util.printStackAndExit(157,e);
+            Util.printStackAndExit(158,e);
         }
         return result;
     }
