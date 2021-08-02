@@ -212,8 +212,8 @@ public class AsmBuilder {
             if(!AsmUtil.imm8m(rsi.immData))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                //ldrEq(tmp, rsi.immData);
-                dataHolder.addAndLoadFromFuncData(this,rsi.immData,tmp);
+                ldrEq(tmp, rsi.immData);
+                //dataHolder.addAndLoadFromFuncData(this,rsi.immData,tmp);
                 return new RegShiftRegOperand(rsi.op,rsi.regM,tmp);
             }
         }
@@ -224,8 +224,8 @@ public class AsmBuilder {
             if(!AsmUtil.imm8m(rsi.imm8m))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                //ldrEq(tmp, rsi.imm8m);
-                dataHolder.addAndLoadFromFuncData(this,(int)rsi.imm8m,tmp);
+                ldrEq(tmp, rsi.imm8m);
+                //dataHolder.addAndLoadFromFuncData(this,(int)rsi.imm8m,tmp);
                 return new RegOperand(tmp);
             }
         }
@@ -261,8 +261,8 @@ public class AsmBuilder {
             if(!AsmUtil.imm8m(imm8m))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                //ldrEq(tmp,imm8m);
-                dataHolder.addAndLoadFromFuncData(this,(int) imm8m,tmp);
+                ldrEq(tmp,imm8m);
+                //dataHolder.addAndLoadFromFuncData(this,(int) imm8m,tmp);
                 return regOperand(RegOperandOP.CMP, rd, new RegOperand(tmp));
             }
         }
@@ -324,8 +324,8 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg tmp = regGetter.getTmpRegister();
-                //ldrEq(tmp, offset);
-                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),tmp);
+                ldrEq(tmp, Math.abs(offset));
+                //dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),tmp);
                 return mem(op,size,rd,rn,tmp,offset<0,ShiftOp.LSL,0,saveOffset,postOffset);
             }
         }
@@ -371,8 +371,8 @@ public class AsmBuilder {
                 Reg baseReg = regGetter.getTmpRegister();
                 Reg offsetReg = regGetter.getTmpRegister(1);
                 ldr(baseReg,label,0);
-                //ldrEq(offsetReg,Math.abs(offset));
-                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),offsetReg);
+                ldrEq(offsetReg,Math.abs(offset));
+                //dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),offsetReg);
                 return mem(Mem.LDR,null,rd,baseReg,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
@@ -403,8 +403,8 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                //ldrEq(offsetReg,Math.abs(offset));//把下面这句改成这句，可以让kmp从WA变成segment fault
-                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),offsetReg);
+                ldrEq(offsetReg,Math.abs(offset));//把下面这句改成这句，可以让kmp从WA变成segment fault
+                //dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),offsetReg);
                 return mem(Mem.LDR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
@@ -417,8 +417,8 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                //ldrEq(offsetReg,Math.abs(offset));
-                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),offsetReg);
+                ldrEq(offsetReg,Math.abs(offset));
+                //dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),offsetReg);
                 return mem(Mem.STR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
@@ -476,8 +476,8 @@ public class AsmBuilder {
         {
             if(!AsmUtil.imm8m(imm8m))
             {
-                //ldrEq(rd, imm8m);
-                dataHolder.addAndLoadFromFuncData(this,imm8m,rd);
+                ldrEq(rd, imm8m);
+                //dataHolder.addAndLoadFromFuncData(this,imm8m,rd);
                 return this;
             }
         }
@@ -502,8 +502,8 @@ public class AsmBuilder {
                     tmp = rd; //节约寄存器
                 else
                     tmp = regGetter.getTmpRegister();
-                //ldrEq(tmp, imm8m);
-                dataHolder.addAndLoadFromFuncData(this,imm8m,tmp);
+                ldrEq(tmp, imm8m);
+                //dataHolder.addAndLoadFromFuncData(this,imm8m,tmp);
                 return add(rd,rn,tmp);
             }
         }
@@ -529,8 +529,8 @@ public class AsmBuilder {
                     tmp = rd; //节约寄存器
                 else
                     tmp = regGetter.getTmpRegister();
-                //ldrEq(tmp, imm8m);
-                dataHolder.addAndLoadFromFuncData(this,imm8m,tmp);
+                ldrEq(tmp, imm8m);
+                //dataHolder.addAndLoadFromFuncData(this,imm8m,tmp);
                 return sub(rd,rn,tmp);
             }
         }

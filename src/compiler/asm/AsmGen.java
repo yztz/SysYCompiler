@@ -11,6 +11,7 @@ import compiler.symboltable.*;
 import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.initvalue.InitValue;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 

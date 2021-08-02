@@ -5,6 +5,7 @@ package compiler.symboltable;
 import compiler.symboltable.function.FuncSymbol;
 import org.antlr.v4.runtime.Token;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
