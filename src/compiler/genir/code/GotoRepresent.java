@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class GotoRepresent extends InterRepresent{
+    public int flag;
     public InterRepresentHolder targetHolder;
 
     public GotoRepresent(InterRepresent target) {

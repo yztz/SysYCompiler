@@ -612,7 +612,7 @@ public class SysYIRListener implements SysYListener {
         if(ctx.trueList==null && ctx.falseList==null)
         {
             List<InterRepresent> pair = createIfGotoPair(ctx, IfGotoRepresent.RelOp.NOT_EQUAL, ctx.lOrExp().address,
-                                                         new AddressOrData(true, 0));
+                                                         new AddressOrData(true, 0),10);
             _currentCollection.addCode(pair.get(0));
             _currentCollection.addCode(pair.get(1));
         }
@@ -927,8 +927,9 @@ public class SysYIRListener implements SysYListener {
     }
 
     private List<InterRepresent> createIfGotoPair(SysYParser.BranchContextBase ctx, IfGotoRepresent.RelOp relOp,
-                                  AddressOrData address1, AddressOrData address2) {
+                                  AddressOrData address1, AddressOrData address2,int flag) {
         IfGotoRepresent ifGoto = new IfGotoRepresent(null, relOp, address1, address2);
+        ifGoto.flag = flag;
         GotoRepresent goTo = new GotoRepresent(null);
         ctx.trueList=new ArrayList<>();
         ctx.falseList=new ArrayList<>();
@@ -960,7 +961,7 @@ public class SysYIRListener implements SysYListener {
                 System.err.println("Unknown rel opcode");
             }
 
-            List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.relExp().address, ctx.addExp().result);
+            List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.relExp().address, ctx.addExp().result,0);
             _currentCollection.addCode(pair.get(0));
             _currentCollection.addCode(pair.get(1));
 
@@ -998,7 +999,7 @@ public class SysYIRListener implements SysYListener {
                 System.err.println("Unknown rel opcode");
             }
 
-            List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.eqExp().address, ctx.relExp().address);
+            List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.eqExp().address, ctx.relExp().address,1);
             _currentCollection.addCode(pair.get(0));
             _currentCollection.addCode(pair.get(1));
 
@@ -1049,6 +1050,7 @@ public class SysYIRListener implements SysYListener {
                         ctx.falseList = falseList;
                     }
                 }else{
+                    System.exit(181);
                     System.err.println("lOrExp,表达式不是常数，但找不到对应的IR");
                 }
             } else if(ctx.eqExp().startStmt==null) //右边是常数
@@ -1056,7 +1058,7 @@ public class SysYIRListener implements SysYListener {
                 if(ctx.lAndExp().trueList==null)
                 {
                     List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                                 ctx.lAndExp().address, new AddressOrData(true, 0));
+                                                                 ctx.lAndExp().address, new AddressOrData(true, 0),2);
 
                     InterRepresent lEqStart =  ctx.eqExp().startStmt!=null?
                             ctx.eqExp().startStmt.getInterRepresent():
@@ -1092,7 +1094,7 @@ public class SysYIRListener implements SysYListener {
             {
                 if(ctx.eqExp().trueList==null){
                     List<InterRepresent> pair = createIfGotoPair(ctx.eqExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                                 ctx.eqExp().address, new AddressOrData(true, 0));
+                                                                 ctx.eqExp().address, new AddressOrData(true, 0),3);
                     _currentCollection.addCode(pair.get(0));
                     _currentCollection.addCode(pair.get(1));
                     if (ctx.eqExp().startStmt==null) {
@@ -1112,6 +1114,7 @@ public class SysYIRListener implements SysYListener {
                                                       ctx.eqExp().startStmt.getInterRepresent());
                         ctx.falseList.add(gotoIR);
                     }else{
+                        System.exit(182);
                         // 0 就什么都不做，没有影响
                         ctx.startStmt = ctx.eqExp().startStmt;
                     }
@@ -1123,7 +1126,7 @@ public class SysYIRListener implements SysYListener {
                 if(ctx.lAndExp().trueList==null)
                 {
                     List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                                 ctx.lAndExp().address, new AddressOrData(true, 0));
+                                                                 ctx.lAndExp().address, new AddressOrData(true, 0),4);
 
                     InterRepresent lEqStart =  ctx.eqExp().startStmt!=null?
                             ctx.eqExp().startStmt.getInterRepresent():
@@ -1139,7 +1142,7 @@ public class SysYIRListener implements SysYListener {
                 }
                 if(ctx.eqExp().trueList==null){
                     List<InterRepresent> pair = createIfGotoPair(ctx.eqExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                                 ctx.eqExp().address, new AddressOrData(true, 0));
+                                                                 ctx.eqExp().address, new AddressOrData(true, 0),5);
                     _currentCollection.addCode(pair.get(0));
                     _currentCollection.addCode(pair.get(1));
                 }
@@ -1202,7 +1205,8 @@ public class SysYIRListener implements SysYListener {
                     if(ctx.lOrExp().trueList==null)
                     {
                         List<InterRepresent> pair = createIfGotoPair(ctx.lOrExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                                     ctx.lOrExp().address, new AddressOrData(true, 0));
+                                                                     ctx.lOrExp().address, new AddressOrData(true, 0)
+                                ,6);
                         InterRepresent lAndStart = ctx.lAndExp().startStmt!=null? ctx.lAndExp().startStmt.getInterRepresent()
                                 :null;
                         if(lAndStart!=null)
@@ -1234,7 +1238,8 @@ public class SysYIRListener implements SysYListener {
                 {
                     if(ctx.lAndExp().trueList==null){
                         List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                                     ctx.lAndExp().address, new AddressOrData(true, 0));
+                                                                     ctx.lAndExp().address, new AddressOrData(true,
+                                                                                                              0),7);
                         _currentCollection.addCode(pair.get(0));
                         _currentCollection.addCode(pair.get(1));
                     }
@@ -1261,7 +1266,7 @@ public class SysYIRListener implements SysYListener {
                 if(ctx.lOrExp().trueList==null)
                 {
                     List<InterRepresent> pair = createIfGotoPair(ctx.lOrExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                                 ctx.lOrExp().address, new AddressOrData(true, 0));
+                                                                 ctx.lOrExp().address, new AddressOrData(true, 0),8);
                     InterRepresent lAndStart = ctx.lAndExp().startStmt!=null? ctx.lAndExp().startStmt.getInterRepresent()
                             :null;
                     if(lAndStart!=null)
@@ -1276,7 +1281,7 @@ public class SysYIRListener implements SysYListener {
                 }
                 if(ctx.lAndExp().trueList==null){
                     List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
-                                                                 ctx.lAndExp().address, new AddressOrData(true, 0));
+                                                                 ctx.lAndExp().address, new AddressOrData(true, 0),9);
                     _currentCollection.addCode(pair.get(0));
                     _currentCollection.addCode(pair.get(1));
                 }
