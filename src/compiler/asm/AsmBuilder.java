@@ -403,8 +403,8 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                //ldrEq(offsetReg,Math.abs(offset));
-                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),rd);
+                ldrEq(offsetReg,Math.abs(offset));
+                //dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),rd);
                 return mem(Mem.LDR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
@@ -417,8 +417,8 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                //ldrEq(offsetReg,Math.abs(offset));
-                dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),rd);
+                ldrEq(offsetReg,Math.abs(offset));
+                //dataHolder.addAndLoadFromFuncData(this,(int) Math.abs(offset),rd);
                 return mem(Mem.STR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
