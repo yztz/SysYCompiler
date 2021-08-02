@@ -498,8 +498,8 @@ public class AsmBuilder {
             if(!AsmUtil.imm8m(imm8m))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                //ldrEq(tmp, imm8m);
-                dataHolder.addAndLoadFromFuncData(this,(int)imm8m,tmp);
+                ldrEq(tmp, imm8m);
+                //dataHolder.addAndLoadFromFuncData(this,(int)imm8m,tmp);
                 return add(rd,rn,tmp);
             }
         }
@@ -521,8 +521,8 @@ public class AsmBuilder {
             if(!AsmUtil.imm8m(imm8m))
             {
                 Reg tmp = regGetter.getTmpRegister();
-                //ldrEq(tmp, imm8m);
-                dataHolder.addAndLoadFromFuncData(this,(int) imm8m,tmp);
+                ldrEq(tmp, imm8m);
+                //dataHolder.addAndLoadFromFuncData(this,(int) imm8m,tmp);
                 return sub(rd,rn,tmp);
             }
         }
