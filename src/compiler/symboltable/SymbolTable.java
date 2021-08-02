@@ -32,7 +32,7 @@ public class SymbolTable {
      * 向符号表中登记符号
      * @param token 符号
      */
-    public VarSymbol addVarArray(Token token, long[] dimensions, InitValue initValues) //类型只有一个int
+    public VarSymbol addVarArray(Token token, int[] dimensions, InitValue initValues) //类型只有一个int
     {
         VarSymbol symbol = new VarSymbol(getCurrentOffset(), token, dimensions, initValues,true);
         symbols.put(token.getText(), symbol);
@@ -81,13 +81,13 @@ public class SymbolTable {
         return symbol;
     }
 
-    public ConstSymbol addConstArray(Token token, long[] dim, InitValue constValues)
+    public ConstSymbol addConstArray(Token token, int[] dim, InitValue constValues)
     {
         ConstSymbol symbol = new ConstSymbol(constValues, token,dim,true);
         symbols.put(token.getText(), symbol);
         return symbol;
     }
-    private long getCurrentOffset()
+    private int getCurrentOffset()
     {
         return domain.getTotalOffset();
     }

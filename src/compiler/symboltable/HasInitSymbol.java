@@ -6,9 +6,9 @@ import org.antlr.v4.runtime.Token;
 
 public abstract class HasInitSymbol extends ValueSymbol{
 
-    public long[] dimensions;
-    protected long length = 0;
-    protected long byteSize = 0;
+    public int[] dimensions;
+    protected int length = 0;
+    protected int byteSize = 0;
     public boolean isGlobal = false;
 
     // 初始数据在汇编的中的标签
@@ -19,12 +19,12 @@ public abstract class HasInitSymbol extends ValueSymbol{
     public HasInitSymbol(Token symbolToken,InitValue initVal) {
         super(symbolToken);
         this.initValues= initVal;
-        dimensions=new long[]{1};
+        dimensions=new int[]{1};
         length = 1;
         byteSize=4;
     }
 
-    public HasInitSymbol(Token symbolToken, long[] dimensions, boolean isArray, InitValue initValues) {
+    public HasInitSymbol(Token symbolToken, int[] dimensions, boolean isArray, InitValue initValues) {
         super(symbolToken, isArray);
         this.initValues= initValues;
         this.dimensions = dimensions;
@@ -62,7 +62,7 @@ public abstract class HasInitSymbol extends ValueSymbol{
     /**
      * 总共占用多少字节
      */
-    public long getByteSize() {
+    public int getByteSize() {
         return byteSize;
     }
 

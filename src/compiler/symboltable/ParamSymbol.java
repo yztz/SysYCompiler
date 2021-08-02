@@ -6,7 +6,7 @@ import compiler.genir.code.AddressOrData;
 import org.antlr.v4.runtime.Token;
 
 public class ParamSymbol extends ValueSymbol{
-    public long offsetByte = 0;
+    public int offsetByte = 0;
     public IRCollection irToCalDimSize;
     public AddressOrData[] dimensions;
     public ParamSymbol(Token symbolToken) {
@@ -26,12 +26,12 @@ public class ParamSymbol extends ValueSymbol{
     }
 
     @Override
-    public long getOffsetByte() {
+    public int getOffsetByte() {
         return offsetByte;
     }
 
 
-    public long getByteSize() {
+    public int getByteSize() {
         return ConstDef.WORD_SIZE;
     }
 }

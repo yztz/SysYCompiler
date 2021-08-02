@@ -65,17 +65,17 @@ public class AsmUtil {
     }
 
 
-    public static long getSymbolArrayIndexOffset(long arrayIndex)
+    public static int getSymbolArrayIndexOffset(int arrayIndex)
     {
         return arrayIndex*ConstDef.WORD_SIZE;
     }
 
-    public static long getSymbolOffset(ValueSymbol symbol)
+    public static int getSymbolOffset(ValueSymbol symbol)
     {
         return -symbol.getOffsetByte() - symbol.getByteSize();
     }
 
-    public static long getSymbolOffset(ValueSymbol symbol, long arrayIndex)
+    public static int getSymbolOffset(ValueSymbol symbol, int arrayIndex)
     {
         return getSymbolOffset(symbol) + getSymbolArrayIndexOffset(arrayIndex);
     }
@@ -91,11 +91,11 @@ public class AsmUtil {
         return frameSize+REG_STAGE_LEN+REG_DATA_LEN;
     }
 
-    public static long getSymbolOffsetFp(ValueSymbol symbol)
+    public static int getSymbolOffsetFp(ValueSymbol symbol)
     {
         return getSymbolOffset(symbol)-2* ConstDef.WORD_SIZE- REG_DATA_LEN - REG_STAGE_LEN;
     }
-    public static long getSymbolOffsetFp(ValueSymbol symbol, long arrayIndex)
+    public static int getSymbolOffsetFp(ValueSymbol symbol, int arrayIndex)
     {
         return getSymbolOffset(symbol,arrayIndex) -2* ConstDef.WORD_SIZE - REG_DATA_LEN - REG_STAGE_LEN;
     }

@@ -60,7 +60,7 @@ public abstract class LSConverter extends AsmConverter {
                                 offset, false, false);
                 }else{
 
-                    long offsetFPWord = AsmUtil.getSymbolOffsetFp(valueSymbol)/ ConstDef.WORD_SIZE;
+                    int offsetFPWord = AsmUtil.getSymbolOffsetFp(valueSymbol)/ ConstDef.WORD_SIZE;
                     Reg rm = regGetter.getReg(ir,ir.offset);
                     builder.add(rm,rm,offsetFPWord);
                     builder.mem(op, null, rdGetter.get(), baseAddrReg,

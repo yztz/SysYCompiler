@@ -38,7 +38,7 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
             if(defCtx.constExp()==null || defCtx.constExp().isEmpty()) //不是数组
             {
                 defCtx.constInitVal().initValues = new SingleInitValue();
-                defCtx.constInitVal().dimensions= new long[]{1};
+                defCtx.constInitVal().dimensions= new int[]{1};
             }
             else{ //是数组
                 defCtx.constInitVal().dimensions = getDimsFromConstExp(defCtx.constExp());
@@ -74,7 +74,7 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
         {
             dimSize*=ctx.dimensions[i];
         }
-        long symbolOffset = ctx.symbolOffset;
+        int symbolOffset = ctx.symbolOffset;
         for (int i = 0; i < ctx.constInitVal().size(); i++) {
             SysYParser.ConstInitValContext childInitVal = ctx.constInitVal().get(i);
             childInitVal.ident = ctx.ident;

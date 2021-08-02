@@ -29,8 +29,8 @@ public class SymbolDomain {
         return id;
     }
 
-    long totalOffset = 0;
-    public long getTotalOffset()
+    int totalOffset = 0;
+    public int getTotalOffset()
     {
         if(getFunc()==null)
             return totalOffset;

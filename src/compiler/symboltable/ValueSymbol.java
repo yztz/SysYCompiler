@@ -29,7 +29,7 @@ public abstract class ValueSymbol {
         isArray = array;
     }
 
-    public abstract long getOffsetByte();
+    public abstract int getOffsetByte();
 
-    public abstract long getByteSize();
+    public abstract int getByteSize();
 }

@@ -36,7 +36,7 @@ public class ListenerUtil {
             return null;
         }
         else {
-            long[] dimensions = varSymbol.dimensions;
+            int[] dimensions = varSymbol.dimensions;
             int[] dimSizes = new int[dimensions.length];
             for (int i = 0; i < dimensions.length; i++) {
                 dimSizes[i] = 1;
@@ -205,8 +205,8 @@ public class ListenerUtil {
     }
 
 
-    public static  long[] getDimsFromConstExp(List<SysYParser.ConstExpContext> expCtxList) {
-        long[] dims= new long[expCtxList.size()];
+    public static  int[] getDimsFromConstExp(List<SysYParser.ConstExpContext> expCtxList) {
+        int[] dims= new int[expCtxList.size()];
         for (int i = 0; i < expCtxList.size(); i++) {
             if (expCtxList.get(i).result!=null&&
                     expCtxList.get(i).result.isData) {
@@ -218,10 +218,10 @@ public class ListenerUtil {
         }
         return dims;
     }
-    public static long getLengthFromDimensions(long[] dimensions)
+    public static int getLengthFromDimensions(int[] dimensions)
     {
-        long length = 1;
-        for (long dim : dimensions) {
+        int length = 1;
+        for (int dim : dimensions) {
             length*=dim;
         }
         return length;

@@ -189,12 +189,12 @@ public class SysYParser extends Parser {
 
 	public static class InitValContextBase extends DomainedContext{
 		public InitValue initValues;
-		public long symbolOffset;
+		public int symbolOffset;
 		public int whichDim; //第几个维度
-		public long[] dimensions;
+		public int[] dimensions;
 		public Token ident;
 		public boolean hasConstInitValue = false;
-		public long initValueLen = 0;
+		public int initValueLen = 0;
 		public InitValContextBase() {
 		}
 

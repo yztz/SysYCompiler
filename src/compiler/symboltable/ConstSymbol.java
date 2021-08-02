@@ -9,12 +9,12 @@ public class ConstSymbol extends HasInitSymbol{
         super(symbolToken,val);
     }
 
-    public ConstSymbol(InitValue val, Token symbolToken, long[] dimensions, boolean isArray) {
+    public ConstSymbol(InitValue val, Token symbolToken, int[] dimensions, boolean isArray) {
         super(symbolToken, dimensions,isArray,val);
     }
 
     @Override
-    public long getOffsetByte() {
+    public int getOffsetByte() {
         return 0;
     }
 }

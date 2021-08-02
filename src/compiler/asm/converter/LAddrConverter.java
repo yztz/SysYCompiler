@@ -42,7 +42,7 @@ public class LAddrConverter extends AsmConverter{
             }
             builder.ldr(rd,Regs.FP,offsetFP); // 读取地址
         }else{
-            long symbolOffsetFp = AsmUtil.getSymbolOffsetFp(symbol);
+            int symbolOffsetFp = AsmUtil.getSymbolOffsetFp(symbol);
             if(retIr.offset.isData)
             {
                 symbolOffsetFp+=(retIr.offset.item*ConstDef.WORD_SIZE);

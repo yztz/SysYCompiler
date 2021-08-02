@@ -95,14 +95,14 @@ public class SysVarListener implements SysYListener {
 
             if (varDefCtx.constExp() == null || varDefCtx.constExp().isEmpty()) //不是数组
             {
-                varDefCtx.initVal().dimensions = new long[]{1};
+                varDefCtx.initVal().dimensions = new int[]{1};
                 varDefCtx.initVal().initValues = new SingleInitValue();
                 varDefCtx.initVal().initValueLen = 1;
             }
             else{ //是数组
-                long[] dims = ListenerUtil.getDimsFromConstExp(varDefCtx.constExp());
+                int[] dims = ListenerUtil.getDimsFromConstExp(varDefCtx.constExp());
                 varDefCtx.initVal().dimensions = dims;
-                long length = ListenerUtil.getLengthFromDimensions(dims);
+                int length = ListenerUtil.getLengthFromDimensions(dims);
                 varDefCtx.initVal().initValues = new ArrayInitValue(length);
                 varDefCtx.initVal().initValueLen = length;
             }
@@ -130,7 +130,7 @@ public class SysVarListener implements SysYListener {
                 // 遍历完成，记录数据
                 varSymbol = currentSymbolTable.addVar(identifier.getSymbol(), initValues);
             }else{
-                long[] dims = ListenerUtil.getDimsFromConstExp(varDefCtx.constExp());
+                int[] dims = ListenerUtil.getDimsFromConstExp(varDefCtx.constExp());
                 // 遍历完成，记录数据
                 varSymbol = currentSymbolTable.addVarArray(identifier.getSymbol(), dims, initValues);
             }
@@ -164,7 +164,7 @@ public class SysVarListener implements SysYListener {
         {
             dimSize*=ctx.dimensions[i];
         }
-        long symbolOffset = ctx.symbolOffset;
+        int symbolOffset = ctx.symbolOffset;
         for (int i = 0; i < ctx.initVal().size(); i++) {
             SysYParser.InitValContext childInitVal = ctx.initVal().get(i);
             childInitVal.ident = ctx.ident;
