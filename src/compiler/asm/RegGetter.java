@@ -11,7 +11,7 @@ import java.util.function.Function;
 public class RegGetter {
     private final Map<Reg, AddressRWInfo> regDesc = new HashMap<>();
     private final Map<AddressRWInfo, RegOrMem> varDesc = new HashMap<>();
-    protected Reg[] usableRegs = {Regs.R4, Regs.R5, Regs.R6, Regs.R7, Regs.R8, Regs.R9, Regs.R10/*, Regs.R12*//*, Regs.R0, Regs.R1, Regs.R2, Regs.R3*/};
+    protected Reg[] usableRegs = {Regs.R4, Regs.R5, Regs.R6, Regs.R7, Regs.R8, Regs.R9, Regs.R10, Regs.R12/*, Regs.R0, Regs.R1, Regs.R2, Regs.R3*/};
 
     private boolean hookIfNotEnough;
     private AsmBuilder builder;
@@ -177,8 +177,8 @@ public class RegGetter {
             /*dataHolder.addAndLoadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),
                                               Regs.R12);*/
             int offsetWord = getAvailableStagingOffsetWord();
-            builder.add(Regs.R12,Regs.FP,AsmUtil.getRegStageOffsetFP()+offsetWord * ConstDef.WORD_SIZE);
-            builder.str(reg,Regs.R12,0);
+            builder.add(Regs.R3,Regs.FP,AsmUtil.getRegStageOffsetFP()+offsetWord * ConstDef.WORD_SIZE);
+            builder.str(reg,Regs.R3,0);
             RegOrMem regOrMem = new RegOrMem(offsetWord);
 
             AddressRWInfo addressRWInfo = regDesc.get(reg);
