@@ -357,11 +357,10 @@ public class AsmGen {
 
                     if(gotoIR instanceof IfGotoRepresent)
                     {
-                        /*if(gotoIR.targetHolder==null)
+                        if(gotoIR.targetHolder==null)
                             System.exit(161);
                         if(gotoIR.getTargetIR()==null)
-                            System.exit(162);*/
-                        System.exit(190+gotoIR.flag);
+                            System.exit(190+gotoIR.flag);
                     }else{
                         String description = irFunction.getDescription(i);
                         if(gotoIR.targetHolder==null)
