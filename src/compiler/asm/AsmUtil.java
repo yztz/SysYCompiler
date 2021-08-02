@@ -82,18 +82,32 @@ public class AsmUtil {
 
     //这些区域用来保存寄存器数据
     public static final int REG_DATA_LEN = 32;
+
+    public static final int REG_STAGE_LEN = 32;
+
+    public static int getFrameSize(int localSize,int maxParamCount)
+    {
+        int frameSize = ((int) Math.ceil(((double)localSize)/4.0 + maxParamCount))*4 + 8;
+        return frameSize+REG_STAGE_LEN+REG_DATA_LEN;
+    }
+
     public static long getSymbolOffsetFp(ValueSymbol symbol)
     {
-        return getSymbolOffset(symbol)-2* ConstDef.WORD_SIZE- REG_DATA_LEN;
+        return getSymbolOffset(symbol)-2* ConstDef.WORD_SIZE- REG_DATA_LEN - REG_STAGE_LEN;
     }
     public static long getSymbolOffsetFp(ValueSymbol symbol, long arrayIndex)
     {
-        return getSymbolOffset(symbol,arrayIndex) -2* ConstDef.WORD_SIZE - REG_DATA_LEN;
+        return getSymbolOffset(symbol,arrayIndex) -2* ConstDef.WORD_SIZE - REG_DATA_LEN - REG_STAGE_LEN;
     }
 
     public static int getRegOffsetFP()
     {
         return -REG_DATA_LEN -2* ConstDef.WORD_SIZE;
+    }
+
+    public static int getRegStageOffsetFP()
+    {
+        return getRegOffsetFP() - REG_STAGE_LEN;
     }
 
     public static int getParamOffsetCalledFp(int index)
@@ -132,7 +146,7 @@ public class AsmUtil {
         return false;
     }
 
-    public static boolean imm12(long x)
+    /*public static boolean imm12(long x)
     {
         if(x>=0)
             return (((int)x)&0xfffff000) == 0;
@@ -146,7 +160,7 @@ public class AsmUtil {
         {
             dataHolder.addAndLoadFromFuncData(builder,num,rd);
         }
-    }
+    }*/
 
 
     /**
@@ -193,6 +207,7 @@ public class AsmUtil {
         {
             Reg tmp = regGetter.getTmpRegister();
             //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
+
             builder.add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
             builder.ldm(AsmBuilder.LSAddressMode.NONE,tmp,regs);
             regGetter.releaseReg(tmp);

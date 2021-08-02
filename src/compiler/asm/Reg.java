@@ -26,6 +26,11 @@ public class Reg {
     }
 
     @Override
+    public String toString() {
+        return getText();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

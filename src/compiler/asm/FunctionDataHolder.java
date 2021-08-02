@@ -40,6 +40,8 @@ public class FunctionDataHolder {
     int currentIndex = 0;
     public void addData(FuncData data)
     {
+        if(datas.containsKey(data)) //不重复添加
+            return;
         dataList.add(data);
         datas.put(data,currentIndex++);
     }
@@ -76,7 +78,11 @@ public class FunctionDataHolder {
         return datas.size();
     }
 
-
+    public void addAndLoadFromFuncData(AsmBuilder builder,FuncData data,Reg rd)
+    {
+        addData(data);
+        loadFromFuncData(builder,data,rd);
+    }
     public void addAndLoadFromFuncData(AsmBuilder builder,int num,Reg rd)
     {
         addData(num);
@@ -188,6 +194,7 @@ public class FunctionDataHolder {
     }
 
     public static class RegFuncData extends FuncData{
+        public static final int size = 32*4;
         public static final String regDataLabel = "._reg";
         private static RegFuncData instance = null;
         public static RegFuncData getInstance(){

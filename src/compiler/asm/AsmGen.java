@@ -88,8 +88,9 @@ public class AsmGen {
                     maxCallParamNum = Math.max(maxCallParamNum,((CallRepresent) ir).params.length);
             }
         }
-        int frameSize = ((int) Math.ceil(((double)totalByteSize)/4.0 + maxCallParamNum))*4 + 8;//4字节对齐,直接乘2
-        funcSymbol.setStackFrameSize(frameSize+AsmUtil.REG_DATA_LEN);
+        funcSymbol.setStackFrameSize(AsmUtil.getFrameSize(totalByteSize,maxCallParamNum));
+        /*int frameSize = ((int) Math.ceil(((double)totalByteSize)/4.0 + maxCallParamNum))*4 + 8;//4字节对齐,直接乘2
+        funcSymbol.setStackFrameSize(frameSize+AsmUtil.REG_DATA_LEN + AsmUtil.REG_STAGE_LEN);*/
     }
 
     /*public void prepareFunctionData(FuncSymbol funcSymbol,IRFunction irFunction,FunctionDataHolder holder)
@@ -170,7 +171,6 @@ public class AsmGen {
                     continue;
                 }*/
 
-
             }
         }
 
@@ -196,11 +196,10 @@ public class AsmGen {
         }
 
         /*AsmBuilder builder=new AsmBuilder();
-        //builder.align(2).label("reg_addr").word("reg");
 
         builder.bss().align(2);
         builder.label(FunctionDataHolder.RegFuncData.regDataLabel);
-        builder.space(15*ConstDef.WORD_SIZE);
+        builder.space(FunctionDataHolder.RegFuncData.size);
         sections.add(builder.getSection());*/
         return sections;
     }
