@@ -256,7 +256,7 @@ public class AsmBuilder {
         return regOperand(RegOperandOP.CMP, rd, new RegOperand(rn));
     }
 
-    public AsmBuilder cmp(Reg rd, int imm8m) {
+    public AsmBuilder cmp(Reg rd, long imm8m) {
         if(_hookIfNotImmXX)
         {
             if(!AsmUtil.imm8m(imm8m))

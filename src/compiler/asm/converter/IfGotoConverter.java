@@ -32,11 +32,11 @@ public class IfGotoConverter extends AsmConverter{
             builder.cmp(rd,rn);
         }else if(!ifIr.left.isData ){
             Reg rd = regGetter.getReg(ir,ifIr.left);
-            int imm8m = ifIr.right.item;
+            long imm8m = ifIr.right.item;
             builder.cmp(rd,imm8m);
         }else if(!ifIr.right.isData ){
             Reg rd = regGetter.getReg(ir,ifIr.right);
-            int imm8m = ifIr.left.item;
+            long imm8m = ifIr.left.item;
             builder.cmp(rd,imm8m);
             relOp = relOp.swapLeftRight(); //左右颠倒
         }else{ //todo 都是立即数
