@@ -969,7 +969,7 @@ public class SysYIRListener implements SysYListener {
             else if(ctx.addExp().startStmt!=null)
                 ctx.startStmt = ctx.addExp().startStmt;
 
-            if(ctx.parent instanceof SysYParser.RelExpContext) //如果父节点还是RelExpContext， 说明出现了类似a<b<c这样的表达式
+            if(!ctx.jump) //如果父节点还是RelExpContext， 说明出现了类似a<b<c这样的表达式
             {
                 RelRepresent represent = InterRepresentFactory.createRelRepresent(ctx.relExp().address,
                                                                                      ctx.addExp().result, relOp);
@@ -992,7 +992,8 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterEqExp(SysYParser.EqExpContext ctx) {
-
+        if(ctx.jump && ctx.op==null)
+            ctx.relExp().jump=true;
     }
 
     @Override
@@ -1005,7 +1006,6 @@ public class SysYIRListener implements SysYListener {
             ctx.address=ctx.relExp().address;
         }else{
 
-            /*ctx.irGroup.bookVacancy(ctx.startStmt);*/
             IfGotoRepresent.RelOp relOp= null;
             if(ctx.Equal()!=null){
                 relOp= IfGotoRepresent.RelOp.EQUAL;
@@ -1015,16 +1015,28 @@ public class SysYIRListener implements SysYListener {
                 System.err.println("Unknown rel opcode");
             }
 
-            List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.eqExp().address, ctx.relExp().address,1);
-            _currentCollection.addCode(pair.get(0));
-            _currentCollection.addCode(pair.get(1));
-
             if(ctx.eqExp().startStmt!=null)
                 ctx.startStmt = ctx.eqExp().startStmt;
             else if(ctx.relExp().startStmt!=null)
                 ctx.startStmt = ctx.relExp().startStmt;
-            else
-                ctx.startStmt = new InterRepresentHolder(pair.get(0));
+
+            if(!ctx.jump) //如果父节点还是EqExpContext， 说明出现了类似a<b<c这样的表达式
+            {
+                RelRepresent represent = InterRepresentFactory.createRelRepresent(ctx.eqExp().address,
+                                                                                  ctx.relExp().address, relOp);
+                _currentFunction.addCode(represent);
+                ctx.address = represent.target;
+
+                if(ctx.startStmt == null)
+                    ctx.startStmt = new InterRepresentHolder(represent);
+            }else{
+                List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.eqExp().address, ctx.relExp().address,1);
+                _currentCollection.addCode(pair.get(0));
+                _currentCollection.addCode(pair.get(1));
+
+                if(ctx.startStmt==null)
+                    ctx.startStmt = new InterRepresentHolder(pair.get(0));
+            }
         }
     }
 
@@ -1032,7 +1044,7 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterLAndExp(SysYParser.LAndExpContext ctx) {
-
+        ctx.eqExp().jump = true;
     }
 
     @Override

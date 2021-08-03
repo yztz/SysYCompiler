@@ -2466,6 +2466,7 @@ public class SysYParser extends Parser {
 			super(parent, invokingStateNumber);
 		}
 		public AddressOrData address;
+		public boolean jump = false;
 		//public InterRepresentHolder vocancy;
 	}
 
