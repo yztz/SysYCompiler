@@ -324,8 +324,7 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg tmp = regGetter.getTmpRegister();
-                //ldrEq(tmp, offset);
-                dataHolder.addAndLoadFromFuncData(this,offset,tmp);
+                ldrEq(tmp, offset);
                 return mem(op,size,rd,rn,tmp,false,ShiftOp.LSL,0,saveOffset,postOffset);
             }
         }
@@ -371,9 +370,8 @@ public class AsmBuilder {
                 Reg baseReg = regGetter.getTmpRegister();
                 Reg offsetReg = regGetter.getTmpRegister(1);
                 ldr(baseReg,label,0);
-                //ldrEq(offsetReg,Math.abs(offset));
-                dataHolder.addAndLoadFromFuncData(this,offset,offsetReg);
-                return mem(Mem.LDR,null,rd,baseReg,offsetReg,false,ShiftOp.LSL,0,false,false);
+                ldrEq(offsetReg,Math.abs(offset));
+                return mem(Mem.LDR,null,rd,baseReg,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
         return addInstruction("ldr", rd.getText(),
@@ -403,9 +401,8 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                //ldrEq(offsetReg,Math.abs(offset));//把下面这句改成这句，可以让kmp从WA变成segment fault
-                dataHolder.addAndLoadFromFuncData(this,offset,offsetReg);
-                return mem(Mem.LDR,null,rd,rn,offsetReg,false,ShiftOp.LSL,0,false,false);
+                ldrEq(offsetReg,Math.abs(offset));
+                return mem(Mem.LDR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
         return mem(Mem.LDR, null, rd, rn, offset, false, false);
