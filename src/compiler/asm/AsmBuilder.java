@@ -474,10 +474,10 @@ public class AsmBuilder {
     public AsmBuilder mov(Reg rd, int imm8m) {
         if(_hookIfNotImmXX)
         {
-            if(!AsmUtil.imm8m(imm8m))
+            if(!AsmUtil.imm12(imm8m))
             {
-                //ldrEq(rd, imm8m);
-                dataHolder.addAndLoadFromFuncData(this,imm8m,rd);
+                ldrEq(rd, imm8m);
+                //dataHolder.addAndLoadFromFuncData(this,imm8m,rd);
                 return this;
             }
         }
