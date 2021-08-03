@@ -9,6 +9,7 @@ import compiler.symboltable.VarSymbol;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,8 +37,19 @@ public class InitVarConverter extends AsmConverter{
                 builder.sub(Regs.R0, Regs.FP,-AsmUtil.getSymbolOffsetFp(varSymbol));
                 builder.ldr(Regs.R1,dataHolder.getLabel(),offsetInFuncData);
                 builder.mov(Regs.R2,varSymbol.getByteSize());
+
+                List<Reg> usingRegister =
+                        regGetter.getUsingRegNext().stream().filter(r->{
+                            int id = r.getId();
+                            return id>2;
+                        }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
+
+                AsmUtil.protectRegs(builder,regGetter,usingRegister);
+
                 builder.bl("memcpy");
-            }else{ //小于4个，用sdr加载
+
+                AsmUtil.recoverRegs(builder,regGetter,usingRegister);
+            }else{ //小于4个，用str加载
 
                 Reg addr = regGetter.getTmpRegister(0);
                 builder.ldr(addr,dataHolder.getLabel(),offsetInFuncData);
