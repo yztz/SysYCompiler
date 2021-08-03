@@ -29,6 +29,7 @@ public class AsmConvertOrganizer {
         allConverter.add(new InitVarConverter());
         allConverter.add(new LAddrConverter());
         allConverter.add(new UnaryConverter());
+        allConverter.add(new RelConverter());
     }
 
     public static List<AsmSection> process(RegGetter regGetter, FuncSymbol funcSymbol, List<IRBlock> irBlocks)

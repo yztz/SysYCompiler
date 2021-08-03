@@ -1,6 +1,7 @@
 package compiler.asm;
 
 import compiler.asm.operand.*;
+import compiler.genir.code.IfGotoRepresent;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -484,6 +485,22 @@ public class AsmBuilder {
         return addInstruction(RegOperandOP.MOV.getText(), rd.getText(), String.format("#%d", imm8m));
     }
 
+    public AsmBuilder mov(Cond cond,Reg rd,int imm8m)
+    {
+        if(_hookIfNotImmXX)
+        {
+            if(!AsmUtil.imm8m(imm8m))
+            {
+                //ldrEq(rd, imm8m);
+                dataHolder.addAndLoadFromFuncData(this,imm8m,rd);
+                return this;
+            }
+        }
+        return addInstruction(
+                String.format("%s%s",RegOperandOP.MOV.getText(),cond.getText()), rd.getText(), String.format("#%d",
+                                                                                                          imm8m));
+    }
+
     public AsmBuilder add(Reg rd, Reg rn, Operand operand) {
         return regRegOperand(RegRegOperandOP.ADD, rd, rn, operand);
     }
@@ -674,6 +691,51 @@ public class AsmBuilder {
         BLT,//小于（有符号数）
         BLE //小于等于（有符号数）
         ;
+
+        public String getText() {
+            return name().toLowerCase(Locale.ROOT);
+        }
+    }
+
+    public enum Cond{
+        EQ,//(等于，Equal) ==
+        NE,//(不等于，Not Equal) !=
+        CS,//(高于或同于,进位设置，Carry Set) >=
+        CC,//(低于,进位清除，Carry Clear) <
+        MI,//(负号，MInus) < 0
+        PL,//(正号，PLus) >=0
+        VS,//(溢出设置，oVerflow Set)
+        VC,//(溢出清除，oVerflow Clear)
+        HI,//(高于，HIgher) >
+        LS,//(低于或同于，Lower or Same) <=
+        GE,//(大于等于，Greater or equal) >=
+        LT,//(小于，Less Than) <
+        GT,//(大于，Greater Than) >
+        LE,//(小于等于，Less or equal) <=
+        AL,//(总是，Always) 永真
+        NV,
+        ;//(从不，Never ) 永假
+
+        public static Cond getFromRelOP(IfGotoRepresent.RelOp op)
+        {
+            switch (op)
+            {
+                case LESS:
+                    return LT;
+                case GREATER:
+                    return GT;
+                case LESS_EQUAL:
+                    return LE;
+                case GREATER_EQUAL:
+                    return GE;
+                case EQUAL:
+                    return EQ;
+                case NOT_EQUAL:
+                    return NE;
+            }
+
+            return NE;
+        }
 
         public String getText() {
             return name().toLowerCase(Locale.ROOT);

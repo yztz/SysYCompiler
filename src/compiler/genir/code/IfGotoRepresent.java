@@ -51,7 +51,7 @@ public class IfGotoRepresent extends GotoRepresent {
         /**
          * 左右交换
          */
-        public RelOp getReverse()
+        public RelOp swapLeftRight()
         {
             switch (this) {
                 case LESS:
@@ -68,6 +68,44 @@ public class IfGotoRepresent extends GotoRepresent {
                     return NOT_EQUAL;
             }
             return NOT_EQUAL;
+        }
+
+        public RelOp not()
+        {
+            switch (this) {
+                case LESS:
+                    return GREATER_EQUAL;
+                case GREATER:
+                    return LESS_EQUAL;
+                case LESS_EQUAL:
+                    return GREATER;
+                case GREATER_EQUAL:
+                    return LESS;
+                case EQUAL:
+                    return NOT_EQUAL;
+                case NOT_EQUAL:
+                    return EQUAL;
+            }
+            return NOT_EQUAL;
+        }
+
+        public boolean compute(int left,int right)
+        {
+            switch (this) {
+                case LESS:
+                    return left<right;
+                case GREATER:
+                    return left>right;
+                case LESS_EQUAL:
+                    return left<=right;
+                case GREATER_EQUAL:
+                    return left>=right;
+                case EQUAL:
+                    return left==right;
+                case NOT_EQUAL:
+                    return left!=right;
+            }
+            return false;
         }
     }
 }

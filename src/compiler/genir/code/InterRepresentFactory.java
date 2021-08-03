@@ -53,6 +53,11 @@ public class InterRepresentFactory {
             System.exit(-7);
         return new SaveRepresent(valueSymbol,offset,source);
     }
+
+    public static RelRepresent createRelRepresent(AddressOrData left, AddressOrData right, IfGotoRepresent.RelOp op)
+    {
+        return new RelRepresent(currentAddress++,op,left,right);
+    }
     /*public static UnaryRepre createCondJumpRepresent(SysYParser.RelExpContextBase ctx)
     {
 

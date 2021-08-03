@@ -38,7 +38,7 @@ public class IfGotoConverter extends AsmConverter{
             Reg rd = regGetter.getReg(ir,ifIr.right);
             long imm8m = ifIr.left.item;
             builder.cmp(rd,imm8m);
-            relOp = relOp.getReverse(); //左右颠倒
+            relOp = relOp.swapLeftRight(); //左右颠倒
         }else{ //todo 都是立即数
             Reg rd = regGetter.getTmpRegister(0);
             Reg rn = regGetter.getTmpRegister(1);

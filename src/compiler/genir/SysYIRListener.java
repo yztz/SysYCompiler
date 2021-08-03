@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import compiler.symboltable.*;
+import sun.util.resources.es.CurrencyNames_es_UY;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -966,16 +967,29 @@ public class SysYIRListener implements SysYListener {
                 System.err.println("Unknown rel opcode");
             }
 
-            List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.relExp().address, ctx.addExp().result,0);
-            _currentCollection.addCode(pair.get(0));
-            _currentCollection.addCode(pair.get(1));
-
             if(ctx.relExp().startStmt!=null)
                 ctx.startStmt = ctx.relExp().startStmt;
             else if(ctx.addExp().startStmt!=null)
                 ctx.startStmt = ctx.addExp().startStmt;
-            else
-                ctx.startStmt = new InterRepresentHolder(pair.get(0));
+
+            if(ctx.parent instanceof SysYParser.RelExpContext) //如果父节点还是RelExpContext， 说明出现了类似a<b<c这样的表达式
+            {
+                RelRepresent represent = InterRepresentFactory.createRelRepresent(ctx.relExp().address,
+                                                                                     ctx.addExp().result, relOp);
+                _currentFunction.addCode(represent);
+                ctx.address = represent.target;
+
+                if(ctx.startStmt == null)
+                    ctx.startStmt = new InterRepresentHolder(represent);
+            }else{
+
+                List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.relExp().address, ctx.addExp().result,0);
+                _currentCollection.addCode(pair.get(0));
+                _currentCollection.addCode(pair.get(1));
+
+                if(ctx.startStmt == null)
+                    ctx.startStmt = new InterRepresentHolder(pair.get(0));
+            }
         }
     }
 
