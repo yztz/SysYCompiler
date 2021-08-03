@@ -256,7 +256,7 @@ public class AsmBuilder {
         return regOperand(RegOperandOP.CMP, rd, new RegOperand(rn));
     }
 
-    public AsmBuilder cmp(Reg rd, long imm8m) {
+    public AsmBuilder cmp(Reg rd, int imm8m) {
         if(_hookIfNotImmXX)
         {
             if(!AsmUtil.imm8m(imm8m))
@@ -414,9 +414,9 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                //ldrEq(offsetReg,Math.abs(offset));
-                dataHolder.addAndLoadFromFuncData(this,offset,offsetReg);
-                return mem(Mem.STR,null,rd,rn,offsetReg,false,ShiftOp.LSL,0,false,false);
+                ldrEq(offsetReg,Math.abs(offset));
+                //dataHolder.addAndLoadFromFuncData(this,offset,offsetReg);
+                return mem(Mem.STR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
         return mem(Mem.STR, null, rd, rn, offset, false, false);
