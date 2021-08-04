@@ -31,6 +31,7 @@ public class Function implements ILabel {
         param.paramIndex = params.size();
         params.add(param);
         if (param.paramIndex < PARAM_LIMIT) {
+            param.offset = totalOffset;
             totalOffset += param.width;
         } else {
             param.offset = param.width * (PARAM_LIMIT - param.paramIndex - 1);
@@ -40,7 +41,14 @@ public class Function implements ILabel {
 
     public void addVariable(Variable variable) {
         variables.add(variable);
-        totalOffset += variable.getBytes();
+        if (variable.isArray) {
+            totalOffset += variable.getBytes();
+            variable.offset = totalOffset - variable.width;
+        } else {
+            variable.offset = totalOffset;
+            totalOffset += variable.getBytes();
+        }
+
     }
 
     public List<Variable> getParams() {

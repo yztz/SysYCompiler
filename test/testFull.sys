@@ -2,16 +2,16 @@
 int cb[10] = {1,2,3,4};
 const int T = 2;
 
-int bar(int a, int b[], int c) {
-    return a + b[1] + c;
-}
+//int bar(int a, int b[], int c) {
+//    return a + b[1] + c;
+//}
 
 int main() {
     int array[3] = {1,2,3};
     int a = 1;
     int b = 2;
     int c = 3;
-
-    int ret = bar(a, array, c);
-	return ret;
+    int d = array[T];
+    //int ret = bar(a, array, c);
+	return d;
 }

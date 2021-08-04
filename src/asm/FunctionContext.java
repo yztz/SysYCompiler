@@ -143,7 +143,7 @@ public class FunctionContext {
                 Register rd, rn, rm;
                 ILabel target;
                 regMap = allocator.getReg(ir);
-                if (ir.isJump()) allocator.saveAll();
+                if (ir.isJump() || ir.isReturn()) allocator.saveAll();
 
                 switch (ir.op) {
                     case ADD:
@@ -234,7 +234,7 @@ public class FunctionContext {
                         //todo
                         if (paramCount > Function.PARAM_LIMIT - 1) {
                             int offset = paramCount - Function.PARAM_LIMIT;
-                            if (ir.op1 instanceof Immediate) {
+                            if (ir.op1 instanceof Immediate) {  // 参数为立即数
                                 rd = allocator.allocFreeReg();
                                 codes.add(AsmFactory.mov(rd, ((Immediate) ir.op1).value));
                                 if (offset == 0)
@@ -345,10 +345,6 @@ public class FunctionContext {
         }
         /* 长度 */
         codes.add(AsmFactory.size(function.name, ".-" + function.name));
-    }
-
-    public int getArrayAddress(Variable variable) {
-        return arrayAddress.get(variable);
     }
 
 

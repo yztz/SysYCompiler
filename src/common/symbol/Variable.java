@@ -24,9 +24,8 @@ public class Variable implements IName {
     public int paramIndex = -1;
     public int pos = 0; //用于数组初始化赋值
 
-    public Variable(String name, int offset, Domain domain, boolean isConst, boolean isArray, int size) {
+    public Variable(String name, Domain domain, boolean isConst, boolean isArray, int size) {
         this.name = name;
-        this.offset = offset;
         this.domain = domain;
         this.isConst = isConst;
         this.isArray = isArray;
@@ -56,24 +55,24 @@ public class Variable implements IName {
         return constVal.getOrDefault(idx, 0);
     }
 
-    public static Variable var(String name, int offset, Domain domain) {
-        return new Variable(name, offset, domain, false, false, 1);
+    public static Variable var(String name, Domain domain) {
+        return new Variable(name, domain, false, false, 1);
     }
 
-    public static Variable constVar(String name, int offset, Domain domain) {
-        return new Variable(name, offset, domain, true, false, 1);
+    public static Variable constVar(String name, Domain domain) {
+        return new Variable(name, domain, true, false, 1);
     }
 
-    public static Variable array(String name, int offset, Domain domain, List<Integer> dimensions) {
+    public static Variable array(String name, Domain domain, List<Integer> dimensions) {
         int size = 1;
         for (int num : dimensions) size *= num;
-        Variable newVar = new Variable(name, offset, domain, false, true, size);
+        Variable newVar = new Variable(name, domain, false, true, size);
         newVar.dimensions = dimensions;
         return newVar;
     }
 
-    public static Variable constArray(String name, int offset, Domain domain, List<Integer> dimensions) {
-        Variable newVar = array(name, offset, domain, dimensions);
+    public static Variable constArray(String name, Domain domain, List<Integer> dimensions) {
+        Variable newVar = array(name, domain, dimensions);
         newVar.isConst = true;
         return newVar;
     }

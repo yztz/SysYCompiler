@@ -56,30 +56,30 @@ public class Domain {
 
 
     public static Variable addConstVar(String name) {
-        return addVariableToTable(Variable.constVar(name, getTotalOffset(), getDomain()));
+        return addVariableToTable(Variable.constVar(name, getDomain()));
     }
 
     public static Variable addConstArray(String name, List<Integer> dimensions) {
-        return addVariableToTable(Variable.constArray(name, getTotalOffset(), getDomain(), dimensions));
+        return addVariableToTable(Variable.constArray(name, getDomain(), dimensions));
     }
 
 
     public static Variable addArray(String name, List<Integer> dimensions) {
-        return addVariableToTable(Variable.array(name, getTotalOffset(), getDomain(), dimensions));
+        return addVariableToTable(Variable.array(name, getDomain(), dimensions));
     }
 
     public static Variable addVariable(String name) {
-        return addVariableToTable(Variable.var(name, getTotalOffset(), getDomain()));
+        return addVariableToTable(Variable.var(name, getDomain()));
     }
 
     public static Variable addParam(String name) {
-        Variable var = Variable.var(name, getTotalOffset(), getDomain());
+        Variable var = Variable.var(name, getDomain());
         var.isParam = true;
         return addVariableToTable(var);
     }
 
     public static Variable addParam(String name, List<Integer> dimensions) {
-        Variable var = Variable.array(name, getTotalOffset(), getDomain(), dimensions);
+        Variable var = Variable.array(name, getDomain(), dimensions);
         var.isParam = true;
         return addVariableToTable(var);
     }

@@ -144,7 +144,7 @@ public class BasicBlock {
                 IR ir = irs.get(i);
                 IName lVal = ir.getLVal();
 
-                List<IName> rVal = ir.getRVal();
+                Set<IName> rVal = ir.getRVal();
                 if (lVal != null) {
                     if (lVal instanceof Temp)
                         refTable.putIfAbsent(lVal, new Reference(null, false));

@@ -76,10 +76,6 @@ public class AsmFactory {
     }
 
 
-    public static Code loadImm(int value, Register register) {
-        return Code.code(String.format("mov %s %d", register, value));
-    }
-
     public static Code b(String target) {
         return Code.code(String.format("b %s", target));
     }

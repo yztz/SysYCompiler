@@ -6,7 +6,9 @@ import ast.Utils;
 import common.symbol.Variable;
 import asm.IName;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class OffsetVar implements IName {
     public Variable variable;
@@ -25,6 +27,13 @@ public class OffsetVar implements IName {
 
     public IAstValue getOffset() {
         return offsetTree.value;
+    }
+
+    public Set<IName> parseSelf() {
+        Set<IName> names = new HashSet<>();
+        names.add(variable);
+        if (getOffset() instanceof IName) names.add(((IName) getOffset()));
+        return names;
     }
 
     @Override

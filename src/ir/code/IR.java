@@ -35,8 +35,8 @@ public abstract class IR {
 
     public abstract IName getLVal();
 
-    public List<IName> getRVal() {
-        List<IName> list = new ArrayList<>();
+    public Set<IName> getRVal() {
+        Set<IName> list = new HashSet<>();
         if (op2 instanceof IName) list.add(((IName) op2));
         if (op3 instanceof IName) list.add(((IName) op3));
         return list;
@@ -89,5 +89,9 @@ public abstract class IR {
                 op == OP.LT ||
                 op == OP.EQ ||
                 op == OP.NOT_EQ;
+    }
+
+    public boolean isReturn() {
+        return op == OP.RETURN;
     }
 }

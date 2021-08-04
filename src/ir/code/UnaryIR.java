@@ -5,7 +5,9 @@ import common.OP;
 import asm.IName;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class UnaryIR extends IR {
@@ -22,8 +24,8 @@ public class UnaryIR extends IR {
     }
 
     @Override
-    public List<IName> getRVal() {
-        List<IName> list = new ArrayList<>();
+    public Set<IName> getRVal() {
+        Set<IName> list = new HashSet<>();
         list.add(((IName) op1));
         return list;
     }

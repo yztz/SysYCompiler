@@ -16,7 +16,7 @@ public class Describer {
     private static final IAddress MEM_ADDR = new MEMAddr();
 
     public static final Register[] availableReg = {
-            r4, r5, r6, r7, r8, r9, r10, r12
+            r4, r5, r6, r7, r8, r9, r10
     };
 
     private Set<Register> locked = new HashSet<>();
@@ -152,6 +152,9 @@ public class Describer {
         addrDesc.get(name).add(target);
     }
 
+    public boolean isLocked(Register register) {
+        return locked.contains(register);
+    }
 
     public Register getFreeRegister() {
         for (Register register : availableReg) {
