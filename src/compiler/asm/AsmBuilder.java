@@ -404,9 +404,9 @@ public class AsmBuilder {
             if(offset>4095 || offset< -4095)
             {
                 Reg offsetReg = regGetter.getTmpRegister(0);
-                //ldrEq(offsetReg,Math.abs(offset));//把下面这句改成这句，可以让kmp从WA变成segment fault
-                dataHolder.addAndLoadFromFuncData(this,offset,offsetReg);
-                return mem(Mem.LDR,null,rd,rn,offsetReg,false,ShiftOp.LSL,0,false,false);
+                ldrEq(offsetReg,Math.abs(offset));//把下面这句改成这句，可以让kmp从WA变成segment fault
+                //dataHolder.addAndLoadFromFuncData(this,offset,offsetReg);
+                return mem(Mem.LDR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
         }
         return mem(Mem.LDR, null, rd, rn, offset, false, false);
