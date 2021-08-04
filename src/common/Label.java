@@ -21,7 +21,7 @@ public class Label implements ILabel {
     }
 
     public static Label newLabel() {
-        return new Label("L" + next_id++);
+        return new Label(".L" + next_id++);
     }
     public static Label newLabel(String name) {
         return new Label(name);

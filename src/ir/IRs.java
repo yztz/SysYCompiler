@@ -7,35 +7,44 @@ import ir.code.IR;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class IRs implements Iterable<IR> {
-    private List<IR> irs = new ArrayList<>();
-    private Map<ILabel, IR> labelMap = new HashMap<>();
-    private ILabel nextLabel;
-//    private Map<Function, List<IR>>
+public class IRs {
+    private static List<IR> irs = new ArrayList<>();
+    private static Map<ILabel, IR> labelMap = new HashMap<>();
+    private static ILabel nextLabel;
+    private static List<Function> functions = new ArrayList<>();
 
-    private Function currentFunc;
+    private static Function currentFunc;
 
-    public int size() {
-        return irs.size();
+    public static List<IR> getIRs() {
+        return Collections.unmodifiableList(irs);
     }
 
-    public void addIR(IR ir) {
-        if (null != currentFunc) {
+    public static IR getIR(ILabel label) {
+        return labelMap.get(label);
+    }
 
+    public static List<Function> getFunctions() {
+        return functions;
+    }
+
+    public static void addIR(IR ir) {
+        if (null != currentFunc) {
+            currentFunc.irs.add(ir);
         }
         attachLabel(ir);
         irs.add(ir);
     }
 
-    public void startSection(Function function) {
+    public static void startSection(Function function) {
+        functions.add(function);
         currentFunc = function;
     }
 
-    public void endSection() {
+    public static void endSection() {
         currentFunc = null;
     }
 
-    private void attachLabel(IR ir) {
+    private static void attachLabel(IR ir) {
         if (nextLabel != null) {
             ir.setLabel(nextLabel);
             labelMap.put(nextLabel, ir);
@@ -43,31 +52,12 @@ public class IRs implements Iterable<IR> {
         }
     }
 
-    public void setNextLabel(ILabel label) {
-        this.nextLabel = label;
+    public static void setNextLabel(ILabel label) {
+        nextLabel = label;
     }
 
-    public IR getIR(int i) {
-        return irs.get(i);
+    public static void removeNextLabel() {
+        nextLabel = null;
     }
 
-    public IR getIR(ILabel label) {
-        return labelMap.get(label);
-    }
-
-
-    @Override
-    public Iterator<IR> iterator() {
-        return irs.iterator();
-    }
-
-    @Override
-    public void forEach(Consumer<? super IR> action) {
-        irs.forEach(action);
-    }
-
-    @Override
-    public Spliterator<IR> spliterator() {
-        return irs.spliterator();
-    }
 }

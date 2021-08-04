@@ -1,54 +1,56 @@
 package asm;
 
+import asm.allocator.RegisterAllocator;
 import asm.code.AsmFactory;
-import common.Register;
+import asm.code.Code;
+import common.symbol.Domain;
 import common.symbol.Function;
+import common.symbol.SymbolTable;
+import common.symbol.Variable;
 import ir.IRs;
-import ir.code.IR;
 
-import static asm.Utils.write;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 
 public class CodeGenerator {
-    Map<Register, Set<IName>> regDesc = new HashMap<>();
-    Map<IName, Set<IAddress>> addrDesc = new HashMap<>();
-    RegisterAllocator allocator;
-    IRs irs;
-
-
-
-    public CodeGenerator(IRs irs) {
-        this.irs = irs;
-        allocator = new RegisterAllocator(irs);
-    }
-
 
     public void genCode() {
-        for (IR ir : irs) {
-            if (ir.isStartOfFunction()) {
-                Function function = (Function) ir.label;
+        // 生成头部信息
+        genInfo();
+        // 初始化全局变量
+        genGlobalVar();
+        // 生成函数
+        write(AsmFactory.code(".text"));
+        for (Function function : IRs.getFunctions())
+            write(new FunctionContext(function).codes);
+    }
 
-            }
+    public void genInfo() {
+        write(AsmFactory.arch("armv7-a"));
+    }
+
+    public void genGlobalVar() {
+        SymbolTable globalSymTab = Domain.globalDomain.symbolTable;
+        if (!globalSymTab.normalVariable.isEmpty())
+            write(AsmFactory.section(".data"));
+        for (Variable variable : globalSymTab.normalVariable) {
+            write(AsmFactory.var(variable));
+        }
+        if (!globalSymTab.constVariable.isEmpty())
+            write(AsmFactory.section(".rodata"));
+        for (Variable variable : globalSymTab.constVariable) {
+            write(AsmFactory.var(variable));
         }
     }
 
-    private void genFuncHead(Function function) {
-        write(function.name + ":");
-        if (function.existCall) {
-            write("\tpush {fp, lr}");
-            write("\tadd fp, sp, #4");
-        } else {
-            write("\tpush {fp}");
-            write("\tadd fp, sp, #0");
-        }
-        write("");
+
+    private void write(Code code) {
+        Utils.write(code);
     }
-
-
-
-
-
+    private void write(List<Code> codes) {
+        for (Code code : codes) {
+            Utils.write(code);
+        }
+    }
 
 }

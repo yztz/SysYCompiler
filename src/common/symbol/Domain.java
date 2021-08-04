@@ -2,12 +2,14 @@ package common.symbol;
 
 import java.util.*;
 
+
 public class Domain {
     public static Map<String, Function> functions = new HashMap<>();
     private static Deque<Domain> stack = new ArrayDeque<>();
     public static Domain globalDomain = new Domain(null);
+
     public static Function currentFunc = null;
-    private static int globalOffset = 0;
+//    private static int globalOffset = 0;
 
     private static Domain nextDomain = null;
 
@@ -23,7 +25,7 @@ public class Domain {
     }
 
     public static void enterDomain() {
-        if (null == nextDomain){
+        if (null == nextDomain) {
             stack.push(new Domain(stack.peek()));
         } else {
             stack.push(nextDomain);
@@ -70,6 +72,18 @@ public class Domain {
         return addVariableToTable(Variable.var(name, getTotalOffset(), getDomain()));
     }
 
+    public static Variable addParam(String name) {
+        Variable var = Variable.var(name, getTotalOffset(), getDomain());
+        var.isParam = true;
+        return addVariableToTable(var);
+    }
+
+    public static Variable addParam(String name, List<Integer> dimensions) {
+        Variable var = Variable.array(name, getTotalOffset(), getDomain(), dimensions);
+        var.isParam = true;
+        return addVariableToTable(var);
+    }
+
 
     private static Variable addVariableToTable(Variable variable) {
         if (null != getDomain().symbolTable.searchSymbol(variable.name)) {
@@ -77,14 +91,21 @@ public class Domain {
             return null;
         }
 
+//        if (globalDomain == Domain.getDomain()) {   // 全局变量
+//
+//        }
+
         // 添加变量到对应的符号表
         getDomain().symbolTable.addVariable(variable);
-        // 增加总偏移量
-        if (null == currentFunc)
-            globalOffset += variable.size * variable.width;
-        else
-            currentFunc.totalOffset += variable.size * variable.width;
 
+        // 添加入函数
+        if (null != currentFunc) {
+            if (variable.isParam) {
+                currentFunc.addParam(variable);
+            } else {
+                currentFunc.addVariable(variable);
+            }
+        }
         return variable;
     }
 
@@ -116,7 +137,7 @@ public class Domain {
 
     private static int getTotalOffset() {
         if (null == currentFunc) {
-            return globalOffset;
+            return -1;
         } else {
             return currentFunc.totalOffset;
         }
@@ -124,7 +145,7 @@ public class Domain {
 
     public static Domain getDomain() {
         if (null == nextDomain)
-             return stack.peek();
+            return stack.peek();
         else
             return nextDomain;
     }

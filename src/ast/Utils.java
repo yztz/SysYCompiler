@@ -1,6 +1,7 @@
 package ast;
 
 import common.OP;
+import common.OffsetVar;
 import common.symbol.Variable;
 
 import java.util.ArrayList;
@@ -56,12 +57,13 @@ public class Utils {
             } else if (op == OP.VARIABLE) {
                 Variable variable = root.getVariable();
                 if (variable.isCollapsible()) {
-                    if (variable.isArray) {
-                        return root;
-                    } else {
-                        return AstNode.makeLeaf((variable.indexConstVal(0)));
-                    }
+                    return AstNode.makeLeaf((variable.indexConstVal(0)));
                 }
+            } else if (op == OP.VAR_OFFSET) {
+                OffsetVar var = (OffsetVar) root.value;
+                var.offsetTree = calc(var.offsetTree);
+                if (var.variable.isCollapsible() && var.offsetTree.op == OP.IMMEDIATE)
+                    return AstNode.makeLeaf(var.variable.indexConstVal(var.offsetTree.getInteger()));
             }
             return root;
         }
@@ -71,6 +73,7 @@ public class Utils {
         IAstValue lVal = left.value;
         IAstValue rVal = right.value;
         switch (op) {
+            // todo 0 * any = 0; 0 + any = any; 1 * any = any;
             case ADD:
                 if (lVal instanceof Immediate && rVal instanceof Immediate)
                     return AstNode.makeLeaf(left.getInteger() + right.getInteger());
@@ -192,14 +195,19 @@ public class Utils {
     public static AstNode getOffset(AstNode[] idx, List<Integer> base) {
         if (idx.length != base.size()) return null;
 
-        AstNode offset = AstNode.makeLeaf(0);
+        AstNode offset = null;
         for (int i = 0; i < idx.length; i++) {
             AstNode left = idx[i];
             for (int j = i + 1; j < base.size(); j++) {
                 AstNode right = AstNode.makeLeaf(base.get(j));
                 left = AstNode.makeBinaryNode(OP.MUL, left, right);
             }
-            offset = AstNode.makeBinaryNode(OP.ADD, offset, left);
+            if (null == offset) {
+                offset = left;
+            } else {
+                offset = AstNode.makeBinaryNode(OP.ADD, offset, left);
+            }
+
         }
         return offset;
     }
@@ -260,8 +268,6 @@ public class Utils {
 //        }
         return currStat;
     }
-
-
 
 
 }

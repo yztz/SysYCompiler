@@ -18,10 +18,10 @@ public class Variable implements IName {
     public List<Integer> dimensions;
     public int size;
     public int width = INT_WIDTH;
+    public boolean isInit = true;
     public Map<Integer, Integer> constVal = new HashMap<>();
-
-    public Set<IAstValue> location = new HashSet<>();
-
+    public boolean isParam;
+    public int paramIndex = -1;
     public int pos = 0; //用于数组初始化赋值
 
     public Variable(String name, int offset, Domain domain, boolean isConst, boolean isArray, int size) {
@@ -32,7 +32,7 @@ public class Variable implements IName {
         this.isArray = isArray;
         this.size = size;
 
-        location.add(new Immediate(offset));
+
     }
 
     public SymbolTable getSymbolTable() {
@@ -45,7 +45,11 @@ public class Variable implements IName {
 
     public boolean isCollapsible() {
         // todo 常量数组待商榷
-        return isConst && domain == Domain.globalDomain;
+        return isConst && isGlobal();
+    }
+
+    public int getBytes() {
+        return size * INT_WIDTH;
     }
 
     public int indexConstVal(int idx) {
@@ -74,6 +78,10 @@ public class Variable implements IName {
         return newVar;
     }
 
+    public boolean isGlobal() {
+        return this.domain == Domain.globalDomain;
+    }
+
 //    public static Variable paramVar(String name) {
 //        return new Variable(name, -1, null, false, false, 1);
 //    }
@@ -82,9 +90,6 @@ public class Variable implements IName {
 //        return array(name, -1, null, dimensions);
 //    }
 
-    public int getOffset() {
-        return -offset * width;
-    }
     @Override
     public String toString() {
         return name;

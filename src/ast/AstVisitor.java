@@ -3,6 +3,7 @@ package ast;
 import antlr.SysYBaseVisitor;
 import antlr.SysYParser;
 import common.OP;
+import common.OffsetVar;
 import common.symbol.Domain;
 import common.symbol.Function;
 import common.symbol.Variable;
@@ -33,9 +34,8 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
         if (null != ctx.funcFParams())
             for (SysYParser.FuncFParamContext paramCtx : ctx.funcFParams().params) {
                 String id = paramCtx.Identifier().getText();
-                Variable variable;
                 if (0 == paramCtx.LeftBracket().size()) {
-                    variable = Domain.addVariable(id);
+                    Domain.addParam(id);
                 } else {
                     List<Integer> dimensions = new ArrayList<>();
                     dimensions.add(-1); // 首维为空
@@ -43,9 +43,8 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
                         Integer value = visit(expCtx).getInteger();
                         dimensions.add(value);
                     }
-                    variable = Domain.addArray(id, dimensions);
+                    Domain.addParam(id, dimensions);
                 }
-                function.addParam(variable);
             }
         AstNode ret = visit(ctx.block());
         // 离开
@@ -55,7 +54,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
         }
 //        Utils.findFirstStat(ret).label = function;
         ret.label = function;
-        System.out.println(function.name + ": " + function.totalOffset);
+//        System.out.println(function.name + ": " + function.totalOffset);
 
         return ret;
     }
@@ -94,9 +93,13 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
 //        } else {
 //            ret.addNode(AstNode.makeEmptyNode(OP.STATEMENT));
 //        }
-        ret.addNode(visit(ctx.stmt(0)));
+        AstNode trueStat = visit(ctx.stmt(0));
+        if (trueStat.op != OP.STATEMENTS) trueStat = AstNode.makeUnaryNode(OP.STATEMENTS, trueStat);
+        ret.addNode(trueStat);
         if (null != ctx.stmt(1)) {
-            ret.addNode(visit(ctx.stmt(1)));
+            AstNode falseStat = visit(ctx.stmt(1));
+            if (falseStat.op != OP.STATEMENTS) falseStat = AstNode.makeUnaryNode(OP.STATEMENTS, falseStat);
+            ret.addNode(falseStat);
         } else {
             ret.addNode(AstNode.makeEmptyNode(OP.STATEMENTS));
         }
@@ -108,7 +111,6 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
         if (null != ctx.exp()) {
             AstNode ret = visit(ctx.exp());
             if (ret.op == OP.CALL) {
-                Domain.currentFunc.existCall = true;
                 return ret;
             }
         }
@@ -213,6 +215,12 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
     }
 
     @Override
+    public AstNode visitDecl(SysYParser.DeclContext ctx) {
+        AstNode ret = super.visitDecl(ctx);
+        return Domain.globalDomain == Domain.getDomain() ? null : ret;
+    }
+
+    @Override
     public AstNode visitVarDecl(SysYParser.VarDeclContext ctx) {
         AstNode ret;
         List<AstNode> list = new ArrayList<>();
@@ -234,6 +242,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
         if (ctx.constExp().isEmpty()) { // 变量
             Variable variable = Domain.addVariable(ctx.Identifier().getText());
             if (null == ctx.initVal()) {
+                variable.isInit = false;
                 return AstNode.makeLeaf(variable);
             }
             AstNode rVal = visit(ctx.initVal());
@@ -281,7 +290,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             //todo 可以加入更多验证 左右值检查
             AstNode rVal = visit(ctx.constInitVal());
             Variable variable = Domain.addConstVar(ctx.Identifier().getText());
-            if (variable.isCollapsible()) {    // 可折叠的
+            if (variable.isGlobal()) {    // 全局变量
                 variable.addConstVal(((Immediate) rVal.value).value);
             }
             return AstNode.makeBinaryNode(OP.ASSIGN, AstNode.makeLeaf(variable), rVal);
@@ -292,7 +301,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             }
             Variable variable = Domain.addConstArray(ctx.Identifier().getText(), dimensions);
             AstNode initVal = visit(ctx.constInitVal());    // 获取初始化值
-            if (variable.isCollapsible()) {    // 可折叠的
+            if (variable.isGlobal()) {    // 全局变量
                 Utils.assignConstArray(variable, initVal, variable.dimensions.size() - 1);
             }
             variable.pos = 0;

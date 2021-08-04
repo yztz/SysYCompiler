@@ -5,29 +5,27 @@ import common.ILabel;
 import common.OP;
 import asm.IName;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
-public class CondGoToIR extends GoToIR{
-    public IAstValue left;
-    public OP relOP;
-    public IAstValue right;
+public class CondGoToIR extends IR{
 
-
-    public CondGoToIR(ILabel target, IAstValue left, OP relOP, IAstValue right) {
-        super(target);
-        this.left = left;
-        this.relOP = relOP;
-        this.right = right;
+    public CondGoToIR(OP op, ILabel target, IAstValue left, IAstValue right) {
+        super(op);
+        this.op1 = target;
+        this.op2 = left;
+        this.op3 = right;
     }
 
+
     @Override
-    public void traverseRVal(Consumer<IName> handler) {
-        if (left instanceof IName) handler.accept((IName) left);
-        if (right instanceof IName) handler.accept((IName) right);
+    public IName getLVal() {
+        return null;
     }
 
     @Override
     public String toString() {
-        return String.format("%-4s\tif %s %s %s goto %-5s", getLabelName(), left, relOP, right, target);
+        return String.format("%-4s\tif %s %s %s goto %-5s", getLabelName(), op2, op, op3, op1);
     }
 }

@@ -4,16 +4,15 @@ import ast.IAstValue;
 import common.ILabel;
 import common.OP;
 import asm.IName;
-import asm.Reference;
+import asm.allocator.Reference;
 import common.symbol.Function;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class IR {
     public ILabel label;
+
     public OP op;
     public IAstValue op1;
     public IAstValue op2;
@@ -34,12 +33,35 @@ public abstract class IR {
         return label.getLabelName();
     }
 
-    public abstract void traverseLVal(Consumer<IName> handler);
-    public abstract void traverseRVal(Consumer<IName> handler);
+    public abstract IName getLVal();
 
-    public boolean isStartOfFunction() {
-        return label instanceof Function;
+    public List<IName> getRVal() {
+        List<IName> list = new ArrayList<>();
+        if (op2 instanceof IName) list.add(((IName) op2));
+        if (op3 instanceof IName) list.add(((IName) op3));
+        return list;
     }
+
+    public List<IName> getNames() {
+        List<IName> list = new ArrayList<>();
+        if (op1 instanceof IName) list.add(((IName) op1));
+        if (op2 instanceof IName) list.add(((IName) op2));
+        if (op3 instanceof IName) list.add(((IName) op3));
+
+        return list;
+    }
+
+//    public abstract IName getLVal();
+//    public abstract List<IName> getRVal();
+//    public List<IName> getAllName() {
+//        List<IName> names = getRVal();
+//        IName lVal = getLVal();
+//        if (lVal != null)
+//            names.add(lVal);
+//
+//        return names;
+//    }
+
 
     public String ref2String() {
         StringBuilder sb = new StringBuilder();
@@ -57,5 +79,15 @@ public abstract class IR {
                 Objects.toString(op1, ""),
                 Objects.toString(op2, ""),
                 Objects.toString(op3, ""));
+    }
+
+    public boolean isJump() {
+        return op == OP.GOTO ||
+                op == OP.GE ||
+                op == OP.GT ||
+                op == OP.LE ||
+                op == OP.LT ||
+                op == OP.EQ ||
+                op == OP.NOT_EQ;
     }
 }

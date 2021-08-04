@@ -2,6 +2,7 @@ package ast;
 
 import common.ILabel;
 import common.OP;
+import common.OffsetVar;
 import common.symbol.Function;
 import common.symbol.Variable;
 import org.antlr.v4.runtime.tree.Tree;
@@ -149,6 +150,10 @@ public class AstNode implements Tree {
     }
 
     public static AstNode makeBinaryNode(OP op, AstNode left, AstNode right) {
+        if (left.op == OP.VAR_OFFSET && op == OP.ASSIGN) {
+            ((OffsetVar) left.value).isLVal = true;
+        }
+
         AstNode ret = new AstNode(op);
         ret.addNode(left);
         ret.addNode(right);

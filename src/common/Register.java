@@ -3,6 +3,7 @@ package common;
 import asm.IAddress;
 
 public enum Register implements IAddress {
+    r0,
     r1,
     r2,
     r3,

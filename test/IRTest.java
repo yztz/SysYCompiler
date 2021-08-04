@@ -1,6 +1,6 @@
 import antlr.SysYParser;
-import asm.BasicBlock;
-import asm.RegisterAllocator;
+import asm.allocator.BasicBlock;
+import asm.allocator.RegisterAllocator;
 import ast.AstNode;
 import ast.AstVisitor;
 import ir.*;
@@ -18,9 +18,9 @@ public class IRTest {
         SysYParser parser = Utils.getParser("test/testFull.sys");
         ParseTree tree = parser.compUnit();
         AstNode root = visitor.visit(tree);
-        IRs irs = irParser.flatAst(root);
+        irParser.flatAst(root);
 
-        for (IR ir : irs) {
+        for (IR ir : IRs.getIRs()) {
             System.out.println(ir);
         }
         Utils.makeVisible(parser, root);
@@ -31,8 +31,8 @@ public class IRTest {
         SysYParser parser = Utils.getParser("test/testIf.sys");
         ParseTree tree = parser.compUnit();
         AstNode root = visitor.visit(tree);
-        IRs irs = irParser.flatAst(root);
-        for (IR ir : irs) {
+        irParser.flatAst(root);
+        for (IR ir : IRs.getIRs()) {
             System.out.println(ir);
         }
         Utils.makeVisible(parser, root);
@@ -43,8 +43,8 @@ public class IRTest {
         SysYParser parser = Utils.getParser("test/testWhile.sys");
         ParseTree tree = parser.compUnit();
         AstNode root = visitor.visit(tree);
-        IRs irs = irParser.flatAst(root);
-        for (IR ir : irs) {
+        irParser.flatAst(root);
+        for (IR ir : IRs.getIRs()) {
             System.out.println(ir);
         }
         Utils.makeVisible(parser, root);
@@ -55,27 +55,26 @@ public class IRTest {
         SysYParser parser = Utils.getParser("test/testWhileIf.sys");
         ParseTree tree = parser.compUnit();
         AstNode root = visitor.visit(tree);
-        IRs irs = irParser.flatAst(root);
-        for (IR ir : irs) {
+        irParser.flatAst(root);
+        for (IR ir : IRs.getIRs()) {
             System.out.println(ir);
         }
         Utils.makeVisible(parser, root);
     }
+//
+//    @Test
+//    public void testBasicBlock() {
+//        RegisterAllocator allocator = new RegisterAllocator(genIR("test/testFull.sys"));
+//        for (BasicBlock block : allocator.blocks) {
+//            block.printBlock();
+//        }
+//    }
 
-    @Test
-    public void testBasicBlock() {
-        RegisterAllocator allocator = new RegisterAllocator(getIRs("test/testFull.sys"));
-        for (BasicBlock block : allocator.blocks) {
-            block.printBlock();
-        }
-    }
 
 
-
-    public IRs getIRs(String filepath) {
+    public void genIR(String filepath) {
         SysYParser parser = Utils.getParser(filepath);
         ParseTree tree = parser.compUnit();
         AstNode root = visitor.visit(tree);
-        return irParser.flatAst(root);
     }
 }

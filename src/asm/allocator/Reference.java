@@ -1,4 +1,4 @@
-package asm;
+package asm.allocator;
 
 import ir.code.IR;
 
