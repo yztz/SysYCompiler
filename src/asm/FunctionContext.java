@@ -114,7 +114,7 @@ public class FunctionContext {
     public void genHead() {
         codes.add(AsmFactory.align(2));
         codes.add(AsmFactory.global(function.name));
-        codes.add(AsmFactory.arch("armv7-a"));
+//        codes.add(AsmFactory.arch("armv7ve"));
         codes.add(AsmFactory.syntax("unified"));
         codes.add(AsmFactory.arm());
         codes.add(AsmFactory.fpu("vfp"));
@@ -199,10 +199,10 @@ public class FunctionContext {
                             codes.add(AsmFactory.div(rd, rn, rm));
                             codes.add(AsmFactory.mls(rd, rm, rd, rn));
                         } else {
-                            Register tmp = allocator.allocFreeReg();
+//                            Register tmp = allocator.allocFreeReg();
                             rm = regMap.get(ir.op3);
-                            codes.add(AsmFactory.div(tmp, rn, rm));
-                            codes.add(AsmFactory.mls(rd, rm, tmp, rn));
+                            codes.add(AsmFactory.div(rd, rn, rm));
+                            codes.add(AsmFactory.mls(rd, rm, rd, rn));
                         }
                         break;
                     case MINUS:
@@ -273,67 +273,89 @@ public class FunctionContext {
                         }
                         codes.add(AsmFactory.b(returnLabel.getLabelName()));
                         break;
+                    case COND_GOTO:
+                        target = ((ILabel) ir.op1);
+                        rn = regMap.get(ir.op2);
+                        codes.add(AsmFactory.cmp(rn, 0));
+                        codes.add(AsmFactory.bWhen(target.getLabelName(), "ne"));
+                        break;
                     case GE:
                         rn = regMap.get(ir.op2);
-                        rm = regMap.get(ir.op3);
-                        target = ((ILabel) ir.op1);
-                        codes.add(AsmFactory.cmp(rn, rm));
-                        codes.add(AsmFactory.bWhen(target.getLabelName(), "ge"));
+                        rd = regMap.get(ir.op1);
+                        if (ir.op3 instanceof Immediate) {
+                            codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
+                        } else {
+                            rm = regMap.get(ir.op3);
+                            codes.add(AsmFactory.cmp(rn, rm));
+                        }
+                        codes.add(AsmFactory.movWhen(rd, 1, "ge"));
+                        codes.add(AsmFactory.movWhen(rd, 0, "lt"));
+                        codes.add(AsmFactory.uxtb(rd));
                         break;
                     case GT:
                         rn = regMap.get(ir.op2);
-                        target = ((ILabel) ir.op1);
+                        rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
                         }
-                        codes.add(AsmFactory.bWhen(target.getLabelName(), "gt"));
+                        codes.add(AsmFactory.movWhen(rd, 1, "gt"));
+                        codes.add(AsmFactory.movWhen(rd, 0, "le"));
+                        codes.add(AsmFactory.uxtb(rd));
                         break;
                     case LE:
                         rn = regMap.get(ir.op2);
-                        target = ((ILabel) ir.op1);
+                        rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
                         }
-                        codes.add(AsmFactory.bWhen(target.getLabelName(), "le"));
+                        codes.add(AsmFactory.movWhen(rd, 1, "le"));
+                        codes.add(AsmFactory.movWhen(rd, 0, "gt"));
+                        codes.add(AsmFactory.uxtb(rd));
                         break;
                     case LT:
                         rn = regMap.get(ir.op2);
-                        target = ((ILabel) ir.op1);
+                        rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
                         }
-                        codes.add(AsmFactory.bWhen(target.getLabelName(), "lt"));
+                        codes.add(AsmFactory.movWhen(rd, 1, "lt"));
+                        codes.add(AsmFactory.movWhen(rd, 0, "ge"));
+                        codes.add(AsmFactory.uxtb(rd));
                         break;
                     case EQ:
                         rn = regMap.get(ir.op2);
-                        target = ((ILabel) ir.op1);
+                        rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
                         }
-                        codes.add(AsmFactory.bWhen(target.getLabelName(), "eq"));
+                        codes.add(AsmFactory.movWhen(rd, 1, "eq"));
+                        codes.add(AsmFactory.movWhen(rd, 0, "ne"));
+                        codes.add(AsmFactory.uxtb(rd));
                         break;
                     case NOT_EQ:
                         rn = regMap.get(ir.op2);
-                        target = ((ILabel) ir.op1);
+                        rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
                         }
-                        codes.add(AsmFactory.bWhen(target.getLabelName(), "ne"));
+                        codes.add(AsmFactory.movWhen(rd, 1, "ne"));
+                        codes.add(AsmFactory.movWhen(rd, 0, "eq"));
+                        codes.add(AsmFactory.uxtb(rd));
                         break;
                 }
             }

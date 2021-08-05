@@ -31,10 +31,10 @@ public class IRTest {
         SysYParser parser = Utils.getParser("test/testIf.sys");
         ParseTree tree = parser.compUnit();
         AstNode root = visitor.visit(tree);
-//        irParser.flatAst(root);
-//        for (IR ir : IRs.getIRs()) {
-//            System.out.println(ir);
-//        }
+        irParser.flatAst(root);
+        for (IR ir : IRs.getIRs()) {
+            System.out.println(ir);
+        }
         Utils.makeVisible(parser, root);
     }
 

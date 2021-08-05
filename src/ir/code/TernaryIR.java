@@ -13,13 +13,19 @@ public class TernaryIR extends IR {
     public TernaryIR(OP op, IAstValue rd, IAstValue rn, IAstValue rm) {
         super(op);
         this.op1 = rd;
-        if (op2 instanceof Immediate) {
-            this.op3 = rn;
-            this.op2 = rm;
-        } else {
-            this.op2 = rn;
-            this.op3 = rm;
-        }
+        this.op2 = rn;
+        this.op3 = rm;
+//        if (op2 instanceof Immediate) {
+//            this.op2 = rm;
+//            this.op3 = rn;
+//            if (op == OP.LE) this.op = OP.GT;
+//            if (op == OP.LT) this.op = OP.GE;
+//            if (op == OP.GE) this.op = OP.LT;
+//            if (op == OP.GT) this.op = OP.LE;
+//        } else {
+//            this.op2 = rn;
+//            this.op3 = rm;
+//        }
     }
 
 

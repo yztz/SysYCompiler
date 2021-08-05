@@ -236,13 +236,24 @@ public class RegisterAllocator {
         Register rd, rn, rm;
         switch (ir.op) {
             // 有两个操作数，一个左值
+            case GE:
+            case GT:
+            case LE:
+            case LT:
+            case EQ:
+            case NOT_EQ:
             case SUB:
             case MUL:
             case DIV:
             case MOD:
             case ADD:
-                rn = allocReg4rVal((IName) ir.op2);
                 rd = allocReg4lVal(ir);
+                if (ir.op2 instanceof IName) {
+                    rn = allocReg4rVal((IName) ir.op2);
+                } else {
+                    rn = allocFreeReg();
+                    codes.add(AsmFactory.mov(rn, ((Immediate) ir.op2).value));
+                }
                 if (ir.op3 instanceof IName) {
                     rm = allocReg4rVal(((IName) ir.op3));
                     ret.put((IName) ir.op3, rm);
@@ -278,33 +289,14 @@ public class RegisterAllocator {
                 break;
             // 仅有一个操作数
             case PARAM:
-                if (ir.op1 instanceof IName) {
-
-                    ret.put(((IName) ir.op1), allocReg4rVal(((IName) ir.op1)));
-                }
-                break;
             case RETURN:
                 if (ir.op1 instanceof IName) {
                     ret.put(((IName) ir.op1), allocReg4rVal(((IName) ir.op1)));
                 }
                 break;
-            // goto语句，可能存在比较
-            case GE:
-            case GT:
-            case LE:
-            case LT:
-            case EQ:
-            case NOT_EQ:
-                ir.getRVal().forEach(name -> {
-                    Register r = allocReg4rVal(name);
-                    ret.put(name, r);
-                });
-//                if (ir.op2 != null) {
-//                    rn = allocReg4rVal(((IName) ir.op2));
-//                    rm = allocReg4rVal(((IName) ir.op3));
-//                    ret.put(((IName) ir.op2), rn);
-//                    ret.put(((IName) ir.op3), rm);
-//                }
+            // cond goto
+            case COND_GOTO:
+                ret.put(((IName) ir.op2), allocReg4rVal(((IName) ir.op2)));
                 break;
             case CALL:
                 if (null != ir.op1) {

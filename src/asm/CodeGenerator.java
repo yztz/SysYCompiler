@@ -26,7 +26,7 @@ public class CodeGenerator {
     }
 
     public void genInfo() {
-        write(AsmFactory.arch("armv7-a"));
+        write(AsmFactory.arch("armv7ve"));
     }
 
     public void genGlobalVar() {

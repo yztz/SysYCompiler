@@ -17,5 +17,12 @@ public class ASMTest {
         codeGenerator.genCode();
     }
 
+    @Test
+    public void testFull() {
+        Utils.getIRs("test/testFull.sys");
+        CodeGenerator codeGenerator = new CodeGenerator();
+        codeGenerator.genCode();
+    }
+
 
 }

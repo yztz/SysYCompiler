@@ -18,6 +18,7 @@ public enum OP {
 
     CALL,
     PARAM,
+    COND_GOTO,
     GOTO,
 
     IF_ELSE,

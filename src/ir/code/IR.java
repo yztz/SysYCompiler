@@ -83,12 +83,7 @@ public abstract class IR {
 
     public boolean isJump() {
         return op == OP.GOTO ||
-                op == OP.GE ||
-                op == OP.GT ||
-                op == OP.LE ||
-                op == OP.LT ||
-                op == OP.EQ ||
-                op == OP.NOT_EQ;
+                op == OP.COND_GOTO;
     }
 
     public boolean isReturn() {

@@ -70,12 +70,12 @@ public class IRParser {
             case MOD:
             case SUB:
             case ADD:
-//            case LE:
-//            case LT:
-//            case GE:
-//            case GT:
-//            case EQ:
-//            case NOT_EQ:
+            case LE:
+            case LT:
+            case GE:
+            case GT:
+            case EQ:
+            case NOT_EQ:
                 tmp = newTmp();
                 left = parseAst(root.getLeft());
                 right = parseAst(root.getRight());
@@ -119,7 +119,8 @@ public class IRParser {
                 AstNode cond = root.getNode(0);
                 AstNode then = root.getNode(1);
                 AstNode el = root.getNode(2);
-                IRs.addIR(new CondGoToIR(cond.op, (ILabel) cond.value, parseAst(cond.getLeft()), parseAst(cond.getRight())));
+                tmp = (Temp) parseAst(cond);
+                IRs.addIR(new CondGoToIR((ILabel) cond.value, tmp));
                 parseAst(el);   // 先parse el方便ir跳转
                 parseAst(then);
                 break;
