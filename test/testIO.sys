@@ -1,6 +1,0 @@
-int main() {
-    int x = getint();
-    putint(x);
-    return 0;
-
-}
