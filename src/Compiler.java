@@ -30,7 +30,6 @@ public class Compiler {
                     file = arg;
             }
         }
-
         SysYParser parser = getParser(file);
         AstVisitor visitor = new AstVisitor();
         IRParser irParser = new IRParser();
