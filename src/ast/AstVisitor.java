@@ -424,14 +424,20 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
         Variable var = Domain.searchVar(id);
 
         if (var.isArray) {  // 数组
+//            if ()
             List<Integer> base = var.dimensions;
-            AstNode[] idx = new AstNode[base.size()];
-            for (int i = 0; i < idx.length; i++) {
-                idx[i] = visit(ctx.exp(i));
+            List<AstNode> idx = new ArrayList<>();
+            for (int i = 0; ctx.exp(i) != null; i++) {
+                idx.add(visit(ctx.exp(i)));
             }
             AstNode offset = Utils.getOffset(idx, base);
-
-            return AstNode.makeLeaf(new OffsetVar(var, offset));
+            if (null == offset)
+                return AstNode.makeLeaf(var);
+            else {
+                OffsetVar offsetVar = new OffsetVar(var, offset);
+                if (idx.size() < base.size()) offsetVar.isAddress = true;
+                return AstNode.makeLeaf(offsetVar);
+            }
         } else {    // 非数组
             if (var.isCollapsible())
                 return AstNode.makeLeaf(var.indexConstVal(0));

@@ -14,6 +14,7 @@ public class OffsetVar implements IName {
     public Variable variable;
     public AstNode offsetTree;
     public boolean isLVal = false;
+    public boolean isAddress = false;
 
     public OffsetVar(Variable array, AstNode offsetTree) {
         this.variable = array;

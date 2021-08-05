@@ -42,6 +42,8 @@ public class RegisterAllocator {
                 if (variable.isGlobal()) {
                     ILabel label = context.globalVarMap.get(variable);
                     codes.add(AsmFactory.lea(register, label.getLabelName()));
+                } else if (variable.isParam) {
+                    codes.add(AsmFactory.ldrFromStack(register, context.getVariableOffset(variable)));
                 } else {
                     codes.add(AsmFactory.add(register, Register.fp, context.getVariableOffset(variable)));
                 }
@@ -60,24 +62,14 @@ public class RegisterAllocator {
             Variable variable = offsetVar.variable;
 
             Register addr = allocReg4rVal(variable);
-            if (variable.isGlobal()) {  // 全局数组
-//                ILabel label = context.globalVarMap.get(variable);
+            if (offsetVar.isAddress) {
                 if (offset instanceof Immediate) {
-                    codes.add(AsmFactory.ldrFromRegWithOffset(register, addr, 4 * ((Immediate) offset).value));
+                    codes.add(AsmFactory.add(register, addr, 4 * ((Immediate) offset).value));
                 } else {
                     Register offsetReg = allocReg4rVal((IName) offset);
-                    codes.add(AsmFactory.ldrFromRegWithOffset(register, addr, offsetReg));
+                    codes.add(AsmFactory.add(register, addr, offsetReg));
                 }
-            } else if (variable.isParam) {  // 形参数组
-                if (offset instanceof Immediate) {
-//                    codes.add(AsmFactory.ldrFromStack(register, context.getVariableOffset(variable)));
-                    codes.add(AsmFactory.ldrFromRegWithOffset(register, addr, 4 * ((Immediate) offset).value));
-                } else {
-                    Register offsetReg = allocReg4rVal((IName) offset);
-//                    codes.add(AsmFactory.ldrFromStack(register, context.getVariableOffset(variable)));
-                    codes.add(AsmFactory.ldrFromRegWithOffset(register, addr, offsetReg));
-                }
-            } else {    // 局部数组
+            } else {    //
                 if (offset instanceof Immediate) {
                     codes.add(AsmFactory.ldrFromRegWithOffset(register, addr, 4 * ((Immediate) offset).value));
                 } else {
@@ -286,6 +278,11 @@ public class RegisterAllocator {
                 break;
             // 仅有一个操作数
             case PARAM:
+                if (ir.op1 instanceof IName) {
+
+                    ret.put(((IName) ir.op1), allocReg4rVal(((IName) ir.op1)));
+                }
+                break;
             case RETURN:
                 if (ir.op1 instanceof IName) {
                     ret.put(((IName) ir.op1), allocReg4rVal(((IName) ir.op1)));
