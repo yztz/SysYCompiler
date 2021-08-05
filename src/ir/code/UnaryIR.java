@@ -1,6 +1,7 @@
 package ir.code;
 
 import ast.IAstValue;
+import ast.Immediate;
 import common.OP;
 import asm.IName;
 
@@ -26,7 +27,8 @@ public class UnaryIR extends IR {
     @Override
     public Set<IName> getRVal() {
         Set<IName> list = new HashSet<>();
-        list.add(((IName) op1));
+        if (op1 instanceof IName)
+            list.add(((IName) op1));
         return list;
     }
 }

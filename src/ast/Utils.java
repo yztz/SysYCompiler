@@ -125,12 +125,22 @@ public class Utils {
             case AND:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     return AstNode.makeLeaf(left.getInteger() == 1 && right.getInteger() == 1 ? 1 : 0);
+                } else if (lVal instanceof Immediate) {
+                    if(left.getInteger() == 0)
+                        return AstNode.makeLeaf(0);
+                    else
+                        return right;
                 } else {
                     return AstNode.makeBinaryNode(OP.AND, left, right);
                 }
             case OR:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     return AstNode.makeLeaf(left.getInteger() == 1 || right.getInteger() == 1 ? 1 : 0);
+                } else if (lVal instanceof Immediate) {
+                    if (left.getInteger() != 0)
+                        return AstNode.makeLeaf(1);
+                    else
+                        return right;
                 } else {
                     return AstNode.makeBinaryNode(OP.OR, left, right);
                 }

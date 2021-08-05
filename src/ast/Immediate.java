@@ -15,4 +15,5 @@ public class Immediate implements IAstValue {
     public String toString() {
         return value + "";
     }
+
 }

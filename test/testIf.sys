@@ -1,12 +1,20 @@
+int ga = 4;
+int assign(int array[]) {
+    array[0] = -1;
+    return 1;
+}
+
 int main() {
-    //int array[2][2][2] = {1,2,3,4,5,6,7,8};
+    int array[3] = {1,2,3};
     int a = 1;
     int b = 2;
     int c = 3;
-    if(1) {
-        c = 1;
-    } else {
-        c = 0;
-    }
-	return c;
+//    if(0 || assign(array)) {
+//
+//    } else {
+//
+//    }
+    array[0] = -1;
+    putint(ga);
+	return 0;
 }

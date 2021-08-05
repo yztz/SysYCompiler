@@ -8,6 +8,17 @@ public class Domain {
     private static Deque<Domain> stack = new ArrayDeque<>();
     public static Domain globalDomain = new Domain(null);
 
+    static {
+        functions.put("getInt", new Function("getInt", "int"));
+        functions.put("getch", new Function("getch", "int"));
+        functions.put("getarray", new Function("getarray", "int"));
+        functions.put("putint", new Function("putint", "void"));
+        functions.put("putch", new Function("putch", "void"));
+        functions.put("putarray", new Function("putarray", "void"));
+        functions.put("starttime", new Function("starttime", "void"));
+        functions.put("stoptime", new Function("stoptime", "void"));
+    }
+
     public static Function currentFunc = null;
 //    private static int globalOffset = 0;
 

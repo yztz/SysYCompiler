@@ -40,8 +40,8 @@ public class RegisterAllocator {
             Variable variable = ((Variable) name);
             if (variable.isArray) { // 数组名
                 if (variable.isGlobal()) {
-                    ILabel label = context.globalVarMap.get(variable);
-                    codes.add(AsmFactory.lea(register, label.getLabelName()));
+//                    ILabel label = context.globalVarMap.get(variable);
+                    codes.add(AsmFactory.lea(register, variable.name));
                 } else if (variable.isParam) {
                     codes.add(AsmFactory.ldrFromStack(register, context.getVariableOffset(variable)));
                 } else {
@@ -49,8 +49,8 @@ public class RegisterAllocator {
                 }
             } else {
                 if (variable.isGlobal()) {  // 全局变量
-                    ILabel label = context.globalVarMap.get(variable);
-                    codes.add(AsmFactory.lea(register, label.getLabelName()));
+//                    ILabel label = context.globalVarMap.get(variable);
+                    codes.add(AsmFactory.lea(register, variable.name));
                     codes.add(AsmFactory.ldrWithoutOffset(register, register));
                 } else {    // 局部变量
                     codes.add(AsmFactory.ldrFromStack(register, context.getVariableOffset(variable)));

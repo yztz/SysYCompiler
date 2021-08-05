@@ -16,7 +16,7 @@ public class AsmFactory {
     }
 
     public static Code mov(Register reg1, int imm) {
-        return Code.code(String.format("mov %s, #%d", reg1, imm));
+        return Code.code(String.format("ldr %s, =0x%s", reg1, Integer.toHexString(imm)));
     }
 
     public static Code ldrFromStack(Register register, int offset) {
@@ -24,7 +24,7 @@ public class AsmFactory {
     }
 
     public static Code lea(Register register, String label) {
-        return Code.code(String.format("ldr %s, %s", register, label));
+        return Code.code(String.format("ldr %s, =%s", register, label));
     }
 
     public static Code lsl(Register register, int val) {
@@ -129,6 +129,10 @@ public class AsmFactory {
         return Code.code(String.format(".common %s, %d, 4", name, bytes));
     }
 
+    public static Code mvn(Register register, int imm8m) {
+        return Code.code(String.format("mvn %s, #%d", register, imm8m));
+    }
+
     public static Code word(int value) {
         return Code.code(String.format(".word %d", value));
     }
@@ -205,6 +209,7 @@ public class AsmFactory {
             codes.add(Code.label(variable.name));
             for (int i = 0; i < variable.size; ) {
                 int val = variable.indexConstVal(i);
+//                System.out.println(val);
                 if (val == 0) {
                     int count = 0;
                     while (variable.indexConstVal(i) == 0 && i < variable.size) {

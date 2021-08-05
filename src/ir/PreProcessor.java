@@ -50,6 +50,7 @@ public class PreProcessor {
         parent.removeNode(ifStat);
     }
 
+
     private static void resolveIfElse(AstNode ifStat) {
         if (ifStat.op != OP.IF_ELSE) return;
 
@@ -57,18 +58,24 @@ public class PreProcessor {
         AstNode then = ifStat.getNode(1);
         AstNode el = ifStat.getNode(2);
 
-        // 处理单值的情况  if(a)...
-        if (!OP.isRelOP(cond)) {
+
+
+        if (!OP.isRelOP(cond)) {    // 处理单值的情况  if(a)...
             cond = AstNode.makeBinaryNode(OP.NOT_EQ, cond, AstNode.makeLeaf(0));
             ifStat.setNode(0, cond);
         }
-        // 尝试计算
+        // 计算
         AstNode res = Utils.calc(cond);
         if (res.op == OP.IMMEDIATE) {   // 如何为1或0直接化简
             int ident = res.getInteger();
             reduceIf(ifStat, ident == 1);
             return;
         }
+//        else if (cond.getLeft().op == OP.IMMEDIATE) {   // 处理 1 || a...
+//            reduceIf(ifStat, );
+//        }
+
+
 
         cond.value = bindLabelToStat(then);  // cond.value正好可以用来存储目标标签，方便IF-IR语句的处理
 
@@ -117,9 +124,11 @@ public class PreProcessor {
             ifStat.setNode(1, newThen);
             // 绑定label
             goTo.value = bindLabelToStat(el);
+
         } else {
             return;
         }
+
         resolveIfElse(ifStat);
         resolveIfElse(newIfElse);
     }

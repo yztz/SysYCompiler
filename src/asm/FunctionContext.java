@@ -36,7 +36,7 @@ public class FunctionContext {
         this.function = function;
         this.irs = function.irs;
         this.function.blocks = BasicBlock.genBlocks(irs);
-        for (BasicBlock block : function.blocks) block.printBlock();
+//        for (BasicBlock block : function.blocks) block.printBlock();
 
         analyze();
         genHead();
@@ -356,13 +356,13 @@ public class FunctionContext {
             codes.add(AsmFactory.bx(Register.lr));
         }
         /* 生成全局变量的地址引用 */
-        codes.add(AsmFactory.align(2));
-        for (Map.Entry<Variable, ILabel> entry : globalVarMap.entrySet()) {
-            Variable var = entry.getKey();
-            ILabel label = entry.getValue();
-            codes.add(AsmFactory.label(label.getLabelName()));
-            codes.add(AsmFactory.word(var.name));
-        }
+//        codes.add(AsmFactory.align(2));
+//        for (Map.Entry<Variable, ILabel> entry : globalVarMap.entrySet()) {
+//            Variable var = entry.getKey();
+//            ILabel label = entry.getValue();
+//            codes.add(AsmFactory.label(label.getLabelName()));
+//            codes.add(AsmFactory.word(var.name));
+//        }
         /* 长度 */
         codes.add(AsmFactory.size(function.name, ".-" + function.name));
     }

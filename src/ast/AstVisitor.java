@@ -135,8 +135,8 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             AstNode left = visit(ctx.lOrExp());
             AstNode right = visit(ctx.lAndExp());
 
-            if (left.isLeaf()) left = AstNode.makeBinaryNode(OP.EQ, left, AstNode.makeLeaf(1));
-            if (right.isLeaf()) right = AstNode.makeBinaryNode(OP.EQ, right, AstNode.makeLeaf(1));
+//            if (left.isLeaf()) left = AstNode.makeBinaryNode(OP.EQ, left, AstNode.makeLeaf(1));
+//            if (right.isLeaf()) right = AstNode.makeBinaryNode(OP.EQ, right, AstNode.makeLeaf(1));
 
             return AstNode.makeBinaryNode(OP.OR, left, right);
         }
@@ -246,6 +246,8 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
                 return AstNode.makeLeaf(variable);
             }
             AstNode rVal = visit(ctx.initVal());
+            if (variable.isGlobal())
+                variable.addConstVal(rVal.getInteger());
 
             return AstNode.makeBinaryNode(OP.ASSIGN, AstNode.makeLeaf(variable), rVal);
         } else {    // 数组
@@ -259,6 +261,9 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             }
             AstNode initVal = visit(ctx.initVal());    // 获取初始化值
 
+            if (variable.isGlobal()) {    // 全局变量
+                Utils.assignConstArray(variable, initVal, variable.dimensions.size() - 1);
+            }
             variable.pos = 0;
             AstNode ret = AstNode.makeEmptyNode(OP.ASSIGN_GROUP);
             Utils.assignArray(variable, initVal, variable.dimensions.size() - 1, ret);
@@ -291,7 +296,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             AstNode rVal = visit(ctx.constInitVal());
             Variable variable = Domain.addConstVar(ctx.Identifier().getText());
             if (variable.isGlobal()) {    // 全局变量
-                variable.addConstVal(((Immediate) rVal.value).value);
+                variable.addConstVal(rVal.getInteger());
             }
             return AstNode.makeBinaryNode(OP.ASSIGN, AstNode.makeLeaf(variable), rVal);
         } else {    // 数组常量
