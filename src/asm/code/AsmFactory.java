@@ -1,8 +1,6 @@
 package asm.code;
 
 import common.Register;
-import asm.Utils;
-import common.symbol.Function;
 import common.symbol.Variable;
 
 import java.util.ArrayList;

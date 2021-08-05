@@ -1,7 +1,6 @@
 package asm;
 
 import asm.allocator.BasicBlock;
-import asm.allocator.Describer;
 import asm.allocator.RegisterAllocator;
 import asm.code.AsmFactory;
 import asm.code.Code;
@@ -9,7 +8,6 @@ import ast.Immediate;
 import common.*;
 import common.symbol.Function;
 import common.symbol.Variable;
-import ir.Temp;
 import ir.code.IR;
 
 import java.util.*;

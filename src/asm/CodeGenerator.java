@@ -1,8 +1,8 @@
 package asm;
 
-import asm.allocator.RegisterAllocator;
 import asm.code.AsmFactory;
 import asm.code.Code;
+import common.Utils;
 import common.symbol.Domain;
 import common.symbol.Function;
 import common.symbol.SymbolTable;

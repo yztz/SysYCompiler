@@ -1,4 +1,4 @@
-package asm;
+package common;
 
 import asm.code.Code;
 
@@ -12,10 +12,18 @@ public class Utils {
 
     private static PrintStream out;
 
-    static {
+//    static {
+//        try {
+////            out = new FileWriter("./out.s");
+//            out = new PrintStream(new FileOutputStream("./out.s"));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    public static void openStream(String file) {
         try {
-//            out = new FileWriter("./out.s");
-            out = new PrintStream(new FileOutputStream("./out.s"));
+            out = new PrintStream(new FileOutputStream(file));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -34,8 +42,4 @@ public class Utils {
         return i + 8 - i % 8;
     }
 
-    public static boolean isLegalImm(int num) {
-        //todo
-        return true;
-    }
 }
