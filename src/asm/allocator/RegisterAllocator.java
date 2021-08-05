@@ -295,12 +295,16 @@ public class RegisterAllocator {
             case LT:
             case EQ:
             case NOT_EQ:
-                if (ir.op2 != null) {
-                    rn = allocReg4rVal(((IName) ir.op2));
-                    rm = allocReg4rVal(((IName) ir.op3));
-                    ret.put(((IName) ir.op2), rn);
-                    ret.put(((IName) ir.op3), rm);
-                }
+                ir.getRVal().forEach(name -> {
+                    Register r = allocReg4rVal(name);
+                    ret.put(name, r);
+                });
+//                if (ir.op2 != null) {
+//                    rn = allocReg4rVal(((IName) ir.op2));
+//                    rm = allocReg4rVal(((IName) ir.op3));
+//                    ret.put(((IName) ir.op2), rn);
+//                    ret.put(((IName) ir.op3), rm);
+//                }
                 break;
             case CALL:
                 if (null != ir.op1) {

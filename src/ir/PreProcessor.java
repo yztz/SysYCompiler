@@ -1,6 +1,7 @@
 package ir;
 
 import ast.AstNode;
+import ast.Immediate;
 import ast.Utils;
 import common.ILabel;
 import common.Label;
@@ -36,6 +37,18 @@ public class PreProcessor {
             resolveIfElse(ifStat);
         });
     }
+    /*
+        将指定分支下的语句替换if语句
+     */
+    private static void reduceIf(AstNode ifStat, boolean branch) {
+        AstNode parent = ifStat.parent;
+        AstNode prev = ifStat;
+        for (AstNode node : ifStat.getNode(branch ? 1 : 2).getSubTrees()) {
+            parent.insertAfter(prev, node);
+            prev = node;
+        }
+        parent.removeNode(ifStat);
+    }
 
     private static void resolveIfElse(AstNode ifStat) {
         if (ifStat.op != OP.IF_ELSE) return;
@@ -46,8 +59,15 @@ public class PreProcessor {
 
         // 处理单值的情况  if(a)...
         if (!OP.isRelOP(cond)) {
-            cond = AstNode.makeBinaryNode(OP.EQ, cond, AstNode.makeLeaf(1));
+            cond = AstNode.makeBinaryNode(OP.NOT_EQ, cond, AstNode.makeLeaf(0));
             ifStat.setNode(0, cond);
+        }
+        // 尝试计算
+        AstNode res = Utils.calc(cond);
+        if (res.op == OP.IMMEDIATE) {   // 如何为1或0直接化简
+            int ident = res.getInteger();
+            reduceIf(ifStat, ident == 1);
+            return;
         }
 
         cond.value = bindLabelToStat(then);  // cond.value正好可以用来存储目标标签，方便IF-IR语句的处理

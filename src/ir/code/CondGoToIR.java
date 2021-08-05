@@ -1,6 +1,7 @@
 package ir.code;
 
 import ast.IAstValue;
+import ast.Immediate;
 import common.ILabel;
 import common.OP;
 import asm.IName;
@@ -16,6 +17,10 @@ public class CondGoToIR extends IR{
         this.op1 = target;
         this.op2 = left;
         this.op3 = right;
+        if (this.op2 instanceof Immediate) {
+            this.op2 = right;
+            this.op3 = left;
+        }
     }
 
 

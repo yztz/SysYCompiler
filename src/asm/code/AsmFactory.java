@@ -67,6 +67,7 @@ public class AsmFactory {
         return Code.code(String.format("cmp %s, %s", rn, rm));
     }
 
+
     public static Code cmp(Register rn, int imm) {
         return Code.code(String.format("cmp %s, #%d", rn, imm));
     }

@@ -10,6 +10,12 @@ public class ASMTest {
         CodeGenerator codeGenerator = new CodeGenerator();
         codeGenerator.genCode();
     }
+    @Test
+    public void testIF() {
+        Utils.getIRs("test/testIf.sys");
+        CodeGenerator codeGenerator = new CodeGenerator();
+        codeGenerator.genCode();
+    }
 
 
 }
