@@ -108,9 +108,8 @@ public class RegisterAllocator {
             if (!variable.isConst) {
                 if (variable.isGlobal()) {  // 全局变量
                     codes.add(AsmFactory.code(String.format("@ save %s:global", variable.name)));
-                    ILabel label = context.globalVarMap.get(variable);
                     Register addr = allocFreeReg();
-                    codes.add(AsmFactory.lea(addr, label.getLabelName()));
+                    codes.add(AsmFactory.lea(addr, variable.name));
                     codes.add(AsmFactory.strWithoutOffset(register, addr));
                 } else {    // 局部变量
                     codes.add(AsmFactory.code(String.format("@ save %s:local", variable.name)));
@@ -211,6 +210,7 @@ public class RegisterAllocator {
             describer.updateName(reg, lVal);
             return reg;
         }
+
         reg = allocFreeReg();
         if (reg != null) {
             describer.updateName(reg, lVal);

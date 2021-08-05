@@ -22,25 +22,24 @@ public class FunctionContext {
     public List<IR> irs;
     public int baseOffset = 0;  // (r - 1) * 4
     public int frameSize;
+    public int localSize;
 
     public boolean isLrUsed = false;
-    public Map<Variable, ILabel> globalVarMap = new HashMap<>();
-    public Map<Variable, Integer> arrayAddress = new HashMap<>();
-
     public ILabel returnLabel;
-
     private int paramCount = 0;
+    private List<Variable> initVars = new ArrayList<>();
 
 
     public FunctionContext(Function function) {
         this.function = function;
         this.irs = function.irs;
         this.function.blocks = BasicBlock.genBlocks(irs);
-//        for (BasicBlock block : function.blocks) block.printBlock();
+        for (BasicBlock block : function.blocks) block.printBlock();
 
         analyze();
         genHead();
         loadParam();
+        initVariable();
         genBody();
         genTail();
     }
@@ -64,46 +63,57 @@ public class FunctionContext {
                 maxParamBytes = Math.max(maxParamBytes, callee.getParamBytes() - 16);
             }
             /* 分析全局变量的使用情况 */
-            ir.getNames().forEach(name -> {
-                if (name instanceof Variable) {
-                    Variable var = (Variable) name;
-                    if (var.isGlobal()) {   // 引用了全局变量
-                        globalVarMap.put(var, Label.newLabel(String.format("%s.L%d", function.name, nextLabelID++)));
-                    }
-                } else if (name instanceof OffsetVar) {
-                    Variable var = ((OffsetVar) name).variable;
-                    if (var.isGlobal()) {   // 引用了全局变量
-                        globalVarMap.put(var, Label.newLabel(String.format("%s.L%d", function.name, nextLabelID++)));
-                    }
-                }
-            });
+//            ir.getNames().forEach(name -> {
+//                if (name instanceof Variable) {
+//                    Variable var = (Variable) name;
+//                    if (var.isGlobal()) {   // 引用了全局变量
+//                        globalVarMap.put(var, Label.newLabel(String.format("%s.L%d", function.name, nextLabelID++)));
+//                    }
+//                } else if (name instanceof OffsetVar) {
+//                    Variable var = ((OffsetVar) name).variable;
+//                    if (var.isGlobal()) {   // 引用了全局变量
+//                        globalVarMap.put(var, Label.newLabel(String.format("%s.L%d", function.name, nextLabelID++)));
+//                    }
+//                }
+//            });
         }
+
+        /* 分析数组定义 */
+        function.getVariables().forEach(variable -> {
+            if (variable.isArray && variable.isInit) initVars.add(variable);
+        });
+        if (!initVars.isEmpty()) enableLR();
+
         /* 分析栈帧大小 */
-        frameSize = Utils.align8(function.totalOffset + maxParamBytes + baseOffset + 4) - 4 - baseOffset;
-        codes.add(AsmFactory.code(String.format("@ %s frameSize=%d", function.name, frameSize)));
-        /* 记录局部数组起始栈帧位置 */
-        int loc = maxParamBytes - frameSize;
-        for (Variable variable : function.getVariables()) {
-            if (variable.isArray) {
-                arrayAddress.put(variable, loc);
-                loc += variable.getBytes();
-            }
-        }
+        frameSize = Utils.align8(function.totalOffset + maxParamBytes + baseOffset + 4);
+        localSize = frameSize - 4 - baseOffset;
+        codes.add(AsmFactory.code(String.format("@ function\t[%s]", function.name)));
+        codes.add(AsmFactory.code(String.format("@ frameSize\t[%d]", frameSize)));
+        codes.add(AsmFactory.code(String.format("@ localSize\t[%d]", localSize)));
+//        /* 记录局部数组起始栈帧位置 */
+//        int loc = maxParamBytes - frameSize;
+//        for (Variable variable : function.getVariables()) {
+//            if (variable.isArray) {
+//                arrayAddress.put(variable, loc);
+//                loc += variable.getBytes();
+//            }
+//        }
         /* 生成返回标签 */
         returnLabel = Label.newLabel(function.name + ".return");
     }
 
-
-    public void initVar(Variable variable) {
-        //todo
+    public void initVariable() {
+        for (Variable variable : initVars) {
+            System.out.println(variable.offset);
+            codes.add(AsmFactory.mov(Register.r2, variable.getBytes()));
+            codes.add(AsmFactory.mov(Register.r1, 0));
+            codes.add(AsmFactory.add(Register.r0, Register.fp, getVariableOffset(variable)));
+            codes.add(AsmFactory.bl("memset"));
+        }
     }
 
-    public void initVar(OffsetVar offsetVar) {
-        //todo
-    }
 
     public void loadParam() {
-        //todo
         List<Variable> params = function.getParams();
         for (int i = 0; i < params.size() && i < Function.PARAM_LIMIT; i++) {
             Variable param = params.get(i);
@@ -128,7 +138,7 @@ public class FunctionContext {
             codes.add(AsmFactory.code("push {fp}"));
             codes.add(AsmFactory.add(Register.fp, Register.sp, 0));
         }
-        codes.add(AsmFactory.sub(Register.sp, Register.sp, frameSize));
+        codes.add(AsmFactory.sub(Register.sp, Register.sp, localSize));
     }
 
     @SuppressWarnings("SuspiciousMethodCalls")

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="904cec9c-5b3a-400c-81ed-14f62a10ff07" name="raspberry" url="http://yz781089956.oicp.net">
+        <fileTransfer rootFolder="/home/pi" host="yz781089956.oicp.net" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

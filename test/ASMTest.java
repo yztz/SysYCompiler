@@ -23,6 +23,12 @@ public class ASMTest {
         CodeGenerator codeGenerator = new CodeGenerator();
         codeGenerator.genCode();
     }
+    @Test
+    public void testWhile() {
+        Utils.getIRs("test/testWhile.sys");
+        CodeGenerator codeGenerator = new CodeGenerator();
+        codeGenerator.genCode();
+    }
 
 
 }

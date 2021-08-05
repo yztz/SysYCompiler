@@ -1,22 +1,18 @@
 
-int cb[10] = {1,2,3,4};
-const int T = 2;
+int array[3] = {1,2,3};
 
-int bar(int array[]) {
-    array[0] = -1;
-    return 1;
+void bar() {
+    putint(array[0]);
+    array[0] = 25;
+    putint(array[0]);
 }
 
 int main() {
-    int array[5] = {1,2,3,4,5};
-    int a = 4;
-    int b = 7;
-    array[0] = a + b;
-    array[1] = a - b;
-    array[2] = a * b;
-    array[3] = b / a;
-    array[4] = b % a;
+    int nums[10] = {};
+    array[0] = 26;
+    putint(nums[0]);
+    putint(nums[2]);
+    //bar();
 
-    putarray(5, array);
-	return 0;
+    return 0;
 }
