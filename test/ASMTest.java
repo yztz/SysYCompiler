@@ -1,5 +1,9 @@
+import antlr.SysYParser;
 import asm.CodeGenerator;
+import ast.AstNode;
 import ir.IRs;
+import ir.code.IR;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 public class ASMTest {
@@ -26,6 +30,13 @@ public class ASMTest {
     @Test
     public void testWhile() {
         Utils.getIRs("test/testWhile.sys");
+        CodeGenerator codeGenerator = new CodeGenerator();
+        codeGenerator.genCode();
+    }
+
+    @Test
+    public void testIO() {
+        Utils.getIRs("test/testIO.sys");
         CodeGenerator codeGenerator = new CodeGenerator();
         codeGenerator.genCode();
     }

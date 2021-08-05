@@ -9,7 +9,7 @@ public class Domain {
     public static Domain globalDomain = new Domain(null);
 
     static {
-        functions.put("getInt", new Function("getInt", "int"));
+        functions.put("getint", new Function("getint", "int"));
         functions.put("getch", new Function("getch", "int"));
         functions.put("getarray", new Function("getarray", "int"));
         functions.put("putint", new Function("putint", "void"));

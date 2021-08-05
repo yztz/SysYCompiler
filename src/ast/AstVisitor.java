@@ -257,6 +257,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             }
             Variable variable = Domain.addArray(ctx.Identifier().getText(), dimensions);
             if (null == ctx.initVal()) {
+                variable.isInit = false;
                 return AstNode.makeLeaf(variable);
             }
             AstNode initVal = visit(ctx.initVal());    // 获取初始化值

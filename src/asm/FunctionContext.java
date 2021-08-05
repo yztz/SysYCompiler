@@ -243,21 +243,14 @@ public class FunctionContext {
                     case PARAM:
                         //todo
                         if (paramCount > Function.PARAM_LIMIT - 1) {
-                            int offset = paramCount - Function.PARAM_LIMIT;
+                            int offset = 4 * (paramCount - Function.PARAM_LIMIT);
                             if (ir.op1 instanceof Immediate) {  // 参数为立即数
                                 rd = allocator.allocFreeReg();
                                 codes.add(AsmFactory.mov(rd, ((Immediate) ir.op1).value));
-                                if (offset == 0)
-                                    codes.add(AsmFactory.strWithoutOffset(rd, Register.sp));
-                                else
-                                    codes.add(AsmFactory.strWithOffset(rd, Register.sp, offset));
+                                codes.add(AsmFactory.strWithOffset(rd, Register.sp, offset));
                             } else {
                                 rd = regMap.get(ir.op1);
-                                codes.add(AsmFactory.mov(rd, ((Immediate) ir.op1).value));
-                                if (offset == 0)
-                                    codes.add(AsmFactory.strWithoutOffset(rd, Register.sp));
-                                else
-                                    codes.add(AsmFactory.strWithOffset(rd, Register.sp, offset));
+                                codes.add(AsmFactory.strWithOffset(rd, Register.sp, offset));
                             }
                         } else {
                             if (ir.op1 instanceof Immediate) {
@@ -368,6 +361,7 @@ public class FunctionContext {
                         codes.add(AsmFactory.uxtb(rd));
                         break;
                 }
+                allocator.killName();
             }
             if (!lastIR.isJump()) allocator.saveAll();
 

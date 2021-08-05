@@ -260,7 +260,7 @@ public class RegisterAllocator {
                 }
                 ret.put((IName) ir.op1, rd);
                 ret.put((IName) ir.op2, rn);
-                describer.updateName(rd, (IName) ir.op1);
+
                 break;
             // 一个操作数，一个左值
             case NEGATE:
@@ -269,7 +269,7 @@ public class RegisterAllocator {
                 rd = allocReg4lVal(ir);
                 ret.put(((IName) ir.op1), rd);
                 ret.put(((IName) ir.op2), rn);
-                describer.updateName(rd, (IName) ir.op1);
+
 //                codes.add(AsmFactory.cmp(rn, 0));
 //                codes.add(AsmFactory.movWhen(rd, 1, "eq"));
 //                codes.add(AsmFactory.movWhen(rd, 0, "ne"));
@@ -283,7 +283,7 @@ public class RegisterAllocator {
                 } else {
                     rn = allocReg4lVal(ir);
                     codes.add(AsmFactory.mov(rn, ((Immediate) ir.op2).value));
-                    describer.updateName(rn, ((IName) ir.op1));
+
                     //saveName(((IName) ir.op1));
                 }
                 break;
@@ -304,15 +304,13 @@ public class RegisterAllocator {
                     ret.put(((IName) ir.op1), register);
                 }
         }
-
-        killName();
         return ret;
     }
 
     /*
         杀死本条语句中不再活跃的变量
      */
-    private void killName() {
+    public void killName() {
         for (IName name : currentIR.refMap.keySet()) {
             Reference ref = currentIR.refMap.get(name);
             if (!ref.isAlive || ref.nextRef == null) { // 不再活跃
