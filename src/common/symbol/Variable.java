@@ -39,12 +39,12 @@ public class Variable implements IName {
     }
 
     public void addConstVal(int val) {
-        this.constVal.put(pos++, val);
+        this.constVal.put(pos, val);
     }
 
     public boolean isCollapsible() {
         // todo 常量数组待商榷
-        return isConst && isGlobal();
+        return isConst && (isGlobal() || isInit );
     }
 
     public int getBytes() {

@@ -32,7 +32,7 @@ public class FunctionContext {
         this.function = function;
         this.irs = function.irs;
         this.function.blocks = BasicBlock.genBlocks(irs);
-        for (BasicBlock block : function.blocks) block.printBlock();
+//        for (BasicBlock block : function.blocks) block.printBlock();
 
         analyze();
         genHead();
@@ -102,7 +102,8 @@ public class FunctionContext {
 
     public void initVariable() {
         for (Variable variable : initVars) {
-            System.out.println(variable.offset);
+//            System.out.println(variable.offset);
+            codes.add(AsmFactory.note(String.format("init %s, size: %d", variable, variable.getBytes())));
             codes.add(AsmFactory.mov(Register.r2, variable.getBytes()));
             codes.add(AsmFactory.mov(Register.r1, 0));
             codes.add(AsmFactory.add(Register.r0, Register.fp, getVariableOffset(variable)));
@@ -147,6 +148,7 @@ public class FunctionContext {
             IR lastIR = null;
             for (IR ir : block.getIRs()) {
                 if (null != ir.label) codes.add(AsmFactory.label(ir.label.getLabelName()));
+                codes.add(AsmFactory.code(String.format("@ %s", ir)));
                 lastIR = ir;
                 Register rd, rn, rm;
                 ILabel target;

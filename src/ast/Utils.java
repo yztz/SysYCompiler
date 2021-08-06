@@ -13,36 +13,43 @@ public class Utils {
     public static int assignConstArray(Variable array, AstNode values, int dimension) {
         if (values.isLeaf() && values.op == OP.IMMEDIATE) {
             array.addConstVal(values.getInteger());
-            return 1;
-        }
-        int init_num = 0;
-        for (AstNode node : values.getSubTrees()) {
-            init_num += assignConstArray(array, node, dimension - 1);
-        }
-        array.pos += Math.max(getDimensionSize(array, dimension) - init_num, 0);
-        return init_num;
-    }
-
-    public static int assignArray(Variable array, AstNode values, int dimension, AstNode group) {
-        if (values.op != OP.VAL_GROUP) {
-            AstNode left = AstNode.makeLeaf(new OffsetVar(array, array.pos));
-            group.addNode(AstNode.makeBinaryNode(OP.ASSIGN, left, values));
+            //System.out.printf("pos: %d, value: %s%n", array.pos, values);
             array.pos++;
             return 1;
         }
         int init_num = 0;
         for (AstNode node : values.getSubTrees()) {
-            init_num += assignArray(array, node, dimension - 1, group);
+            init_num += assignConstArray(array, node, dimension + 1);
         }
         array.pos += Math.max(getDimensionSize(array, dimension) - init_num, 0);
-        return init_num;
+        return getDimensionSize(array, dimension);
+    }
+
+
+
+    public static int assignArray(Variable array, AstNode values, int dimension, AstNode group) {
+        if (values.op != OP.VAL_GROUP) {
+            AstNode left = AstNode.makeLeaf(new OffsetVar(array, array.pos));
+            group.addNode(AstNode.makeBinaryNode(OP.ASSIGN, left, values));
+           if (array.name.equals("d"))
+                System.out.printf("pos: %d, value: %s%n", array.pos, values);
+            array.pos++;
+            return 1;
+        }
+        int init_num = 0;
+        for (AstNode node : values.getSubTrees()) {
+            init_num += assignArray(array, node, dimension + 1, group);
+        }
+//        System.out.println("fixDelta: " + Math.max(getDimensionSize(array, dimension) - init_num, 0));
+        array.pos += Math.max(getDimensionSize(array, dimension) - init_num, 0);
+        return getDimensionSize(array, dimension);
     }
 
 
     public static int getDimensionSize(Variable array, int dimension) {
         List<Integer> dimensions = array.dimensions;
         int size = 1;
-        for (int i = dimension + 1; i < dimensions.size(); i++) {
+        for (int i = dimension; i < dimensions.size(); i++) {
             size *= dimensions.get(i);
         }
 
@@ -126,7 +133,7 @@ public class Utils {
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     return AstNode.makeLeaf(left.getInteger() == 1 && right.getInteger() == 1 ? 1 : 0);
                 } else if (lVal instanceof Immediate) {
-                    if(left.getInteger() == 0)
+                    if (left.getInteger() == 0)
                         return AstNode.makeLeaf(0);
                     else
                         return right;

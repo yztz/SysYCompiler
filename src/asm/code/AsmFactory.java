@@ -9,6 +9,10 @@ import java.util.List;
 
 public class AsmFactory {
 
+    public static Code note(String content) {
+        return Code.code(String.format("@ %s", content));
+    }
+
     public static Code mov(Register reg1, Register reg2) {
         return Code.code(String.format("mov %s, %s", reg1, reg2));
     }

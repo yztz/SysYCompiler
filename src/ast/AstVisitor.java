@@ -263,11 +263,11 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             AstNode initVal = visit(ctx.initVal());    // 获取初始化值
 
             if (variable.isGlobal()) {    // 全局变量
-                Utils.assignConstArray(variable, initVal, variable.dimensions.size() - 1);
+                Utils.assignConstArray(variable, initVal, 0);
             }
             variable.pos = 0;
             AstNode ret = AstNode.makeEmptyNode(OP.ASSIGN_GROUP);
-            Utils.assignArray(variable, initVal, variable.dimensions.size() - 1, ret);
+            Utils.assignArray(variable, initVal, 0, ret);
             return ret;
         }
     }
@@ -296,9 +296,9 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             //todo 可以加入更多验证 左右值检查
             AstNode rVal = visit(ctx.constInitVal());
             Variable variable = Domain.addConstVar(ctx.Identifier().getText());
-            if (variable.isGlobal()) {    // 全局变量
-                variable.addConstVal(rVal.getInteger());
-            }
+//            if (variable.isGlobal()) {    // 全局变量
+            variable.addConstVal(rVal.getInteger());
+//            }
             return AstNode.makeBinaryNode(OP.ASSIGN, AstNode.makeLeaf(variable), rVal);
         } else {    // 数组常量
             List<Integer> dimensions = new ArrayList<>();
@@ -307,12 +307,12 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             }
             Variable variable = Domain.addConstArray(ctx.Identifier().getText(), dimensions);
             AstNode initVal = visit(ctx.constInitVal());    // 获取初始化值
-            if (variable.isGlobal()) {    // 全局变量
-                Utils.assignConstArray(variable, initVal, variable.dimensions.size() - 1);
-            }
+//            if (variable.isConst) {    // 全局变量
+            Utils.assignConstArray(variable, initVal, 0);
+//            }
             variable.pos = 0;
             AstNode ret = AstNode.makeEmptyNode(OP.ASSIGN_GROUP);
-            Utils.assignArray(variable, initVal, variable.dimensions.size() - 1, ret);
+            Utils.assignArray(variable, initVal, 0, ret);
             return ret;
         }
 
