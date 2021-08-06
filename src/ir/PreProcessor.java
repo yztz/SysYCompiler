@@ -44,6 +44,13 @@ public class PreProcessor {
         AstNode parent = ifStat.parent;
         AstNode prev = ifStat;
         for (AstNode node : ifStat.getNode(branch ? 1 : 2).getSubTrees()) {
+            if (node.op == OP.GOTO && node.value == ifStat.label) {
+                AstNode firstNode = ifStat.getNode(branch ? 1 : 2).getLeft();
+                if (firstNode.label == null)
+                    firstNode.label = ((ILabel) node.value);
+                else
+                    node.value = firstNode.label;
+            }
             parent.insertAfter(prev, node);
             prev = node;
         }
@@ -100,6 +107,9 @@ public class PreProcessor {
             //重设原else
             newEl = AstNode.makeEmptyNode(OP.STATEMENTS);
             newEl.addNode(newIfElse);
+            // 为newEl增加跳转
+            AstNode nextStat = Utils.findNextStat(ifStat);
+            newEl.addNode(AstNode.makeGoTo(nextStat.putLabelIfAbsent(Label::newLabel)));
             ifStat.setNode(2, newEl);
             // 绑定label
             goTo.value = bindLabelToStat(then);

@@ -230,7 +230,6 @@ public class FunctionContext {
                                 codes.add(AsmFactory.mls(rd, rm, rd, rn));
                             } else {
                                 rm = regMap.get(ir.op3);
-                                codes.add(AsmFactory.mov(rn, ((Immediate) ir.op2).value));
                                 codes.add(AsmFactory.div(rd, rn, rm));
                                 codes.add(AsmFactory.mls(rd, rm, rd, rn));
                             }
