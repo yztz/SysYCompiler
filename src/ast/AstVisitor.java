@@ -419,7 +419,8 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
     @Override
     public AstNode visitPrimaryExp(SysYParser.PrimaryExpContext ctx) {
         if (null != ctx.exp()) return visit(ctx.exp());
-        if (null != ctx.Integer_const()) return AstNode.makeLeaf(ctx.Integer_const().getSymbol().getText());
+        if (null != ctx.Integer_const())
+            return AstNode.makeLeaf(ctx.Integer_const().getSymbol().getText());
 
         return visit(ctx.lVal());
     }

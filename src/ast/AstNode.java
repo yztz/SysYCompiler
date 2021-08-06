@@ -200,7 +200,15 @@ public class AstNode implements Tree {
     }
 
     public static AstNode makeLeaf(String value) {
-        return makeLeaf(Integer.parseInt(value));
+        value = value.toLowerCase();
+        if ("0".equals(value)) return makeLeaf(0);
+        if (value.startsWith("0x")) {
+            return makeLeaf((int) Long.parseLong(value.substring(2), 16));
+        } else if (value.startsWith("0")) {
+            return makeLeaf((int) Long.parseLong(value.substring(1), 8));
+        } else {
+            return makeLeaf((int) Long.parseLong(value));
+        }
     }
 
 
@@ -228,7 +236,7 @@ public class AstNode implements Tree {
         if (null == value)
             return String.format("%s%s", getLabelName(), op);
         else
-            return String.format("%s%s[%s]", getLabelName(),op, value);
+            return String.format("%s%s[%s]", getLabelName(), op, value);
     }
 
 
