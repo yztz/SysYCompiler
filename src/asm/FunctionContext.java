@@ -291,6 +291,8 @@ public class FunctionContext {
                         if (function.hasReturn()) {
                             if (ir.op1 instanceof Immediate) {
                                 codes.add(AsmFactory.mov(Register.r0, ((Immediate) ir.op1).value));
+                            } else if (null == ir.op1) {
+                                codes.add(AsmFactory.mov(Register.r0, 0));
                             } else {
                                 rd = regMap.get(ir.op1);
                                 codes.add(AsmFactory.mov(Register.r0, rd));
