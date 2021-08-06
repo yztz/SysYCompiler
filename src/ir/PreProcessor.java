@@ -60,7 +60,7 @@ public class PreProcessor {
 
 
 
-        if (!OP.isRelOP(cond)) {    // 处理单值的情况  if(a)...
+        if (!OP.isRelOP(cond.op)) {    // 处理单值的情况  if(a)...
             cond = AstNode.makeBinaryNode(OP.NOT_EQ, cond, AstNode.makeLeaf(0));
             ifStat.setNode(0, cond);
         }

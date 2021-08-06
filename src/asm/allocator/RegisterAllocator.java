@@ -250,16 +250,13 @@ public class RegisterAllocator {
                 rd = allocReg4lVal(ir);
                 if (ir.op2 instanceof IName) {
                     rn = allocReg4rVal((IName) ir.op2);
-                } else {
-                    rn = allocFreeReg();
-                    codes.add(AsmFactory.mov(rn, ((Immediate) ir.op2).value));
+                    ret.put((IName) ir.op2, rn);
                 }
                 if (ir.op3 instanceof IName) {
                     rm = allocReg4rVal(((IName) ir.op3));
                     ret.put((IName) ir.op3, rm);
                 }
                 ret.put((IName) ir.op1, rd);
-                ret.put((IName) ir.op2, rn);
 
                 break;
             // 一个操作数，一个左值

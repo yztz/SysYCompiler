@@ -168,12 +168,17 @@ public class FunctionContext {
                         break;
                     case SUB:
                         rd = regMap.get(ir.op1);
-                        rn = regMap.get(ir.op2);
-                        if (ir.op3 instanceof Immediate) {
-                            codes.add(AsmFactory.sub(rd, rn, ((Immediate) ir.op3).value));
+                        if (ir.op2 instanceof Immediate) {
+                            rn = regMap.get(ir.op3);
+                            codes.add(AsmFactory.rsb(rd, rn, ((Immediate) ir.op2).value));
                         } else {
-                            rm = regMap.get(ir.op3);
-                            codes.add(AsmFactory.sub(rd, rn, rm));
+                            rn = regMap.get(ir.op2);
+                            if (ir.op3 instanceof Immediate) {
+                                codes.add(AsmFactory.sub(rd, rn, ((Immediate) ir.op3).value));
+                            } else {
+                                rm = regMap.get(ir.op3);
+                                codes.add(AsmFactory.sub(rd, rn, rm));
+                            }
                         }
                         break;
                     case MUL:
@@ -190,29 +195,45 @@ public class FunctionContext {
                         break;
                     case DIV:
                         rd = regMap.get(ir.op1);
-                        rn = regMap.get(ir.op2);
-                        if (ir.op3 instanceof Immediate) {
-                            Register tmp = allocator.allocFreeReg();
-                            codes.add(AsmFactory.mov(tmp, ((Immediate) ir.op3).value));
-                            codes.add(AsmFactory.div(rd, rn, tmp));
-                        } else {
+                        //rn = regMap.get(ir.op2);
+                        if (ir.op2 instanceof Immediate) {
                             rm = regMap.get(ir.op3);
-                            codes.add(AsmFactory.div(rd, rn, rm));
+                            Register tmp = allocator.allocFreeReg();
+                            codes.add(AsmFactory.mov(tmp, ((Immediate) ir.op2).value));
+                            codes.add(AsmFactory.div(rd, tmp, rm));
+                        } else {
+                            rn = regMap.get(ir.op2);
+                            if (ir.op3 instanceof Immediate) {
+                                Register tmp = allocator.allocFreeReg();
+                                codes.add(AsmFactory.mov(tmp, ((Immediate) ir.op3).value));
+                                codes.add(AsmFactory.div(rd, rn, tmp));
+                            } else {
+                                rm = regMap.get(ir.op3);
+                                codes.add(AsmFactory.div(rd, rn, rm));
+                            }
                         }
                         break;
                     case MOD:
                         rd = regMap.get(ir.op1);
-                        rn = regMap.get(ir.op2);
-                        if (ir.op3 instanceof Immediate) {
-                            rm = allocator.allocFreeReg();
-                            codes.add(AsmFactory.mov(rm, ((Immediate) ir.op3).value));
+                        if (ir.op2 instanceof Immediate) {
+                            rn = allocator.allocFreeReg();
+                            rm = regMap.get(ir.op3);
+                            codes.add(AsmFactory.mov(rn, ((Immediate) ir.op2).value));
                             codes.add(AsmFactory.div(rd, rn, rm));
                             codes.add(AsmFactory.mls(rd, rm, rd, rn));
                         } else {
-//                            Register tmp = allocator.allocFreeReg();
-                            rm = regMap.get(ir.op3);
-                            codes.add(AsmFactory.div(rd, rn, rm));
-                            codes.add(AsmFactory.mls(rd, rm, rd, rn));
+                            rn = regMap.get(ir.op2);
+                            if (ir.op3 instanceof Immediate) {
+                                rm = allocator.allocFreeReg();
+                                codes.add(AsmFactory.mov(rm, ((Immediate) ir.op3).value));
+                                codes.add(AsmFactory.div(rd, rn, rm));
+                                codes.add(AsmFactory.mls(rd, rm, rd, rn));
+                            } else {
+                                rm = regMap.get(ir.op3);
+                                codes.add(AsmFactory.mov(rn, ((Immediate) ir.op2).value));
+                                codes.add(AsmFactory.div(rd, rn, rm));
+                                codes.add(AsmFactory.mls(rd, rm, rd, rn));
+                            }
                         }
                         break;
                     case MINUS:

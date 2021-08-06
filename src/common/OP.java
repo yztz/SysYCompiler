@@ -46,6 +46,12 @@ public enum OP {
     AND,
     OR;
 
+    public static final OP[] COMMUTATIVE_OP = {
+            ADD,
+            MUL,
+            EQ,
+            NOT_EQ
+    };
 
     public static final OP[] REL_OP = {
             //NEGATE,
@@ -66,13 +72,16 @@ public enum OP {
         return false;
     }
 
+    public static boolean isCommutative(OP op) {
+        return include(op, COMMUTATIVE_OP);
+    }
+
 
     /**
      * 判断是否是关系运算
      */
-    public static boolean isRelOP(AstNode node) {
-        if (null == node) return false;
-        return include(node.op, REL_OP);
+    public static boolean isRelOP(OP op) {
+        return include(op, REL_OP);
     }
 
 
