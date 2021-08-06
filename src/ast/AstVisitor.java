@@ -122,7 +122,9 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
         AstNode ret = AstNode.makeEmptyNode(OP.WHILE);
         ret.addNode(visit(ctx.cond()));
 //        ret.addNode(AstNode.makeLeaf(Label.newLabel()));
-        ret.addNode(visit(ctx.stmt()));
+        AstNode stmt = visit(ctx.stmt());
+        if (stmt.op != OP.STATEMENTS) stmt = AstNode.makeUnaryNode(OP.STATEMENTS, stmt);
+        ret.addNode(stmt);
 //        ret.addNode(AstNode.makeLeaf(Label.newLabel()));
         return ret;
     }

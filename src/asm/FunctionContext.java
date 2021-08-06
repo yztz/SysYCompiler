@@ -32,7 +32,7 @@ public class FunctionContext {
         this.function = function;
         this.irs = function.irs;
         this.function.blocks = BasicBlock.genBlocks(irs);
-//        for (BasicBlock block : function.blocks) block.printBlock();
+        for (BasicBlock block : function.blocks) block.printBlock();
 
         analyze();
         genHead();
@@ -238,7 +238,8 @@ public class FunctionContext {
                         break;
                     case MINUS:
                         rd = regMap.get(ir.op1);
-                        codes.add(AsmFactory.rsb(rd, rd, 0));
+                        rn = regMap.get(ir.op2);
+                        codes.add(AsmFactory.rsb(rd, rn, 0));
                         break;
                     case NEGATE:
                         rd = regMap.get(ir.op1);

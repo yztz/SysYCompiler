@@ -122,7 +122,6 @@ public class RegisterAllocator {
             IAstValue offset = offsetVar.getOffset();
 
             if (!variable.isConst) {
-
                 if (variable.isGlobal()) {  // 全局数组
                     Register addr = allocReg4rVal(variable);
                     if (offset instanceof IName) {
@@ -308,7 +307,15 @@ public class RegisterAllocator {
         杀死本条语句中不再活跃的变量
      */
     public void killName() {
-        for (IName name : currentIR.refMap.keySet()) {
+        IName lVal = currentIR.getLVal();
+        if (lVal != null) {
+            Reference ref = currentIR.refMap.get(lVal);
+            if (!ref.isAlive || ref.nextRef == null) { // 不再活跃
+//                System.out.printf("try to kill [%s]%n", name);
+                saveName(lVal);
+            }
+        }
+        for (IName name : currentIR.getRVal()) {
             Reference ref = currentIR.refMap.get(name);
             if (!ref.isAlive || ref.nextRef == null) { // 不再活跃
 //                System.out.printf("try to kill [%s]%n", name);
