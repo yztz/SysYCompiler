@@ -32,7 +32,7 @@ public class FunctionContext {
         this.function = function;
         this.irs = function.irs;
         this.function.blocks = BasicBlock.genBlocks(irs);
-        for (BasicBlock block : function.blocks) block.printBlock();
+//        for (BasicBlock block : function.blocks) block.printBlock();
 
         analyze();
         genHead();

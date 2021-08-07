@@ -21,6 +21,8 @@ public class RegisterAllocator {
     private List<Code> codes;
     private FunctionContext context;
 
+    private Set<Register> releaseSet = new HashSet<>();
+
     private IR currentIR;
 
 
@@ -98,6 +100,7 @@ public class RegisterAllocator {
     }
 
     private void saveName(IName name) {
+        System.out.printf("[saveName] save name: %s%n", name);
         if (name instanceof Temp || describer.isInMemory(name)) {
             describer.freeName(name);
             return;
@@ -163,6 +166,7 @@ public class RegisterAllocator {
 
         int minCost = Integer.MAX_VALUE;
         for (Register register : Describer.availableReg) {
+            if (releaseSet.contains(register)) continue;
             if (describer.isLocked(register)) continue;
 
             int cost = getCost(register, currentIR);
@@ -171,8 +175,10 @@ public class RegisterAllocator {
                 reg = register;
             }
         }
-//        System.out.printf("try to release [%s] %n", reg);
+        System.out.printf("[spill] select reg: %s%n", reg);
+        releaseSet.add(reg);
         saveReg(reg);
+        releaseSet.remove(reg);
         return reg;
     }
 
@@ -183,6 +189,7 @@ public class RegisterAllocator {
     public Register allocFreeReg() {
         Register register = describer.getFreeRegister();
         if (register == null) {
+            System.out.println("[allocFreeReg] spilled");
             register = spill();
         }
         return register;
@@ -197,6 +204,7 @@ public class RegisterAllocator {
             loadName(reg, name);
             return reg;
         }
+        System.out.printf("[allocReg4rVal] spilled for name: %s%n", name);
         reg = spill();
         loadName(reg, name);
         return reg;
@@ -223,6 +231,7 @@ public class RegisterAllocator {
                 return reg;
             }
         }
+        System.out.printf("[allocReg4lVal] spilled for name: %s%n", lVal);
         reg = spill();
         describer.updateName(reg, lVal);
         return reg;
