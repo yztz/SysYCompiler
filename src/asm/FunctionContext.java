@@ -117,7 +117,7 @@ public class FunctionContext {
         List<Variable> params = function.getParams();
         for (int i = 0; i < params.size() && i < Function.PARAM_LIMIT; i++) {
             Variable param = params.get(i);
-            codes.add(AsmFactory.strStack(Register.valueOf("r" + i), getVariableOffset(param)));
+            codes.add(AsmFactory.strWithOffset(Register.valueOf("r" + i), Register.fp, getVariableOffset(param)));
         }
     }
 
@@ -133,7 +133,12 @@ public class FunctionContext {
         codes.add(AsmFactory.label(function.name));
         codes.add(AsmFactory.push(savedRegs));
         codes.add(AsmFactory.add(Register.fp, Register.sp, 4 * (savedRegs.size() - 1)));
-        codes.add(AsmFactory.sub(Register.sp, Register.sp, localSize));
+        if (Utils.imm8m(localSize)){
+            codes.add(AsmFactory.sub(Register.sp, Register.sp, localSize));
+        } else {
+            codes.add(AsmFactory.mov(Register.r4, localSize));
+            codes.add(AsmFactory.sub(Register.sp, Register.sp, Register.r4));
+        }
     }
 
     @SuppressWarnings("SuspiciousMethodCalls")
@@ -148,6 +153,7 @@ public class FunctionContext {
                 lastIR = ir;
                 Register rd, rn, rm;
                 ILabel target;
+                int imm;
                 regMap = allocator.getReg(ir);
                 // 如果当前语句是跳转语句，则在该语句之前生成保存语句
                 if (ir.isJump() || ir.isReturn()) allocator.saveAll();
@@ -157,7 +163,13 @@ public class FunctionContext {
                         rd = regMap.get(ir.op1);
                         rn = regMap.get(ir.op2);
                         if (ir.op3 instanceof Immediate) {
-                            codes.add(AsmFactory.add(rd, rn, ((Immediate) ir.op3).value));
+                            imm = ((Immediate) ir.op3).value;
+                            if (Utils.imm8m(imm)) {
+                                codes.add(AsmFactory.add(rd, rn, imm));
+                            } else {
+                                codes.add(AsmFactory.mov(rd, imm));
+                                codes.add(AsmFactory.add(rd, rn, rd));
+                            }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.add(rd, rn, rm));
@@ -166,12 +178,24 @@ public class FunctionContext {
                     case SUB:
                         rd = regMap.get(ir.op1);
                         if (ir.op2 instanceof Immediate) {
+                            imm = ((Immediate) ir.op2).value;
                             rn = regMap.get(ir.op3);
-                            codes.add(AsmFactory.rsb(rd, rn, ((Immediate) ir.op2).value));
+                            if (Utils.imm8m(imm)) {
+                                codes.add(AsmFactory.rsb(rd, rn, imm));
+                            } else {
+                                codes.add(AsmFactory.mov(rd, imm));
+                                codes.add(AsmFactory.rsb(rd, rn, rd));
+                            }
                         } else {
                             rn = regMap.get(ir.op2);
                             if (ir.op3 instanceof Immediate) {
-                                codes.add(AsmFactory.sub(rd, rn, ((Immediate) ir.op3).value));
+                                imm = ((Immediate) ir.op3).value;
+                                if (Utils.imm8m(imm)) {
+                                    codes.add(AsmFactory.sub(rd, rn, imm));
+                                } else {
+                                    codes.add(AsmFactory.mov(rd, imm));
+                                    codes.add(AsmFactory.sub(rd, rn, rd));
+                                }
                             } else {
                                 rm = regMap.get(ir.op3);
                                 codes.add(AsmFactory.sub(rd, rn, rm));

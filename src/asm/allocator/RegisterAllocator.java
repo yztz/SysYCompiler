@@ -6,9 +6,9 @@ import asm.code.AsmFactory;
 import asm.code.Code;
 import ast.IAstValue;
 import ast.Immediate;
-import common.ILabel;
 import common.OffsetVar;
 import common.Register;
+import common.Utils;
 import common.symbol.Variable;
 import ir.Temp;
 import ir.code.IR;
@@ -46,9 +46,15 @@ public class RegisterAllocator {
 //                    ILabel label = context.globalVarMap.get(variable);
                     codes.add(AsmFactory.lea(register, variable.name));
                 } else if (variable.isParam) {
-                    codes.add(AsmFactory.ldrFromStack(register, context.getVariableOffset(variable)));
+                    codes.add(AsmFactory.ldrWithOffset(register, Register.fp,context.getVariableOffset(variable)));
                 } else {
-                    codes.add(AsmFactory.add(register, Register.fp, context.getVariableOffset(variable)));
+                    int offset = context.getVariableOffset(variable);
+                    if (Utils.imm8m(offset)) {
+                        codes.add(AsmFactory.add(register, Register.fp, offset));
+                    } else {
+                        codes.add(AsmFactory.mov(register, offset));
+                        codes.add(AsmFactory.add(register, Register.fp, register));
+                    }
                 }
             } else {
                 if (variable.isGlobal()) {  // 全局变量
@@ -56,7 +62,13 @@ public class RegisterAllocator {
                     codes.add(AsmFactory.lea(register, variable.name));
                     codes.add(AsmFactory.ldrWithoutOffset(register, register));
                 } else {    // 局部变量
-                    codes.add(AsmFactory.ldrFromStack(register, context.getVariableOffset(variable)));
+                    int offset = context.getVariableOffset(variable);
+                    if (Utils.imm8m(offset)) {
+                        codes.add(AsmFactory.ldrWithOffset(register, Register.fp, register, false));
+                    } else {
+                        codes.add(AsmFactory.mov(register, offset));
+                        codes.add(AsmFactory.ldrWithOffset(register, Register.fp, register, false));
+                    }
                 }
             }
         } else if (name instanceof OffsetVar) {
@@ -67,17 +79,29 @@ public class RegisterAllocator {
             Register addr = allocReg4rVal(variable);
             if (offsetVar.isAddress) {
                 if (offset instanceof Immediate) {
-                    codes.add(AsmFactory.add(register, addr, 4 * ((Immediate) offset).value));
+                    int imm = 4 * ((Immediate) offset).value;
+                    if (Utils.imm8m(imm)) {
+                        codes.add(AsmFactory.add(register, addr, imm));
+                    } else {
+                        codes.add(AsmFactory.mov(register, imm));
+                        codes.add(AsmFactory.add(register, addr, register));
+                    }
                 } else {
                     Register offsetReg = allocReg4rVal((IName) offset);
                     codes.add(AsmFactory.add(register, addr, offsetReg));
                 }
             } else {    //
                 if (offset instanceof Immediate) {
-                    codes.add(AsmFactory.ldrFromRegWithOffset(register, addr, 4 * ((Immediate) offset).value));
+                    int imm = 4 * ((Immediate) offset).value;
+                    if (Utils.imm8m(imm)) {
+                        codes.add(AsmFactory.ldrWithOffset(register, addr, imm));
+                    } else {
+                        codes.add(AsmFactory.mov(register, imm));
+                        codes.add(AsmFactory.ldrWithOffset(register, addr, register, false));
+                    }
                 } else {
                     Register offsetReg = allocReg4rVal((IName) offset);
-                    codes.add(AsmFactory.ldrFromRegWithOffset(register, addr, offsetReg));
+                    codes.add(AsmFactory.ldrWithOffset(register, addr, offsetReg, true));
                 }
             }
         }
@@ -118,7 +142,14 @@ public class RegisterAllocator {
                     codes.add(AsmFactory.strWithoutOffset(register, addr));
                 } else {    // 局部变量
                     codes.add(AsmFactory.code(String.format("@ save %s:local", variable.name)));
-                    codes.add(AsmFactory.strStack(register, context.getVariableOffset(variable)));
+                    int offset = context.getVariableOffset(variable);
+                    if (Utils.imm8m(offset)){
+                        codes.add(AsmFactory.strWithOffset(register, Register.fp, offset));
+                    } else {
+                        Register offsetReg = allocFreeReg();
+                        codes.add(AsmFactory.mov(offsetReg, offset));
+                        codes.add(AsmFactory.strWithOffset(register, Register.fp, offsetReg, false));
+                    }
                 }
             }
         } else if (name instanceof OffsetVar) {
@@ -131,28 +162,42 @@ public class RegisterAllocator {
                     Register addr = allocReg4rVal(variable);
                     if (offset instanceof IName) {
                         Register offsetReg = allocReg4rVal((IName) offset);
-                        codes.add(AsmFactory.strWithRegOffset(register, addr, offsetReg));
+                        codes.add(AsmFactory.strWithOffset(register, addr, offsetReg, true));
                     } else {
                         codes.add(AsmFactory.strWithOffset(register, addr, 4 * ((Immediate) offset).value));
                     }
                 } else if (variable.isParam) {
                     Register addr = allocReg4rVal(variable);
                     if (offset instanceof Immediate) {
+                        int imm = 4 * ((Immediate) offset).value;
                         // 传送数据
-                        codes.add(AsmFactory.strWithOffset(register, addr, 4 * ((Immediate) offset).value));
+                        if (Utils.imm8m(imm)) {
+                            codes.add(AsmFactory.strWithOffset(register, addr, imm));
+                        } else {
+                            Register offsetReg = allocFreeReg();
+                            codes.add(AsmFactory.mov(offsetReg, imm));
+                            codes.add(AsmFactory.strWithOffset(register, addr, offsetReg, false));
+                        }
                     } else {
                         Register offsetReg = allocReg4rVal((IName) offset);
                         // 传送数据
-                        codes.add(AsmFactory.strWithRegOffset(register, addr, offsetReg));
+                        codes.add(AsmFactory.strWithOffset(register, addr, offsetReg, true));
                     }
                 } else {    // 局部数组
                     int arrayAddress = context.getVariableOffset(variable);
                     if (offset instanceof Immediate) {
-                        codes.add(AsmFactory.strStack(register, arrayAddress + ((Immediate) offset).value * 4));
+                        int imm = arrayAddress + ((Immediate) offset).value * 4;
+                        if (Utils.imm8m(imm)){
+                            codes.add(AsmFactory.strWithOffset(register, Register.fp,imm));
+                        } else {
+                            Register offsetReg = allocFreeReg();
+                            codes.add(AsmFactory.mov(offsetReg, imm));
+                            codes.add(AsmFactory.strWithOffset(register, Register.fp, offsetReg, false));
+                        }
                     } else {
                         Register addr = allocReg4rVal(variable);
                         Register offsetReg = allocReg4rVal((IName) offset);
-                        codes.add(AsmFactory.strWithRegOffset(register, addr, offsetReg));
+                        codes.add(AsmFactory.strWithOffset(register, addr, offsetReg, true));
                     }
                 }
             }

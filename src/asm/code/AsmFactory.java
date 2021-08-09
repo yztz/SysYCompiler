@@ -45,16 +45,10 @@ public class AsmFactory {
         return Code.code(String.format("ldr %s, =0x%s", reg1, Integer.toHexString(imm)));
     }
 
-    public static Code ldrFromStack(Register register, int offset) {
-        return Code.code(String.format("ldr %s, [fp, #%d]", register, offset));
-    }
+
 
     public static Code lea(Register register, String label) {
         return Code.code(String.format("ldr %s, =%s", register, label));
-    }
-
-    public static Code lsl(Register register, int val) {
-        return Code.code(String.format("lsl %s, %s, #%d", register, register, val));
     }
 
     public static Code ldrWithoutOffset(Register rd, Register rt) {
@@ -65,16 +59,15 @@ public class AsmFactory {
         return Code.code(String.format("ldr %s, [%s]", rd, rt));
     }
 
-    public static Code ldrFromRegWithOffset(Register rd, Register rt, Register offset) {
-        return Code.code(String.format("ldr %s, [%s, %s, lsl #2]", rd, rt, offset));
+    public static Code ldrWithOffset(Register rd, Register rt, Register offset, boolean align) {
+        if (align)
+            return Code.code(String.format("ldr %s, [%s, %s, lsl #2]", rd, rt, offset));
+        else
+            return Code.code(String.format("ldr %s, [%s, %s]", rd, rt, offset));
     }
 
-    public static Code ldrFromRegWithOffset(Register rd, Register rt, int offset) {
+    public static Code ldrWithOffset(Register rd, Register rt, int offset) {
         return Code.code(String.format("ldr %s, [%s, #%d]", rd, rt, offset));
-    }
-
-    public static Code strStack(Register register, int offset) {
-        return Code.code(String.format("str %s, [fp, #%d]", register, offset));
     }
 
     public static Code strWithoutOffset(Register rn, Register rd) {
@@ -85,8 +78,11 @@ public class AsmFactory {
         return Code.code(String.format("str %s, [%s, #%d]", rn, rd, offset));
     }
 
-    public static Code strWithRegOffset(Register rn, Register rd, Register offset) {
-        return Code.code(String.format("str %s, [%s, %s, lsl #2]", rn, rd, offset));
+    public static Code strWithOffset(Register rn, Register rd, Register offset, boolean align) {
+        if (align)
+            return Code.code(String.format("str %s, [%s, %s, lsl #2]", rn, rd, offset));
+        else
+            return Code.code(String.format("str %s, [%s, %s]", rn, rd, offset));
     }
 
     public static Code cmp(Register rn, Register rm) {
@@ -141,6 +137,10 @@ public class AsmFactory {
 
     public static Code rsb(Register rd, Register rn, int imm) {
         return Code.code(String.format("rsb %s, %s, #%d", rd, rn, imm));
+    }
+
+    public static Code rsb(Register rd, Register rn, Register rm) {
+        return Code.code(String.format("rsb %s, %s, %s", rd, rn, rm));
     }
 
     public static Code sub(Register rd, Register rn, Register rm) {
