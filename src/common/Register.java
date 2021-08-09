@@ -21,9 +21,5 @@ public enum Register implements IAddress {
     lr,
     pc;
 
-    public static final Register FP = fp;
-    public static final Register SP = sp;
-    public static final Register LR = lr;
-    public static final Register PC = pc;
 
 }

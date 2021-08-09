@@ -16,6 +16,7 @@ import ir.code.IR;
 import java.util.*;
 
 public class RegisterAllocator {
+    public Set<Register> usedRegs = new HashSet<>();
     public Describer describer;
     private BasicBlock block;
     private List<Code> codes;
@@ -88,6 +89,7 @@ public class RegisterAllocator {
         }
     }
 
+
     /*
         保存register中的所有变量至内存
      */
@@ -100,8 +102,8 @@ public class RegisterAllocator {
     }
 
     private void saveName(IName name) {
-        System.out.printf("[saveName] save name: %s%n", name);
-        if (name instanceof Temp || describer.isInMemory(name)) {
+//        System.out.printf("[saveName] save name: %s%n", name);
+        if (describer.isInMemory(name)) {
             describer.freeName(name);
             return;
         }
@@ -154,12 +156,28 @@ public class RegisterAllocator {
                     }
                 }
             }
-        } else {
-            System.err.printf("%s 无法保存%n", name);
-            return;
         }
+
         describer.freeName(name);
     }
+
+    private void saveState() {
+        IName savedName = null;
+        for (Register register : Describer.availableReg) {
+            Set<IName> names = describer.getNames(register);
+            for (IName name : names) {
+                // 当前名字是tmp
+                if (name instanceof Temp && isReferredAfter(name, currentIR)) {
+                    codes.add(AsmFactory.mov(Register.r4, register));
+                    savedName = name;
+                }
+            }
+        }
+        saveAll();
+        if (savedName != null)
+            describer.updateName(Register.r4, savedName);
+    }
+
 
     private Register spill() {
         Register reg = null;
@@ -175,7 +193,7 @@ public class RegisterAllocator {
                 reg = register;
             }
         }
-        System.out.printf("[spill] select reg: %s%n", reg);
+//        System.out.printf("[spill] select reg: %s%n", reg);
         releaseSet.add(reg);
         saveReg(reg);
         releaseSet.remove(reg);
@@ -189,9 +207,11 @@ public class RegisterAllocator {
     public Register allocFreeReg() {
         Register register = describer.getFreeRegister();
         if (register == null) {
-            System.out.println("[allocFreeReg] spilled");
+//            System.out.println("[allocFreeReg] spilled");
             register = spill();
+            describer.lock(register);
         }
+        usedRegs.add(register);
         return register;
     }
 
@@ -199,13 +219,7 @@ public class RegisterAllocator {
         Register reg;
         reg = describer.getRegister(name);
         if (reg != null) return reg;
-        reg = describer.getFreeRegister();
-        if (reg != null) {
-            loadName(reg, name);
-            return reg;
-        }
-        System.out.printf("[allocReg4rVal] spilled for name: %s%n", name);
-        reg = spill();
+        reg = allocFreeReg();
         loadName(reg, name);
         return reg;
     }
@@ -231,7 +245,7 @@ public class RegisterAllocator {
                 return reg;
             }
         }
-        System.out.printf("[allocReg4lVal] spilled for name: %s%n", lVal);
+//        System.out.printf("[allocReg4lVal] spilled for name: %s%n", lVal);
         reg = spill();
         describer.updateName(reg, lVal);
         return reg;
@@ -304,6 +318,7 @@ public class RegisterAllocator {
                 ret.put(((IName) ir.op2), allocReg4rVal(((IName) ir.op2)));
                 break;
             case CALL:
+                saveState();
                 if (null != ir.op1) {
                     Register register = allocReg4lVal(ir);
                     ret.put(((IName) ir.op1), register);
@@ -341,10 +356,14 @@ public class RegisterAllocator {
         // 获取R中存储的所有名字
         Set<IName> names = describer.getNames(register);
         for (IName name : names) {  // 遍历
+            if (describer.isInMemory(name)) continue;
             Set<Register> address = describer.getRegisters(name);   // 获取名字所在的所有寄存器
             if (address.size() == 1) {    // 当前名字不在其他R中
                 if (lVal != name || rVal.contains(lVal)) {  // ！“该名字是左值，且左值不存在于右值”
-                    if (isReferredAfter(name, ir)) cost++;  //
+                    if (isReferredAfter(name, ir)) {
+                        cost++;  //
+                        if (name instanceof Temp) cost++;
+                    }
                 }
             }
         }

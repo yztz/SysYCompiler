@@ -89,4 +89,8 @@ public abstract class IR {
     public boolean isReturn() {
         return op == OP.RETURN;
     }
+
+    public boolean isCall() {
+        return op == OP.CALL;
+    }
 }

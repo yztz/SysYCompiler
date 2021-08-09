@@ -195,34 +195,20 @@ public class Utils {
     }
 
 
-//    public static int getOffset(int[] idx, List<Integer> base) {
-//        if (idx.length != base.size()) return -1;
-//
-//        int offset = 0;
-//        for (int i = 0; i < idx.length; i++) {
-//            int t = idx[i];
-//            for (int j = i + 1; j < base.size(); j++) {
-//                t *= base.get(j);
-//            }
-//            offset += t;
-//        }
-//        return offset;
-//    }
-
-    public static AstNode getOffset(List<AstNode> idx, List<Integer> base) {
+    public static AstNode getOffset(List<AstNode> indexes, Variable array) {
 //        if (idx.size() != base.size()) return null;
 
         AstNode offset = null;
-        for (int i = 0; i < idx.size(); i++) {
-            AstNode left = idx.get(i);
-            for (int j = i + 1; j < base.size(); j++) {
-                AstNode right = AstNode.makeLeaf(base.get(j));
-                left = AstNode.makeBinaryNode(OP.MUL, left, right);
+        for (int i = 0; i < indexes.size(); i++) {
+            AstNode idx = indexes.get(i);
+            int size = getDimensionSize(array, i + 1);
+            if (1 != size) {
+                idx = AstNode.makeBinaryNode(OP.MUL, idx, AstNode.makeLeaf(size));
             }
             if (null == offset) {
-                offset = left;
+                offset = idx;
             } else {
-                offset = AstNode.makeBinaryNode(OP.ADD, offset, left);
+                offset = AstNode.makeBinaryNode(OP.ADD, offset, idx);
             }
 
         }

@@ -105,12 +105,11 @@ public class BasicBlock {
                 if (i < len - 1) enterPoints.add(irs.get(i + 1));
                 IR target = IRs.getIR((ILabel) ir.op1);
                 enterPoints.add(target);
-            } else if (ir.op == OP.CALL) {
-                enterPoints.add(irs.get(i));
-//                if (i < len - 1) enterPoints.add(irs.getIR(i + 1));
-//                IR target = IRs.getIR((ILabel) ir.op2);
-//                enterPoints.add(target);
-            } else if (ir.op == OP.RETURN) {
+            }
+//            else if (ir.op == OP.CALL) {
+//                enterPoints.add(irs.get(i));
+//            }
+            else if (ir.op == OP.RETURN) {
                 if (i < len - 1) enterPoints.add(irs.get(i + 1));  // return返回语句是call的下一条语句
             }
         }

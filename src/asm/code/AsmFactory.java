@@ -9,6 +9,30 @@ import java.util.List;
 
 public class AsmFactory {
 
+    public static Code push(List<Register> registers) {
+        StringBuilder regs = new StringBuilder("{");
+        for (int i = 0; i < registers.size(); i++) {
+            if (i == 0)
+                regs.append(registers.get(0));
+            else
+                regs.append(", ").append(registers.get(i));
+        }
+        regs.append("}");
+        return Code.code(String.format("push %s", regs));
+    }
+
+    public static Code pop(List<Register> registers) {
+        StringBuilder regs = new StringBuilder("{");
+        for (int i = 0; i < registers.size(); i++) {
+            if (i == 0)
+                regs.append(registers.get(0));
+            else
+                regs.append(", ").append(registers.get(i));
+        }
+        regs.append("}");
+        return Code.code(String.format("pop %s", regs));
+    }
+
     public static Code note(String content) {
         return Code.code(String.format("@ %s", content));
     }
@@ -102,6 +126,10 @@ public class AsmFactory {
     public static Code mls(Register rd, Register rm, Register rs, Register rn) {
         return Code.code(String.format("mls %s, %s, %s, %s", rd, rm, rs, rn));
     }
+
+//    public static Code mod(Register rd) {
+//
+//    }
 
     public static Code add(Register rd, Register rn, Register rm) {
         return Code.code(String.format("add %s, %s, %s", rd, rn, rm));

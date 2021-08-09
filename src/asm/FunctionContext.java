@@ -18,11 +18,11 @@ public class FunctionContext {
     public Function function;
     public List<Code> codes = new LinkedList<>();
     public List<IR> irs;
-    public int baseOffset = 0;  // (r - 1) * 4
+    private List<Register> savedRegs = new LinkedList<>();
+    //    public int baseOffset = 4;  // (r - 1) * 4
     public int frameSize;
     public int localSize;
 
-    public boolean isLrUsed = false;
     public ILabel returnLabel;
     private int paramCount = 0;
     private List<Variable> initVars = new ArrayList<>();
@@ -32,7 +32,9 @@ public class FunctionContext {
         this.function = function;
         this.irs = function.irs;
         this.function.blocks = BasicBlock.genBlocks(irs);
-//        for (BasicBlock block : function.blocks) block.printBlock();
+        for (BasicBlock block : function.blocks) block.printBlock();
+        this.savedRegs.add(Register.r4);
+        this.savedRegs.add(Register.fp);
 
         analyze();
         genHead();
@@ -43,8 +45,7 @@ public class FunctionContext {
     }
 
     private void enableLR() {
-        this.isLrUsed = true;
-        baseOffset = 4;
+        if (!this.savedRegs.contains(Register.lr)) this.savedRegs.add(Register.lr);
     }
 
     public void analyze() {
@@ -83,8 +84,8 @@ public class FunctionContext {
         if (!initVars.isEmpty()) enableLR();
 
         /* 分析栈帧大小 */
-        frameSize = Utils.align8(function.totalOffset + maxParamBytes + baseOffset + 4);
-        localSize = frameSize - 4 - baseOffset;
+        frameSize = Utils.align8(function.totalOffset + maxParamBytes + 4 * savedRegs.size());
+        localSize = frameSize - 4 * savedRegs.size();
         codes.add(AsmFactory.code(String.format("@ function\t[%s]", function.name)));
         codes.add(AsmFactory.code(String.format("@ frameSize\t[%d]", frameSize)));
         codes.add(AsmFactory.code(String.format("@ localSize\t[%d]", localSize)));
@@ -130,13 +131,8 @@ public class FunctionContext {
         codes.add(AsmFactory.type(function.name, "function"));
 
         codes.add(AsmFactory.label(function.name));
-        if (isLrUsed) {
-            codes.add(AsmFactory.code("push {fp, lr}"));
-            codes.add(AsmFactory.add(Register.fp, Register.sp, 4));
-        } else {
-            codes.add(AsmFactory.code("push {fp}"));
-            codes.add(AsmFactory.add(Register.fp, Register.sp, 0));
-        }
+        codes.add(AsmFactory.push(savedRegs));
+        codes.add(AsmFactory.add(Register.fp, Register.sp, 4 * (savedRegs.size() - 1)));
         codes.add(AsmFactory.sub(Register.sp, Register.sp, localSize));
     }
 
@@ -153,6 +149,7 @@ public class FunctionContext {
                 Register rd, rn, rm;
                 ILabel target;
                 regMap = allocator.getReg(ir);
+                // 如果当前语句是跳转语句，则在该语句之前生成保存语句
                 if (ir.isJump() || ir.isReturn()) allocator.saveAll();
 
                 switch (ir.op) {
@@ -252,14 +249,16 @@ public class FunctionContext {
                         //...
                         break;
                     case CALL:
+                        // 调用
                         paramCount = 0;
                         Function targetFunc = ((Function) ir.op2);
                         codes.add(AsmFactory.bl(targetFunc.getLabelName()));
+                        // 获取返回值
                         if (targetFunc.hasReturn()) {
                             rd = regMap.get(ir.op1);
                             codes.add(AsmFactory.mov(rd, Register.r0));
                         }
-
+//                        allocator.restoreState();
                         break;
                     case PARAM:
                         //todo
@@ -274,6 +273,7 @@ public class FunctionContext {
                                 codes.add(AsmFactory.strWithOffset(rd, Register.sp, offset));
                             }
                         } else {
+//                            if (paramCount == 0) allocator.saveState();
                             if (ir.op1 instanceof Immediate) {
                                 codes.add(AsmFactory.mov(Register.valueOf("r" + paramCount), ((Immediate) ir.op1).value));
                             } else {
@@ -384,10 +384,11 @@ public class FunctionContext {
                         codes.add(AsmFactory.uxtb(rd));
                         break;
                 }
+                // 在每天语句末尾删除不相关的名字
                 allocator.killName();
             }
-            if (!lastIR.isJump()) allocator.saveAll();
-
+            // 基本块的最后一条不是跳转语句，主动生成保存语句
+            if (!lastIR.isJump() && !lastIR.isReturn()) allocator.saveAll();
         }
     }
 
@@ -396,22 +397,14 @@ public class FunctionContext {
         /* 添加返回标签 */
         codes.add(AsmFactory.label(returnLabel.getLabelName()));
         /* 恢复 */
-        if (isLrUsed) {
-            codes.add(AsmFactory.sub(Register.sp, Register.fp, 4));
-            codes.add(AsmFactory.code("pop {fp, pc}"));
+        codes.add(AsmFactory.sub(Register.sp, Register.fp, 4 * (savedRegs.size() - 1)));
+        if (savedRegs.contains(Register.lr)) {
+            savedRegs.set(savedRegs.indexOf(Register.lr), Register.pc);
+            codes.add(AsmFactory.pop(savedRegs));
         } else {
-            codes.add(AsmFactory.add(Register.sp, Register.fp, 0));
-            codes.add(AsmFactory.code("ldr fp, [sp], #4"));
+            codes.add(AsmFactory.pop(savedRegs));
             codes.add(AsmFactory.bx(Register.lr));
         }
-        /* 生成全局变量的地址引用 */
-//        codes.add(AsmFactory.align(2));
-//        for (Map.Entry<Variable, ILabel> entry : globalVarMap.entrySet()) {
-//            Variable var = entry.getKey();
-//            ILabel label = entry.getValue();
-//            codes.add(AsmFactory.label(label.getLabelName()));
-//            codes.add(AsmFactory.word(var.name));
-//        }
         /* 长度 */
         codes.add(AsmFactory.size(function.name, ".-" + function.name));
     }
@@ -419,7 +412,7 @@ public class FunctionContext {
 
     public int getVariableOffset(Variable variable) {
         if (variable.paramIndex < 4) {   // 栈内地址
-            return -variable.offset - baseOffset - 4;
+            return -variable.offset - 4 * savedRegs.size();
         } else {
             return -variable.offset;
         }

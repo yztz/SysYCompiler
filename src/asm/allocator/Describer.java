@@ -91,6 +91,10 @@ public class Describer {
         regDesc.get(register).clear();
     }
 
+    public void lock(Register register) {
+        this.locked.add(register);
+    }
+
     /*
         将名字映射到寄存器上
      */

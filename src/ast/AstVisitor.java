@@ -439,7 +439,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             for (int i = 0; ctx.exp(i) != null; i++) {
                 idx.add(visit(ctx.exp(i)));
             }
-            AstNode offset = Utils.getOffset(idx, base);
+            AstNode offset = Utils.getOffset(idx, var);
             if (null == offset)
                 return AstNode.makeLeaf(var);
             else {
