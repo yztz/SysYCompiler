@@ -53,6 +53,7 @@ public class Utils {
      * Checks if immediate value can be converted to imm12(12 bits) value.
      */
     public static boolean imm8m(long x) {
+        x = Math.abs(x);
         int rot;
 
         for (rot = 0; rot < 16; rot++)

@@ -64,7 +64,7 @@ public class RegisterAllocator {
                 } else {    // 局部变量
                     int offset = context.getVariableOffset(variable);
                     if (Utils.imm8m(offset)) {
-                        codes.add(AsmFactory.ldrWithOffset(register, Register.fp, register, false));
+                        codes.add(AsmFactory.ldrWithOffset(register, Register.fp, offset));
                     } else {
                         codes.add(AsmFactory.mov(register, offset));
                         codes.add(AsmFactory.ldrWithOffset(register, Register.fp, register, false));
