@@ -30,13 +30,15 @@ public class PreProcessor {
         List<AstNode> ifStats = Utils.searchNode(root, OP.IF_ELSE);
         ifStats.forEach(ifStat -> {
             // 为el增加跳转
-            AstNode nextStat = Utils.findNextStat(ifStat);
-            assert nextStat != null;
-            ifStat.getRight().addNode(AstNode.makeGoTo(nextStat.putLabelIfAbsent(Label::newLabel)));
+//            AstNode nextStat = Utils.findNextStat(ifStat);
+//            AstNode then = ifStat.getNode(1);
+//            AstNode el = ifStat.getNode(2);
+//
             // 制造短路
             resolveIfElse(ifStat);
         });
     }
+
     /*
         将指定分支下的语句替换if语句
      */
@@ -66,7 +68,6 @@ public class PreProcessor {
         AstNode el = ifStat.getNode(2);
 
 
-
         if (!OP.isRelOP(cond.op)) {    // 处理单值的情况  if(a)...
             cond = AstNode.makeBinaryNode(OP.NOT_EQ, cond, AstNode.makeLeaf(0));
             ifStat.setNode(0, cond);
@@ -81,7 +82,13 @@ public class PreProcessor {
 //        else if (cond.getLeft().op == OP.IMMEDIATE) {   // 处理 1 || a...
 //            reduceIf(ifStat, );
 //        }
-
+        AstNode nextStat = Utils.findNextStat(ifStat);
+//        if (then.isLeaf() || then.getRight().op != OP.GOTO) {
+//            then.addNode(AstNode.makeGoTo(nextStat.putLabelIfAbsent(Label::newLabel)));
+//        }
+        if (el.isLeaf() || el.getRight().op != OP.GOTO) {
+            el.addNode(AstNode.makeGoTo(nextStat.putLabelIfAbsent(Label::newLabel)));
+        }
 
 
         cond.value = bindLabelToStat(then);  // cond.value正好可以用来存储目标标签，方便IF-IR语句的处理
@@ -108,8 +115,8 @@ public class PreProcessor {
             newEl = AstNode.makeEmptyNode(OP.STATEMENTS);
             newEl.addNode(newIfElse);
             // 为newEl增加跳转
-            AstNode nextStat = Utils.findNextStat(ifStat);
-            newEl.addNode(AstNode.makeGoTo(nextStat.putLabelIfAbsent(Label::newLabel)));
+//            AstNode nextStat = Utils.findNextStat(ifStat);
+//            newEl.addNode(AstNode.makeGoTo(nextStat.putLabelIfAbsent(Label::newLabel)));
             ifStat.setNode(2, newEl);
             // 绑定label
             goTo.value = bindLabelToStat(then);
@@ -145,19 +152,22 @@ public class PreProcessor {
 
     private static void resolveWhile(AstNode whileStat) {
         if (whileStat.op != OP.WHILE) return;
+
+        AstNode nextStat = Utils.findNextStat(whileStat);
+        ILabel exit = nextStat.putLabelIfAbsent(Label::newLabel);
+
         // 将while标签替换为if-else
         whileStat.op = OP.IF_ELSE;
         // 增加false stat
-        whileStat.addNode(AstNode.makeEmptyNode(OP.STATEMENTS));
+        AstNode el = AstNode.makeEmptyNode(OP.STATEMENTS);
+//        el.addNode(AstNode.makeGoTo(exit));
+        whileStat.addNode(el);
 
         AstNode then = whileStat.getNode(1);
         // 往then中加入跳转GOTO
         ILabel whileStatLabel = whileStat.putLabelIfAbsent(Label::newLabel);
         then.addNode(AstNode.makeGoTo(whileStatLabel));
         // then中可能存在continue以及break，将其替换为对应的goto, 特别注意嵌套while
-        AstNode nextStat = Utils.findNextStat(whileStat);
-        assert nextStat != null;
-        ILabel exit = nextStat.putLabelIfAbsent(Label::newLabel);
 
         List<AstNode> continues = Utils.searchNode(whileStat, OP.CONTINUE);
         List<AstNode> breaks = Utils.searchNode(whileStat, OP.BREAK);

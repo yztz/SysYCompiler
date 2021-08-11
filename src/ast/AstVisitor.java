@@ -93,12 +93,16 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
 //        } else {
 //            ret.addNode(AstNode.makeEmptyNode(OP.STATEMENT));
 //        }
+
         AstNode trueStat = visit(ctx.stmt(0));
-        if (trueStat.op != OP.STATEMENTS) trueStat = AstNode.makeUnaryNode(OP.STATEMENTS, trueStat);
+        if (null == trueStat || trueStat.op != OP.STATEMENTS)
+            trueStat = AstNode.makeUnaryNode(OP.STATEMENTS, trueStat);
         ret.addNode(trueStat);
+
         if (null != ctx.stmt(1)) {
             AstNode falseStat = visit(ctx.stmt(1));
-            if (falseStat.op != OP.STATEMENTS) falseStat = AstNode.makeUnaryNode(OP.STATEMENTS, falseStat);
+            if (null == falseStat || falseStat.op != OP.STATEMENTS)
+                falseStat = AstNode.makeUnaryNode(OP.STATEMENTS, falseStat);
             ret.addNode(falseStat);
         } else {
             ret.addNode(AstNode.makeEmptyNode(OP.STATEMENTS));
@@ -123,7 +127,9 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
         ret.addNode(visit(ctx.cond()));
 //        ret.addNode(AstNode.makeLeaf(Label.newLabel()));
         AstNode stmt = visit(ctx.stmt());
-        if (stmt.op != OP.STATEMENTS) stmt = AstNode.makeUnaryNode(OP.STATEMENTS, stmt);
+        if (null == stmt || OP.STATEMENTS != stmt.op) {
+            stmt = AstNode.makeUnaryNode(OP.STATEMENTS, stmt);
+        }
         ret.addNode(stmt);
 //        ret.addNode(AstNode.makeLeaf(Label.newLabel()));
         return ret;
@@ -136,9 +142,6 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
         } else {
             AstNode left = visit(ctx.lOrExp());
             AstNode right = visit(ctx.lAndExp());
-
-//            if (left.isLeaf()) left = AstNode.makeBinaryNode(OP.EQ, left, AstNode.makeLeaf(1));
-//            if (right.isLeaf()) right = AstNode.makeBinaryNode(OP.EQ, right, AstNode.makeLeaf(1));
 
             return AstNode.makeBinaryNode(OP.OR, left, right);
         }

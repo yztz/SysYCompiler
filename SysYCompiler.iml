@@ -7,7 +7,6 @@
       <excludeFolder url="file://$MODULE_DIR$/src/gencode" />
       <excludeFolder url="file://$MODULE_DIR$/src/genir" />
       <excludeFolder url="file://$MODULE_DIR$/src/symboltable" />
-      <excludeFolder url="file://$MODULE_DIR$/test" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
