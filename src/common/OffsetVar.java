@@ -18,7 +18,7 @@ public class OffsetVar implements IName {
 
     public OffsetVar(Variable array, AstNode offsetTree) {
         this.variable = array;
-        this.offsetTree = Utils.calc(offsetTree);
+        this.offsetTree = offsetTree;
     }
 
     public OffsetVar(Variable array, int offsetTree) {

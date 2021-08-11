@@ -365,11 +365,31 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             String op = ctx.op.getText();
             switch (op) {
                 case "+":
-                    return AstNode.makeBinaryNode(OP.ADD, left, right);
+                    return AstNode.makeBinaryNode(OP.ADD, left, right).compute();
                 case "-":
-                    return AstNode.makeBinaryNode(OP.SUB, left, right);
+                    return AstNode.makeBinaryNode(OP.SUB, left, right).compute();
             }
         }
+        return right;
+    }
+
+    @Override
+    public AstNode visitMulExp(SysYParser.MulExpContext ctx) {
+
+        AstNode right = visit(ctx.unaryExp());
+        if (null != ctx.mulExp()) {
+            AstNode left = visit(ctx.mulExp());
+            String op = ctx.op.getText();
+            switch (op) {
+                case "*":
+                    return AstNode.makeBinaryNode(OP.MUL, left, right).compute();
+                case "/":
+                    return AstNode.makeBinaryNode(OP.DIV, left, right).compute();
+                case "%":
+                    return AstNode.makeBinaryNode(OP.MOD, left, right).compute();
+            }
+        }
+
         return right;
     }
 
@@ -384,26 +404,6 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
         return AstNode.makeBinaryNode(OP.CALL, left, right);
     }
 
-
-    @Override
-    public AstNode visitMulExp(SysYParser.MulExpContext ctx) {
-
-        AstNode right = visit(ctx.unaryExp());
-        if (null != ctx.mulExp()) {
-            AstNode left = visit(ctx.mulExp());
-            String op = ctx.op.getText();
-            switch (op) {
-                case "*":
-                    return AstNode.makeBinaryNode(OP.MUL, left, right);
-                case "/":
-                    return AstNode.makeBinaryNode(OP.DIV, left, right);
-                case "%":
-                    return AstNode.makeBinaryNode(OP.MOD, left, right);
-            }
-        }
-
-        return right;
-    }
 
     @Override
     public AstNode visitSignExpr(SysYParser.SignExprContext ctx) {
@@ -462,20 +462,18 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
     @Override
     public AstNode visitConstExp(SysYParser.ConstExpContext ctx) {
         AstNode ret = visit(ctx.addExp());
-        return Utils.calc(ret); // todo 考虑在单一pass做折叠
+        return ret.compute(); // todo 考虑在单一pass做折叠
     }
 
     @Override
     public AstNode visitExp(SysYParser.ExpContext ctx) {
         AstNode ret = visit(ctx.addExp());
-        return Utils.calc(ret); // todo 考虑在单一pass做折叠
+        return ret.compute(); // todo 考虑在单一pass做折叠
     }
 
     @Override
     public AstNode visitCond(SysYParser.CondContext ctx) {
         AstNode ret = visit(ctx.lOrExp());
-        ret = Utils.calc(ret);  // todo 考虑在单一pass做折叠
-//        if (ret.isLeaf()) ret = AstNode.makeBinaryNode(OP.EQ, ret, AstNode.makeLeaf(1));
-        return ret;
+        return ret.compute();  // todo 考虑在单一pass做折叠
     }
 }

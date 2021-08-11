@@ -73,7 +73,7 @@ public class PreProcessor {
             ifStat.setNode(0, cond);
         }
         // 计算
-        AstNode res = Utils.calc(cond);
+        AstNode res = cond.compute();
         if (res.op == OP.IMMEDIATE) {   // 如何为1或0直接化简
             int ident = res.getInteger();
             reduceIf(ifStat, ident == 1);
