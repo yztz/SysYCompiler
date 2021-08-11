@@ -143,6 +143,7 @@ public class FunctionContext {
 
     @SuppressWarnings("SuspiciousMethodCalls")
     public void genBody() {
+        // todo 可以提取重复的合法立即数判断代码
         for (BasicBlock block : function.blocks) {
             Map<IName, Register> regMap;
             RegisterAllocator allocator = new RegisterAllocator(this, block);
@@ -333,7 +334,13 @@ public class FunctionContext {
                         rn = regMap.get(ir.op2);
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
-                            codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
+                            imm = ((Immediate) ir.op3).value;
+                            if (Utils.imm8m(imm)){
+                                codes.add(AsmFactory.cmp(rn, imm));
+                            } else {
+                                codes.add(AsmFactory.mov(rd, imm));
+                                codes.add(AsmFactory.cmp(rn, rd));
+                            }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
@@ -346,7 +353,13 @@ public class FunctionContext {
                         rn = regMap.get(ir.op2);
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
-                            codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
+                            imm = ((Immediate) ir.op3).value;
+                            if (Utils.imm8m(imm)){
+                                codes.add(AsmFactory.cmp(rn, imm));
+                            } else {
+                                codes.add(AsmFactory.mov(rd, imm));
+                                codes.add(AsmFactory.cmp(rn, rd));
+                            }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
@@ -359,7 +372,13 @@ public class FunctionContext {
                         rn = regMap.get(ir.op2);
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
-                            codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
+                            imm = ((Immediate) ir.op3).value;
+                            if (Utils.imm8m(imm)){
+                                codes.add(AsmFactory.cmp(rn, imm));
+                            } else {
+                                codes.add(AsmFactory.mov(rd, imm));
+                                codes.add(AsmFactory.cmp(rn, rd));
+                            }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
@@ -372,7 +391,13 @@ public class FunctionContext {
                         rn = regMap.get(ir.op2);
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
-                            codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
+                            imm = ((Immediate) ir.op3).value;
+                            if (Utils.imm8m(imm)){
+                                codes.add(AsmFactory.cmp(rn, imm));
+                            } else {
+                                codes.add(AsmFactory.mov(rd, imm));
+                                codes.add(AsmFactory.cmp(rn, rd));
+                            }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
@@ -385,7 +410,13 @@ public class FunctionContext {
                         rn = regMap.get(ir.op2);
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
-                            codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
+                            imm = ((Immediate) ir.op3).value;
+                            if (Utils.imm8m(imm)){
+                                codes.add(AsmFactory.cmp(rn, imm));
+                            } else {
+                                codes.add(AsmFactory.mov(rd, imm));
+                                codes.add(AsmFactory.cmp(rn, rd));
+                            }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
@@ -398,7 +429,13 @@ public class FunctionContext {
                         rn = regMap.get(ir.op2);
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
-                            codes.add(AsmFactory.cmp(rn, ((Immediate) ir.op3).value));
+                            imm = ((Immediate) ir.op3).value;
+                            if (Utils.imm8m(imm)){
+                                codes.add(AsmFactory.cmp(rn, imm));
+                            } else {
+                                codes.add(AsmFactory.mov(rd, imm));
+                                codes.add(AsmFactory.cmp(rn, rd));
+                            }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
