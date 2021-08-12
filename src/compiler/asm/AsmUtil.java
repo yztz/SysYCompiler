@@ -83,7 +83,7 @@ public class AsmUtil {
     //这些区域用来保存寄存器数据
     public static final int REG_DATA_LEN = 32;
 
-    public static final int REG_STAGE_LEN = 32;
+    public static final int REG_STAGE_LEN = 64;//32个值
 
     public static int getFrameSize(int localSize,int maxParamCount)
     {
@@ -100,6 +100,7 @@ public class AsmUtil {
         return getSymbolOffset(symbol,arrayIndex) -2* ConstDef.WORD_SIZE - REG_DATA_LEN - REG_STAGE_LEN;
     }
 
+    //需要保存fp,lr,所以往低地址偏移两个字
     public static int getRegOffsetFP()
     {
         return -REG_DATA_LEN -2* ConstDef.WORD_SIZE;
