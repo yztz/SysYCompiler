@@ -107,7 +107,13 @@ public class FunctionContext {
             codes.add(AsmFactory.note(String.format("init %s, size: %d", variable, variable.getBytes())));
             codes.add(AsmFactory.mov(Register.r2, variable.getBytes()));
             codes.add(AsmFactory.mov(Register.r1, 0));
-            codes.add(AsmFactory.add(Register.r0, Register.fp, getVariableOffset(variable)));
+            int offset = getVariableOffset(variable);
+            if (Utils.imm8m(offset)) {
+                codes.add(AsmFactory.add(Register.r0, Register.fp, offset));
+            } else {
+                codes.add(AsmFactory.mov(Register.r0, offset));
+                codes.add(AsmFactory.add(Register.r0, Register.fp, Register.r0));
+            }
             codes.add(AsmFactory.bl("memset"));
         }
     }

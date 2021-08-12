@@ -7,6 +7,7 @@ import common.symbol.Function;
 import common.symbol.Variable;
 import org.antlr.v4.runtime.tree.Tree;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,7 +90,7 @@ public class AstNode implements Tree {
     }
 
     public List<AstNode> getSubTrees() {
-        return Collections.unmodifiableList(subTree);
+        return new ArrayList<>(subTree);
     }
 
     public boolean isLeaf() {

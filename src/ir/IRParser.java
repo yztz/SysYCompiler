@@ -7,6 +7,10 @@ import common.symbol.Function;
 import ir.code.*;
 import common.OP;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static ir.Temp.newTmp;
 
 public class IRParser {
@@ -110,8 +114,17 @@ public class IRParser {
                 parseAst(root.getLeft());
                 return parseAst(root.getRight());
             case PARAM:
+                List<AstNode> children = root.getSubTrees();
+                Map<AstNode, IAstValue> results = new HashMap<>();
+                for (AstNode child : children) {
+                    if (child.op == OP.CALL) results.put(child, parseAst(child));
+                }
                 for (AstNode child : root.getSubTrees()) {
-                    IAstValue res = parseAst(child);
+                    IAstValue res;
+                    if (results.containsKey(child))
+                        res = results.get(child);
+                    else
+                        res = parseAst(child);
                     IRs.addIR(new UnaryIR(op, res));
                 }
                 break;

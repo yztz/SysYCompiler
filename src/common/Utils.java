@@ -21,6 +21,10 @@ public class Utils {
 //        }
 //    }
 
+    public static void main(String[] args) {
+        System.out.println(Long.parseLong("fffffbf8", 16));
+    }
+
     public static void openStream(String file) {
         try {
             out = new PrintStream(new FileOutputStream(file));
