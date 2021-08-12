@@ -17,6 +17,7 @@ public enum Register implements IAddress {
     fp,
     r12,
 
+    ip,
     sp,
     lr,
     pc;

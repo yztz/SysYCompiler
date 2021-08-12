@@ -46,7 +46,7 @@ public class RegisterAllocator {
 //                    ILabel label = context.globalVarMap.get(variable);
                     codes.add(AsmFactory.lea(register, variable.name));
                 } else if (variable.isParam) {
-                    codes.add(AsmFactory.ldrWithOffset(register, Register.fp,context.getVariableOffset(variable)));
+                    codes.add(AsmFactory.ldrWithOffset(register, Register.fp, context.getVariableOffset(variable)));
                 } else {
                     int offset = context.getVariableOffset(variable);
                     if (Utils.imm8m(offset)) {
@@ -137,13 +137,13 @@ public class RegisterAllocator {
             if (!variable.isConst) {
                 if (variable.isGlobal()) {  // 全局变量
                     codes.add(AsmFactory.code(String.format("@ save %s:global", variable.name)));
-                    Register addr = allocFreeReg();
+                    Register addr = Register.ip;
                     codes.add(AsmFactory.lea(addr, variable.name));
                     codes.add(AsmFactory.strWithoutOffset(register, addr));
                 } else {    // 局部变量
                     codes.add(AsmFactory.code(String.format("@ save %s:local", variable.name)));
                     int offset = context.getVariableOffset(variable);
-                    if (Utils.imm8m(offset)){
+                    if (Utils.imm8m(offset)) {
                         codes.add(AsmFactory.strWithOffset(register, Register.fp, offset));
                     } else {
                         Register offsetReg = allocFreeReg();
@@ -158,15 +158,16 @@ public class RegisterAllocator {
             IAstValue offset = offsetVar.getOffset();
 
             if (!variable.isConst) {
-                if (variable.isGlobal()) {  // 全局数组
-                    Register addr = allocReg4rVal(variable);
-                    if (offset instanceof IName) {
-                        Register offsetReg = allocReg4rVal((IName) offset);
-                        codes.add(AsmFactory.strWithOffset(register, addr, offsetReg, true));
-                    } else {
-                        codes.add(AsmFactory.strWithOffset(register, addr, 4 * ((Immediate) offset).value));
-                    }
-                } else if (variable.isParam) {
+//                if (variable.isGlobal()) {  // 全局数组
+//                    Register addr = allocReg4rVal(variable);
+//                    if (offset instanceof IName) {
+//                        Register offsetReg = allocReg4rVal((IName) offset);
+//                        codes.add(AsmFactory.strWithOffset(register, addr, offsetReg, true));
+//                    } else {
+//                        codes.add(AsmFactory.strWithOffset(register, addr, 4 * ((Immediate) offset).value));
+//                    }
+//                } else
+                if (variable.isParam || variable.isGlobal()) {
                     Register addr = allocReg4rVal(variable);
                     if (offset instanceof Immediate) {
                         int imm = 4 * ((Immediate) offset).value;
@@ -187,8 +188,8 @@ public class RegisterAllocator {
                     int arrayAddress = context.getVariableOffset(variable);
                     if (offset instanceof Immediate) {
                         int imm = arrayAddress + ((Immediate) offset).value * 4;
-                        if (Utils.imm8m(imm)){
-                            codes.add(AsmFactory.strWithOffset(register, Register.fp,imm));
+                        if (Utils.imm8m(imm)) {
+                            codes.add(AsmFactory.strWithOffset(register, Register.fp, imm));
                         } else {
                             Register offsetReg = allocFreeReg();
                             codes.add(AsmFactory.mov(offsetReg, imm));
