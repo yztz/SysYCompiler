@@ -3,9 +3,11 @@ import antlr.SysYParser;
 import compiler.Util;
 import compiler.asm.AsmGen;
 import compiler.genir.SysYIRListener;
+import compiler.preprocess.Preprocessor;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import compiler.symboltable.FuncSymbolTable;
@@ -62,7 +64,14 @@ public class Compiler {
             }
 
             if(inputFileStr==null || outputFileStr==null) return;
-            SysYParser parser = getParser(inputFileStr);
+
+            File file=new File(inputFileStr);
+            FileReader fileReader=new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            String preprocessed = Preprocessor.preprocess(bufferedReader);
+
+            SysYParser parser = getParser(CharStreams.fromString(preprocessed,inputFileStr));
             ParseTree tree = parser.compUnit();
             ParseTreeWalker walker = new ParseTreeWalker();
             SymbolTableHost symbolTableHost=new SymbolTableHost();
@@ -266,14 +275,8 @@ public class Compiler {
         SymbolScanner scanner = new SymbolScanner(symbolTableHost, funcSymbolTable);
         scanner.scanSymbol(tree);
     }
-    private static SysYParser getParser(String fileName)
+    private static SysYParser getParser(CharStream input)
     {
-        CharStream input = null;
-        try {
-            input = CharStreams.fromFileName(fileName);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         assert input!=null;
 
         SysYLexer lexer = new SysYLexer(input);
