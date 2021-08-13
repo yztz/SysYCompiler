@@ -1422,7 +1422,8 @@ public class SysYParser extends Parser {
 		void setContinueQuads(List<InterRepresentHolder> quads);
 	}
 	public static class StmtContext extends PositionalbleBase implements IHasBreakOrContinue {
-
+		public boolean trueBodyOfIf = false;
+		public List<GotoRepresent> doneList = null;
 		public StmtContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}

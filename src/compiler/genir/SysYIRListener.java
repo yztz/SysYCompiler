@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import compiler.symboltable.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
@@ -253,7 +254,6 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void enterBlock(SysYParser.BlockContext ctx) {
-
     }
 
     @Override
@@ -401,11 +401,11 @@ public class SysYIRListener implements SysYListener {
         ctx.setContinueQuads(ctx.block().getContinueQuads());
 
         ctx.setStartStmt(ctx.block().getStartStmt());
-
     }
 
     @Override
     public void enterIfStat(SysYParser.IfStatContext ctx) {
+        ctx.stmt(0).trueBodyOfIf = true;
         _currentCollection.startSection("jump depending on condition: "+ctx.cond().getText());
     }
 
@@ -417,19 +417,31 @@ public class SysYIRListener implements SysYListener {
             for (GotoRepresent ir : ctx.cond().falseList) {
                 ir.setTargetIR(elseStart);
             }
-            if(ctx.stmt().get(0).getStartStmt()!=null)
+
+            /*if(ctx.stmt().get(0).getStartStmt()!=null)
             {
                 // 需要插入一句goto，在if的代码块执行完成后跳过else代码块
                 GotoRepresent skipElseStmtIR = new GotoRepresent(null);
-
-                _currentCollection.insertBefore(skipElseStmtIR, elseStart, "skip stmts in else block");
+                _currentCollection.startSection("skip else stmts");
+                _currentCollection.insertBefore(skipElseStmtIR, elseStart, false);
                 _currentCollection.bookVacancy(skipElseStmtIR.targetHolder);
-            }
-
+            }*/
         }else{
             for (GotoRepresent ir : ctx.cond().falseList) {
                 _currentCollection.bookVacancy(ir.targetHolder);
             }
+        }
+
+        if(ctx.stmt().get(0).getStartStmt()!=null && ctx.stmt(0).doneList!=null)
+        {
+            for (GotoRepresent gotoIR : ctx.stmt(0).doneList) {
+                _currentCollection.bookVacancy(gotoIR.targetHolder);
+            }
+            // 需要插入一句goto，在if的代码块执行完成后跳过else代码块
+                /*GotoRepresent skipElseStmtIR = new GotoRepresent(null);
+                _currentCollection.startSection("skip else stmts");
+                _currentCollection.insertBefore(skipElseStmtIR, elseStart, false);
+                _currentCollection.bookVacancy(skipElseStmtIR.targetHolder);*/
         }
 
         if(ctx.stmt().get(0).getStartStmt()!=null)
@@ -1359,5 +1371,16 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitEveryRule(ParserRuleContext parserRuleContext) {
+        if(parserRuleContext instanceof SysYParser.StmtContext)
+        {
+            SysYParser.StmtContext ctx = ((SysYParser.StmtContext) parserRuleContext);
+            if(ctx.trueBodyOfIf)
+            {
+                GotoRepresent gotoRepresent = new GotoRepresent(null);
+                _currentCollection.addCode(gotoRepresent,"true body done");
+                ctx.doneList = new LinkedList<>();
+                ctx.doneList.add(gotoRepresent);
+            }
+        }
     }
 }

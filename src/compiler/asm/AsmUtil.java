@@ -83,7 +83,7 @@ public class AsmUtil {
     //这些区域用来保存寄存器数据
     public static final int REG_DATA_LEN = 32;
 
-    public static final int REG_STAGE_LEN = 64;//32个值
+    public static final int REG_STAGE_LEN = 128;//32个值
 
     public static int getFrameSize(int localSize,int maxParamCount)
     {

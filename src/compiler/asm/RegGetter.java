@@ -36,7 +36,7 @@ public class RegGetter {
     private Map<AddressOrData,Integer> refTimes=new HashMap<>();
 
     private static final int regStagingMemLen = AsmUtil.REG_STAGE_LEN;
-    private boolean[] usedRegStagingMem = new boolean[regStagingMemLen /4];
+    private boolean[] usedRegStagingMem = new boolean[regStagingMemLen /ConstDef.WORD_SIZE];
     private int getAvailableStagingOffsetWord()
     {
         for (int i = 0; i < usedRegStagingMem.length; i++) {

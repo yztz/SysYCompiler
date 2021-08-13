@@ -1,6 +1,7 @@
 package compiler.genir;
 
 
+import compiler.genir.code.GotoRepresent;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.InterRepresentHolder;
 import compiler.symboltable.function.FuncSymbol;
@@ -61,9 +62,24 @@ public class IRCollection {
 
     public void insertBefore(InterRepresent inserted, InterRepresent benchmark)
     {
+        insertBefore(inserted,benchmark,false);
+    }
+
+    public void insertBefore(InterRepresent inserted, InterRepresent benchmark,boolean replaceGotoTarget)
+    {
         inserted.collection = this;
         int index= irs.indexOf(benchmark);
         irs.stream().parallel().forEach(t->{
+            if(replaceGotoTarget && (t instanceof GotoRepresent))
+            {
+                GotoRepresent gotoIR = (GotoRepresent) t;
+                if (gotoIR.targetHolder!=null &&
+                        gotoIR.targetHolder.getInterRepresent()!=null
+                        && gotoIR.targetHolder.getInterRepresent() == benchmark) {
+                    gotoIR.targetHolder.setInterRepresent(inserted);
+                }
+            }
+
             if (t.getLineNum()>=index)
                 t.setLineNum(t.getLineNum()+1);
         });
