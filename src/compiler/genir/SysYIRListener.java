@@ -432,7 +432,7 @@ public class SysYIRListener implements SysYListener {
             }
         }
 
-        if(ctx.stmt().get(0).getStartStmt()!=null && ctx.stmt(0).doneList!=null)
+        if(ctx.stmt(0).doneList!=null)
         {
             for (GotoRepresent gotoIR : ctx.stmt(0).doneList) {
                 _currentCollection.bookVacancy(gotoIR.targetHolder);
