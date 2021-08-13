@@ -35,6 +35,11 @@ public class LAddrRepresent extends WrittenRepresent{
     }
 
     @Override
+    public InterRepresent createCopy() {
+        return new LAddrRepresent(target.copy(),valueSymbol,offset.copy());
+    }
+
+    @Override
     public String toString() {
         return String.format("%s: %-7s %-4s %s+%s",lineNumToString(),
                              "LADDR",target.toString(),valueSymbol.symbolToken.getText(),

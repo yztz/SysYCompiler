@@ -31,6 +31,11 @@ public class BinocularRepre extends WrittenRepresent{
     }
 
     @Override
+    public InterRepresent createCopy() {
+        return new BinocularRepre(OP,sourceFirst.copy(),sourceSecond.copy(),target.item);
+    }
+
+    @Override
     public String toString() {
         return String.format("%s: %-7s %-4s %-4s %-4s",lineNumToString(),OP.toString(),sourceFirst.toString(),
                              sourceSecond.toString(),

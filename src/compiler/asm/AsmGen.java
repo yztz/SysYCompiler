@@ -13,13 +13,11 @@ import compiler.symboltable.*;
 import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.initvalue.InitValue;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class AsmGen {
     SymbolTableHost symbolTableHost;
-
+    public boolean genDebugInfo = false;
     public AsmGen(SymbolTableHost symbolTableHost) {
         //throw new IOException("试一试");
         this.symbolTableHost = symbolTableHost;
@@ -90,7 +88,7 @@ public class AsmGen {
 
         List<AsmSection> codeSections = new LinkedList<>();
         try {
-            codeSections.addAll(AsmConvertOrganizer.process(regGetter,funcSymbol, irBlocks));
+            codeSections.addAll(AsmConvertOrganizer.process(regGetter,funcSymbol, irBlocks, genDebugInfo));
         }catch (NullPointerException ne)
         {
             Util.printStackAndExit(-21,ne);
@@ -116,7 +114,7 @@ public class AsmGen {
             }
         }
         int maxCallParamNum = 0;
-        for (InterRepresent ir : irFunction.flatIR()) {
+        for (InterRepresent ir : irFunction.getAllIR()) {
             if(ir instanceof CallRepresent)
             {
                 if(((CallRepresent) ir).params!=null)

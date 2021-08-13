@@ -43,4 +43,9 @@ public class ReturnRepresent extends InterRepresent{
 
         return super.addressMapRule(address);
     }
+
+    @Override
+    public InterRepresent createCopy() {
+        return new ReturnRepresent(returnData.copy());
+    }
 }

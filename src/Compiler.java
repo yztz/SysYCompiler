@@ -116,7 +116,7 @@ public class Compiler {
 
             for (int i = 0; i < allClass.size(); i++) {
                 if (allClass.get(i).equals(stackTraceElement.getClassName())) {
-                    System.exit(i);
+                    Util.printStackAndExit(i,e);
                 }
             }
             //System.err.println(stackTraceElement.getClassName());

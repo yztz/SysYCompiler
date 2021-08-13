@@ -30,4 +30,11 @@ public class GotoRepresent extends InterRepresent{
     public Collection<AddressRWInfo> getAllAddressRWInfo() {
         return new ArrayList<>();
     }
+
+    @Override
+    public InterRepresent createCopy() {
+        GotoRepresent gotoRepresent = new GotoRepresent(null);
+        gotoRepresent.targetHolder = targetHolder;
+        return gotoRepresent;
+    }
 }

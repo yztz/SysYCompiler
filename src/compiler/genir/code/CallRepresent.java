@@ -63,4 +63,13 @@ public class CallRepresent extends InterRepresent{
         }
         return super.addressMapRule(address);
     }
+
+    @Override
+    public InterRepresent createCopy() {
+        AddressOrData[] copyParams = new AddressOrData[params.length];
+        for (int i = 0; i < params.length; i++) {
+            copyParams[i] = params[i].copy();
+        }
+        return new CallRepresent(funcSymbol,copyParams,returnResult.item);
+    }
 }

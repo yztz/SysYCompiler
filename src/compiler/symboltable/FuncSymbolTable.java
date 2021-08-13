@@ -1,5 +1,6 @@
 package compiler.symboltable;
 
+import compiler.Location;
 import compiler.symboltable.function.FuncSymbol;
 import org.antlr.v4.runtime.Token;
 
@@ -10,14 +11,13 @@ public class FuncSymbolTable {
     private int defineOrder = 0;
     public final Map<String,Map<Integer, FuncSymbol>> funcSymbols=new HashMap<>();
 
-    public FuncSymbol addFunc(Token funcName,int paramNum,BType returnType)
+    public FuncSymbol addFunc(Token funcName, int paramNum, BType returnType, Location location)
     {
         if (!funcSymbols.containsKey(funcName.getText())) {
             funcSymbols.put(funcName.getText(),new HashMap<>());
         }
         Map<Integer, FuncSymbol> funcThisName = funcSymbols.get(funcName.getText());
-        FuncSymbol funcSymbol = new FuncSymbol(funcName, defineOrder,funcThisName.size(), returnType);
-
+        FuncSymbol funcSymbol = new FuncSymbol(funcName, defineOrder,funcThisName.size(),location, returnType);
         funcThisName.put(paramNum, funcSymbol);
         defineOrder++;
         return funcSymbol;

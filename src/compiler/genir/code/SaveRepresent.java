@@ -30,4 +30,9 @@ public class SaveRepresent extends LSRepresent{
 
         return allAddressRWInfos;
     }
+
+    @Override
+    public InterRepresent createCopy() {
+        return new SaveRepresent(valueSymbol,offset.copy(),target.copy());
+    }
 }

@@ -5,7 +5,7 @@ import compiler.symboltable.ValueSymbol;
 
 import java.util.Collection;
 
-public class LSRepresent extends WrittenRepresent {
+public abstract class LSRepresent extends WrittenRepresent {
     public ValueSymbol valueSymbol;
     public AddressOrData offset;
 

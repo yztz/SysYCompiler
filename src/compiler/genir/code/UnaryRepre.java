@@ -24,6 +24,11 @@ public class UnaryRepre extends WrittenRepresent{
     }
 
     @Override
+    public InterRepresent createCopy() {
+        return new UnaryRepre(OP,source.copy(),target.item);
+    }
+
+    @Override
     public String toString() {
         return String.format("%s: %-7s %-4s %-4s",lineNumToString(),OP.toString(),source.toString(),target.toString());
     }

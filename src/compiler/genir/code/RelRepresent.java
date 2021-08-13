@@ -32,4 +32,9 @@ public class RelRepresent extends WrittenRepresent{
 
         return addressRWInfo;
     }
+
+    @Override
+    public InterRepresent createCopy() {
+        return new RelRepresent(target.item,op,left.copy(),right.copy());
+    }
 }

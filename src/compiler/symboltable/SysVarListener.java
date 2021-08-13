@@ -3,7 +3,7 @@ package compiler.symboltable;
 import antlr.SysYListener;
 import antlr.SysYParser;
 import compiler.genir.code.AddressOrData;
-import compiler.genir.code.ListenerUtil;
+import compiler.genir.ListenerUtil;
 import compiler.symboltable.initvalue.ArrayInitValue;
 import compiler.symboltable.initvalue.InitValue;
 import compiler.symboltable.initvalue.SingleInitValue;

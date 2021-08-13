@@ -38,7 +38,7 @@ public class IRBlock extends IRCollection {
     }
 
     @Override
-    public List<InterRepresent> flatIR() {
+    public List<InterRepresent> getAllIR() {
         return irs;
     }
 }

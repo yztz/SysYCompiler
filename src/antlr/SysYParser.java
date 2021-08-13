@@ -7,9 +7,8 @@ import compiler.genir.IRFunction;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.GotoRepresent;
 import compiler.genir.code.InterRepresentHolder;
-import compiler.genir.code.ListenerUtil;
+import compiler.genir.ListenerUtil;
 import compiler.symboltable.ValueSymbol;
-import compiler.symboltable.initvalue.ArrayInitValue;
 import compiler.symboltable.initvalue.InitValue;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATN;
@@ -1138,6 +1137,7 @@ public class SysYParser extends Parser {
 	}
 
 	public static class FuncFParamContext extends DomainedContext {
+		public AddressOrData[] dimensions;
 		public BTypeContext bType() {
 			return getRuleContext(BTypeContext.class,0);
 		}

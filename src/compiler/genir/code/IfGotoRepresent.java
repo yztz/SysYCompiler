@@ -108,4 +108,11 @@ public class IfGotoRepresent extends GotoRepresent {
             return false;
         }
     }
+
+    @Override
+    public InterRepresent createCopy() {
+        IfGotoRepresent ifGotoRepresent = new IfGotoRepresent(null, relOp, left.copy(), right.copy());
+        ifGotoRepresent.targetHolder = targetHolder;
+        return ifGotoRepresent ;
+    }
 }

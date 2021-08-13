@@ -2,7 +2,6 @@ package compiler.optim;
 
 import compiler.Util;
 import compiler.asm.AddressRWInfo;
-import compiler.asm.converter.*;
 import compiler.genir.IRBlock;
 import compiler.genir.IRFunction;
 import compiler.genir.code.GotoRepresent;
@@ -54,7 +53,7 @@ public class OptimizeProcessor {
 
     public static void jumpOptimize(IRFunction irFunction)
     {
-        List<InterRepresent> flatIR = irFunction.flatIR();
+        List<InterRepresent> flatIR = irFunction.getAllIR();
         for (int i = 0; i < flatIR.size(); i++) {
             InterRepresent ir = flatIR.get(i);
             if (!(ir instanceof GotoRepresent)) continue;
@@ -133,7 +132,7 @@ public class OptimizeProcessor {
         List<IRBlock> result = new ArrayList<>();
 
         FuncSymbol funcSymbol = irFunction.funcSymbol;
-        List<InterRepresent> codes = irFunction.flatIR();
+        List<InterRepresent> codes = irFunction.getAllIR();
         Set<InterRepresent> enterPoints = new HashSet<>();
         int len = codes.size();
         // 第一条语句

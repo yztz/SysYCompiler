@@ -1,10 +1,11 @@
 package compiler.genir;
 
 
+import compiler.Location;
 import compiler.genir.code.GotoRepresent;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.InterRepresentHolder;
-import compiler.symboltable.function.FuncSymbol;
+import org.antlr.v4.runtime.Token;
 
 import java.util.*;
 
@@ -37,7 +38,7 @@ public class IRCollection {
         vacancyHolders.clear();
     }
 
-    private final LinkedList<InterRepresent> irs = new LinkedList<>();
+    protected final LinkedList<InterRepresent> irs = new LinkedList<>();
 
     private final Map<Integer,String> descriptionMap = new HashMap<>();
 
@@ -89,7 +90,21 @@ public class IRCollection {
     }
 
     int nextLineNum = 0;
-    public void addCode(InterRepresent ir)
+    public void addCode(InterRepresent ir, Token token)
+    {
+        addCode(ir);
+        if(token==null)
+            return;
+        ir.location = new Location(token);
+    }
+
+    public void addCode(InterRepresent ir,Token token, String description)
+    {
+        startSection(description);
+        addCode(ir,token);
+    }
+
+    private void addCode(InterRepresent ir)
     {
         ir.collection = this;
         irs.add(ir);
@@ -98,15 +113,9 @@ public class IRCollection {
         fullFillVacancy(ir);
     }
 
-    public void addCode(InterRepresent ir, String description)
-    {
-        startSection(description);
-        addCode(ir);
-    }
-
     public void addCodes(IRCollection irs)
     {
-        for (InterRepresent ir : irs.irs) {
+        for (InterRepresent ir : irs.getAllIR()) {
             addCode(ir);
         }
     }
@@ -152,7 +161,7 @@ public class IRCollection {
         return irs.size();
     }
 
-    public List<InterRepresent> flatIR() {
+    public List<InterRepresent> getAllIR() {
 
         return irs;
     }

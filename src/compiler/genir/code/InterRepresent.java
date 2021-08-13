@@ -1,5 +1,6 @@
 package compiler.genir.code;
 
+import compiler.Location;
 import compiler.asm.AddressRWInfo;
 import compiler.asm.Reference;
 
@@ -12,7 +13,8 @@ import java.util.Map;
 
 public abstract class InterRepresent{
     public IRCollection collection;
-
+    public Location location = Location.defaultLoc;
+    public boolean startOfBlock;
     public Map<AddressRWInfo, Reference> refMap = new HashMap<>();
 
     
@@ -65,4 +67,6 @@ public abstract class InterRepresent{
     {
         return null;
     }
+
+    public abstract InterRepresent createCopy();
 }

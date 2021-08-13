@@ -15,4 +15,9 @@ public class LoadRepresent extends LSRepresent {
                              valueSymbol.symbolToken.getText(),
                              offset.toString());
     }
+
+    @Override
+    public InterRepresent createCopy() {
+        return new LoadRepresent(valueSymbol,offset.copy(),target.copy());
+    }
 }

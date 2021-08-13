@@ -1,5 +1,6 @@
 package compiler.asm.converter;
 
+import compiler.Location;
 import compiler.asm.*;
 import compiler.genir.IRBlock;
 import compiler.genir.code.InitVarRepresent;
@@ -32,7 +33,8 @@ public class AsmConvertOrganizer {
         allConverter.add(new RelConverter());
     }
 
-    public static List<AsmSection> process(RegGetter regGetter, FuncSymbol funcSymbol, List<IRBlock> irBlocks)
+    public static List<AsmSection> process(RegGetter regGetter, FuncSymbol funcSymbol, List<IRBlock> irBlocks,
+                                           boolean genDebugInfo)
     {
         List<AsmSection> asmSections = new LinkedList<>();
         AsmBuilder builder = new AsmBuilder(funcSymbol.getAsmLabel());
@@ -50,7 +52,7 @@ public class AsmConvertOrganizer {
         asmSections.add(builder.getSectionAndStartNew());
 
         for (IRBlock irBlock : irBlocks) {
-            List<InterRepresent> flatIRList = irBlock.flatIR();
+            List<InterRepresent> flatIRList = irBlock.getAllIR();
             for (int j = 0; j < flatIRList.size(); j++) {
                 InterRepresent ir = flatIRList.get(j);
                 if(ir instanceof InitVarRepresent)
@@ -70,6 +72,10 @@ public class AsmConvertOrganizer {
 
                     if (ir.hasLabel()) {
                         builder.label(ir.getLabel());
+                    }
+                    if(genDebugInfo &&ir.location!= Location.defaultLoc)
+                    {
+                        builder.loc(1,ir.location);
                     }
                     j+=converter.process(builder, regGetter, ir, flatIRList, j, funcSymbol,holder )-1;
                     regGetter.stepToNextIR();
@@ -96,11 +102,19 @@ public class AsmConvertOrganizer {
         //生成函数的开头和保存LR寄存器和移动FP的代码
         //在这里生成，是因为我们需要知道代码中是否修改了lr寄存器
         builder.text().align(2).global().arch("armv7-a").fpu("vfp").type(AsmBuilder.Type.Function).label();
+
+        if(genDebugInfo)
+            builder.lfb(funcSymbol.defineOrder).loc(1,funcSymbol.defineLocation);
+
         genFunctionGenericStartPushORStrFP(builder, funcSymbol, regGetter);
         asmSections.add(0,builder.getSectionAndStartNew());
 
 
         genFunctionGenericEnd(builder, funcSymbol);
+
+        if(genDebugInfo)
+            builder.lfe(funcSymbol.defineOrder);
+
         asmSections.add(builder.getSection());
 
         if(holder.getDataItemNum()>0)

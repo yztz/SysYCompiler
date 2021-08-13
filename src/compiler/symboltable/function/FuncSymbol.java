@@ -1,5 +1,6 @@
 package compiler.symboltable.function;
 
+import compiler.Location;
 import compiler.symboltable.BType;
 import compiler.symboltable.ParamSymbol;
 import compiler.symboltable.SymbolDomain;
@@ -13,6 +14,7 @@ public class FuncSymbol extends AbstractFuncSymbol{
 
     private final Token funcNameToken;
     public int defineOrder = -1;
+    public Location defineLocation;
     /*public IRFunction irFunction; //对应的所有IR语句*/
 
     public BType returnType;
@@ -26,11 +28,12 @@ public class FuncSymbol extends AbstractFuncSymbol{
     {
         return paramSymbols.size();
     }
-    public FuncSymbol(Token funcNameToken, int defineOrder, int overloadIdent, BType returnType) {
+    public FuncSymbol(Token funcNameToken, int defineOrder, int overloadIdent,Location defineLoc, BType returnType) {
         this.funcNameToken = funcNameToken;
         this.defineOrder = defineOrder;
         this.returnType = returnType;
         this.overloadIdent = overloadIdent;
+        this.defineLocation = defineLoc;
     }
     public void addDomain(SymbolDomain domain)
     {

@@ -1,5 +1,6 @@
 package compiler.asm;
 
+import compiler.Location;
 import compiler.asm.operand.*;
 import compiler.genir.code.IfGotoRepresent;
 
@@ -75,6 +76,11 @@ public class AsmBuilder {
 
     public AsmBuilder addDirective(String directive, String arg1, String arg2) {
         building.add(String.format("\t.%s\t%s, %s", directive, arg1, arg2));
+        return this;
+    }
+
+    public AsmBuilder addDirective(String directive, String arg1, String arg2, String arg3) {
+        building.add(String.format("\t.%s\t%s, %s, %s", directive, arg1, arg2,arg3));
         return this;
     }
 
@@ -167,6 +173,38 @@ public class AsmBuilder {
         return size(label, size);
     }
 
+    //-------------------------调试用--------------------------------
+    public AsmBuilder lfb(int index) {
+        return label(String.format(".LFB%d",index));
+    }
+
+    public AsmBuilder lfe(int index) {
+        return label(String.format(".LFE%d",index));
+    }
+
+    public AsmBuilder lbb(int index) {
+        return label(String.format(".LBB%d",index));
+    }
+
+    public AsmBuilder lbe(int index) {
+        return label(String.format(".LBE%d",index));
+    }
+    public AsmBuilder loc(int fileNo, Location loc) {
+        return addDirective(String.format("loc %d %d %d",fileNo,loc.lineNum,loc.colNum));
+    }
+    public AsmBuilder loc(int fileNo,int lineNum,int colNum) {
+        return addDirective(String.format("loc %d %d %d",fileNo,lineNum,colNum));
+    }
+
+    public AsmBuilder file(String fileName)
+    {
+        return addDirective(String.format("file\t\"%s\"",fileName));
+    }
+
+    public AsmBuilder file(int index , String fileName)
+    {
+        return addDirective(String.format("file\t%d \"%s\"",fileName));
+    }
 
     //========================汇编指令部分===================================
 

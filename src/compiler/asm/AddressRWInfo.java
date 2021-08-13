@@ -34,13 +34,11 @@ public class AddressRWInfo {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AddressRWInfo addressRWInfo1 = (AddressRWInfo) o;
-        return address == addressRWInfo1.address;
+        return address.item == addressRWInfo1.address.item && address.isData==addressRWInfo1.address.isData;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(address);
+        return Objects.hash(address.item);
     }
-
-
 }

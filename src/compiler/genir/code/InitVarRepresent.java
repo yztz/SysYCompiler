@@ -19,6 +19,11 @@ public class InitVarRepresent extends InterRepresent{
     }
 
     @Override
+    public InterRepresent createCopy() {
+        return new InitVarRepresent(varSymbol);
+    }
+
+    @Override
     public String toString() {
         return String.format("%s: %-7s %s[%d]",lineNumToString(),"DEC",varSymbol.symbolToken.getText(),
                              varSymbol.getLength());

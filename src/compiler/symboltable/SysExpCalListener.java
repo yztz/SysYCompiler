@@ -4,7 +4,7 @@ import antlr.SysYListener;
 import antlr.SysYParser;
 import compiler.Util;
 import compiler.genir.code.AddressOrData;
-import compiler.genir.code.ListenerUtil;
+import compiler.genir.ListenerUtil;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -316,11 +316,11 @@ public class SysExpCalListener implements SysYListener {
 
 
             if(symbolAndOffset.symbol instanceof ConstSymbol
-                    && symbolAndOffset.offsetResult.isData)
+                    && symbolAndOffset.isOffsetImm())
             {
                 ctx.result =
                         new AddressOrData (true,
-                                           symbolAndOffset.symbol.initValues.get(symbolAndOffset.offsetResult.item));
+                                           symbolAndOffset.symbol.initValues.get(symbolAndOffset.getOffsetImm()));
             }
         }
     }

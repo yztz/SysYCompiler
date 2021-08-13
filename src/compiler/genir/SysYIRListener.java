@@ -155,7 +155,7 @@ public class SysYIRListener implements SysYListener {
             }else{
                 InitVarRepresent initIR = new InitVarRepresent(symbol);
                 ctx.setStartStmt(new InterRepresentHolder(initIR));
-                _currentCollection.addCode(initIR, "Init var:"+symbol.symbolToken.getText());
+                _currentCollection.addCode(initIR,ctx.stop, "Init var:"+symbol.symbolToken.getText());
             }
         }else{
             _currentCollection = irCollectionStack.pop();
@@ -177,7 +177,7 @@ public class SysYIRListener implements SysYListener {
 
             SaveRepresent ir = InterRepresentFactory.createSaveRepresent(symbol, new AddressOrData(true, ctx.symbolOffset),
                                                                          initResult);
-            _currentCollection.addCode(ir);
+            _currentCollection.addCode(ir,ctx.start);
         }
     }
 
@@ -201,7 +201,7 @@ public class SysYIRListener implements SysYListener {
         /*if(_currentIRFunc.getLineOccupied()==0||
             !(_currentIRFunc.getLast().getLastIR() instanceof ReturnRepresent))
         {*/
-        _currentCollection.addCode(new ReturnRepresent(), "default return");
+        _currentCollection.addCode(new ReturnRepresent(),ctx.block().stop, "default return");
         /*}*/
         _currentFunction = null;
     }
@@ -236,18 +236,18 @@ public class SysYIRListener implements SysYListener {
     public void exitFuncFParam(SysYParser.FuncFParamContext ctx) {
         TerminalNode identifier = ctx.Identifier();
         ParamSymbol symbol = symbolTableHost.searchParamSymbol(ctx.scope, identifier.getSymbol());
-        symbol.irToCalDimSize = _currentCollection;
+
         if(ctx.exp()!=null && ctx.exp().size()>0)
         {
-            if(symbol.dimensions==null)
-                symbol.dimensions=new AddressOrData[ctx.exp().size()+1];
+            if(ctx.dimensions==null)
+                ctx.dimensions=new AddressOrData[ctx.exp().size()+1];
             for (int i = 0; i < ctx.exp().size(); i++) {
-                symbol.dimensions[i+1] = ctx.exp(i).result;
+                ctx.dimensions[i+1] = ctx.exp(i).result;
             }
         }else{
-            symbol.dimensions=new AddressOrData[]{new AddressOrData(true,1)};
+            ctx.dimensions=new AddressOrData[]{new AddressOrData(true,1)};
         }
-
+        symbol.setIrToCalDimSize(_currentCollection,ctx.dimensions);
 
         _currentCollection = irCollectionStack.pop();
     }
@@ -317,20 +317,21 @@ public class SysYIRListener implements SysYListener {
 
         SaveRepresent saveRepresent;
         ListenerUtil.SymbolWithOffset<? extends ValueSymbol> symbolAndOffset;
+        ListenerUtil.IrCalOffset offsetCalculatorGroup;
+
         if(targetSymbol instanceof HasInitSymbol)
         {
             symbolAndOffset =
                     ListenerUtil.getSymbolAndOffset((HasInitSymbol) targetSymbol,lValCtx);
 
-            for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
-                _currentCollection.addCode(ir);
-            }
+            offsetCalculatorGroup = symbolAndOffset.getOffsetCalculatorGroup();
+            _currentCollection.addCodes(offsetCalculatorGroup);
             if(lValCtx.startStmt==null)
             {
-                if(symbolAndOffset.irToCalculateOffset.size()>0)
+                if(offsetCalculatorGroup.getLineOccupied()>0)
                 {
                     lValCtx.startStmt = new InterRepresentHolder(
-                            symbolAndOffset.irToCalculateOffset.get(0)
+                            offsetCalculatorGroup.getAllIR().get(0)
                     );
                 }
             }
@@ -341,20 +342,14 @@ public class SysYIRListener implements SysYListener {
             symbolAndOffset =
                     ListenerUtil.getSymbolAndOffset(paramSymbol, lValCtx);
 
-            _currentCollection.addCodes(paramSymbol.irToCalDimSize);
-
-            for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
-                _currentCollection.addCode(ir);
-            }
+            offsetCalculatorGroup = symbolAndOffset.getOffsetCalculatorGroup();
+            _currentCollection.addCodes(offsetCalculatorGroup);
             if(lValCtx.startStmt==null)
             {
-                if(paramSymbol.irToCalDimSize.flatIR().size()>0)
-                {
-                    lValCtx.startStmt = new InterRepresentHolder(paramSymbol.irToCalDimSize.getFirst());
-                }else if(symbolAndOffset.irToCalculateOffset.size()>0)
+                if(offsetCalculatorGroup.getLineOccupied()>0)
                 {
                     lValCtx.startStmt = new InterRepresentHolder(
-                            symbolAndOffset.irToCalculateOffset.get(0)
+                            offsetCalculatorGroup.getAllIR().get(0)
                     );
                 }
             }
@@ -364,11 +359,11 @@ public class SysYIRListener implements SysYListener {
         }
 
         saveRepresent = InterRepresentFactory.createSaveRepresent(symbolAndOffset.symbol
-                , symbolAndOffset.offsetResult, sourceResult);
+                , offsetCalculatorGroup.offsetResult, sourceResult);
 
 
 
-        _currentCollection.addCode(saveRepresent);
+        _currentCollection.addCode(saveRepresent,ctx.Assign().getSymbol());
 
         if(ctx.lVal().startStmt!=null){
             ctx.setStartStmt(ctx.lVal().startStmt);
@@ -487,7 +482,7 @@ public class SysYIRListener implements SysYListener {
 
         //_currentIRFunc.startSection(ctx.stmt().irSection);
         GotoRepresent gotoStart = new GotoRepresent(whileStartIR);
-        _currentCollection.addCode(gotoStart, "while end");
+        _currentCollection.addCode(gotoStart,ctx.stmt().stop, "while end");
 
         if(ctx.stmt().getStartStmt()!=null) //stmt可能一条语句都没有
         {
@@ -534,7 +529,7 @@ public class SysYIRListener implements SysYListener {
         GotoRepresent breakGoto=new GotoRepresent(null);
         ctx.setBreakQuads(new ArrayList<>());
         ctx.getBreakQuads().add(breakGoto.targetHolder);
-        _currentCollection.addCode(breakGoto, "break");
+        _currentCollection.addCode(breakGoto,ctx.start, "break");
         ctx.setStartStmt(new InterRepresentHolder(breakGoto));
     }
 
@@ -549,7 +544,7 @@ public class SysYIRListener implements SysYListener {
         ctx.setContinueQuads(new ArrayList<>());
         ctx.getContinueQuads().add(continueGoto.targetHolder);
 
-        _currentCollection.addCode(continueGoto, "continue");
+        _currentCollection.addCode(continueGoto,ctx.start, "continue");
         ctx.setStartStmt(new InterRepresentHolder(continueGoto));
     }
 
@@ -571,7 +566,7 @@ public class SysYIRListener implements SysYListener {
         }else{
             ctx.setStartStmt(new InterRepresentHolder(returnRepresent));
         }
-        _currentCollection.addCode(returnRepresent);
+        _currentCollection.addCode(returnRepresent,ctx.start);
     }
 
     @Override
@@ -602,7 +597,7 @@ public class SysYIRListener implements SysYListener {
                 ctx.lOrExp().trueList = new ArrayList<>();
                 ctx.lOrExp().falseList = new ArrayList<>();
                 GotoRepresent gotoIR = new GotoRepresent(null);
-                _currentFunction.addCode(gotoIR);
+                _currentFunction.addCode(gotoIR,ctx.lOrExp().start);
                 if(address.item!=0)
                 {
                     ctx.lOrExp().trueList.add(gotoIR);
@@ -627,8 +622,8 @@ public class SysYIRListener implements SysYListener {
         {
             List<InterRepresent> pair = createIfGotoPair(ctx, IfGotoRepresent.RelOp.NOT_EQUAL, ctx.lOrExp().address,
                                                          new AddressOrData(true, 0),10);
-            _currentCollection.addCode(pair.get(0));
-            _currentCollection.addCode(pair.get(1));
+            _currentCollection.addCode(pair.get(0),ctx.start);
+            _currentCollection.addCode(pair.get(1),null);
         }
 
         for (GotoRepresent ir : ctx.trueList) {
@@ -680,16 +675,14 @@ public class SysYIRListener implements SysYListener {
                 if(symbol instanceof HasInitSymbol) //是变量常量，不是参数
                 {
 
-                    /*ListenerUtil.SymbolWithOffset<HasInitSymbol> */symbolAndOffset =
-                            ListenerUtil.getSymbolAndOffset((HasInitSymbol) symbol,lValCtx);
+                    symbolAndOffset = ListenerUtil.getSymbolAndOffset((HasInitSymbol) symbol,lValCtx);
                     dimLength =((HasInitSymbol)symbol).dimensions.length;
 
                 }else if(symbol instanceof ParamSymbol)//是参数
                 {
                     ParamSymbol paramSymbol=(ParamSymbol) symbol;
-                    /*ListenerUtil.SymbolWithOffset<ParamSymbol> */symbolAndOffset =
-                            ListenerUtil.getSymbolAndOffset(paramSymbol,lValCtx);
-                    dimLength = paramSymbol.dimensions.length;
+                    symbolAndOffset = ListenerUtil.getSymbolAndOffset(paramSymbol,lValCtx);
+                    dimLength = paramSymbol.getDimLength();
 
                 }else{
                     return;
@@ -698,53 +691,49 @@ public class SysYIRListener implements SysYListener {
                         (lValCtx.exp()==null||lValCtx.exp().size()<dimLength))
                 {//是数组，并且没有下标下标的数量小于定义时的数量，则取地址
 
-                    if(symbol instanceof ParamSymbol)//是参数
+                    /*if(symbol instanceof ParamSymbol)//是参数
                     {
                         ParamSymbol paramSymbol = (ParamSymbol) symbol;
-                        if(paramSymbol.irToCalDimSize.flatIR().size()>0)
+                        if(paramSymbol.irToCalDimSize.getAllIR().size()>0)
                             _currentCollection.addCodes(paramSymbol.irToCalDimSize);
-                    }
+                    }*/
 
-                    for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
-                        _currentCollection.addCode(ir);
-                    }
+                    ListenerUtil.IrCalOffset offsetCalculator = symbolAndOffset.getOffsetCalculatorGroup();
+                    _currentCollection.addCodes(offsetCalculator);
+
                     LAddrRepresent lAddrRepresent = InterRepresentFactory.createLAddrRepresent(
-                            symbolAndOffset.symbol, symbolAndOffset.offsetResult
+                            symbolAndOffset.symbol, offsetCalculator.offsetResult
                     );
-                    _currentCollection.addCode(lAddrRepresent);
+                    _currentCollection.addCode(lAddrRepresent,ctx.start);
                     ctx.result = lAddrRepresent.target;
 
                     if (lValCtx.startStmt!=null) {
                         ctx.startStmt=lValCtx.startStmt;
                     }else{
-                        if(symbol instanceof ParamSymbol && ((ParamSymbol) symbol).irToCalDimSize.flatIR().size()>0)
-                        {
-                            ctx.startStmt=new InterRepresentHolder(((ParamSymbol) symbol).irToCalDimSize.getFirst());
-                        } else if(symbolAndOffset.irToCalculateOffset.size()>0)
-                            ctx.startStmt=new InterRepresentHolder(symbolAndOffset.irToCalculateOffset.get(0));
+                        if(offsetCalculator.getLineOccupied()>0)
+                            ctx.startStmt=new InterRepresentHolder(offsetCalculator.getFirst());
                         else
                             ctx.startStmt=new InterRepresentHolder(lAddrRepresent);
                     }
 
                 }else{ //否则则取对应值
-                    if(symbol instanceof ParamSymbol)//Param支持动态dimSize
+                    /*if(symbol instanceof ParamSymbol)//Param支持动态dimSize
                     {
                         _currentCollection.addCodes(((ParamSymbol) symbol).irToCalDimSize);
-                    }
+                    }*/ //现已包含在offsetCalculator中
 
-                    for (InterRepresent ir : symbolAndOffset.irToCalculateOffset) {
-                        _currentCollection.addCode(ir);
-                    }
+                    ListenerUtil.IrCalOffset offsetCalculator = symbolAndOffset.getOffsetCalculatorGroup();
+                    _currentCollection.addCodes(offsetCalculator);
                     LoadRepresent loadRepresent = InterRepresentFactory.createLoadRepresent(symbolAndOffset.symbol
-                            , symbolAndOffset.offsetResult);
-                    _currentCollection.addCode(loadRepresent);
+                            , offsetCalculator.offsetResult);
+                    _currentCollection.addCode(loadRepresent,null);
                     ctx.result = loadRepresent.target;
 
                     if (lValCtx.startStmt!=null) {
                         ctx.startStmt=lValCtx.startStmt;
                     }else{
-                        if(symbolAndOffset.irToCalculateOffset.size()>0)
-                            ctx.startStmt=new InterRepresentHolder(symbolAndOffset.irToCalculateOffset.get(0));
+                        if(offsetCalculator.getLineOccupied()>0)
+                            ctx.startStmt=new InterRepresentHolder(offsetCalculator.getFirst());
                         else
                             ctx.startStmt=new InterRepresentHolder(loadRepresent);
                     }
@@ -805,7 +794,7 @@ public class SysYIRListener implements SysYListener {
         }
         (_currentFunction).funcSymbol.setHasFuncCallInside(true);
 
-        _currentCollection.addCode(ir);
+        _currentCollection.addCode(ir,ctx.start);
         ctx.result = ir.returnResult;
     }
 
@@ -830,7 +819,7 @@ public class SysYIRListener implements SysYListener {
         }
 
         UnaryRepre ir = InterRepresentFactory.createUnaryRepresent(opcode, ctx.unaryExp().result);
-        _currentCollection.addCode(ir);
+        _currentCollection.addCode(ir,ctx.start);
         ctx.result=ir.target;
 
         if(ctx.unaryExp().startStmt!=null)
@@ -873,7 +862,7 @@ public class SysYIRListener implements SysYListener {
             }
             BinocularRepre ir= InterRepresentFactory.createBinocularRepresent(opcodes,ctx.mulExp().result,
                                                                               ctx.unaryExp().result);
-            _currentCollection.addCode(ir);
+            _currentCollection.addCode(ir,ctx.start);
             ctx.result = ir.target;
 
             if(ctx.mulExp().startStmt!=null)
@@ -908,7 +897,7 @@ public class SysYIRListener implements SysYListener {
             }
             BinocularRepre ir= InterRepresentFactory.createBinocularRepresent(opcodes, ctx.addExp().result,
                                                                               ctx.mulExp().result);
-            _currentCollection.addCode(ir);
+            _currentCollection.addCode(ir,ctx.start);
             ctx.result = ir.target;
 
             if(ctx.addExp().startStmt!=null)
@@ -985,7 +974,7 @@ public class SysYIRListener implements SysYListener {
             {
                 RelRepresent represent = InterRepresentFactory.createRelRepresent(ctx.relExp().address,
                                                                                      ctx.addExp().result, relOp);
-                _currentFunction.addCode(represent);
+                _currentFunction.addCode(represent,ctx.start);
                 ctx.address = represent.target;
 
                 if(ctx.startStmt == null)
@@ -993,8 +982,8 @@ public class SysYIRListener implements SysYListener {
             }else{
 
                 List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.relExp().address, ctx.addExp().result,0);
-                _currentCollection.addCode(pair.get(0));
-                _currentCollection.addCode(pair.get(1));
+                _currentCollection.addCode(pair.get(0),ctx.start);
+                _currentCollection.addCode(pair.get(1),null);
 
                 if(ctx.startStmt == null)
                     ctx.startStmt = new InterRepresentHolder(pair.get(0));
@@ -1036,15 +1025,15 @@ public class SysYIRListener implements SysYListener {
             {
                 RelRepresent represent = InterRepresentFactory.createRelRepresent(ctx.eqExp().address,
                                                                                   ctx.relExp().address, relOp);
-                _currentFunction.addCode(represent);
+                _currentFunction.addCode(represent,ctx.start);
                 ctx.address = represent.target;
 
                 if(ctx.startStmt == null)
                     ctx.startStmt = new InterRepresentHolder(represent);
             }else{
                 List<InterRepresent> pair = createIfGotoPair(ctx, relOp, ctx.eqExp().address, ctx.relExp().address,1);
-                _currentCollection.addCode(pair.get(0));
-                _currentCollection.addCode(pair.get(1));
+                _currentCollection.addCode(pair.get(0),ctx.start);
+                _currentCollection.addCode(pair.get(1),null);
 
                 if(ctx.startStmt==null)
                     ctx.startStmt = new InterRepresentHolder(pair.get(0));
@@ -1075,7 +1064,7 @@ public class SysYIRListener implements SysYListener {
                 if(ctx.lAndExp().address.isData && ctx.eqExp().address.isData)
                 {
                     GotoRepresent gotoIR = new GotoRepresent(null); //无条件跳转了
-                    _currentFunction.addCode(gotoIR);
+                    _currentFunction.addCode(gotoIR,ctx.start);
                     ctx.startStmt = new InterRepresentHolder(gotoIR);
                     if(ctx.lAndExp().address.item!=0 && ctx.eqExp().address.item!=0) //恒为true
                     {
@@ -1108,8 +1097,8 @@ public class SysYIRListener implements SysYListener {
                         _currentCollection.insertBefore(pair.get(0), lEqStart);
                         _currentCollection.insertBefore(pair.get(1), lEqStart);
                     }else{
-                        _currentCollection.addCode(pair.get(0));
-                        _currentCollection.addCode(pair.get(1));
+                        _currentCollection.addCode(pair.get(0),ctx.lAndExp().start);
+                        _currentCollection.addCode(pair.get(1),null);
                     }
                 }
 
@@ -1135,8 +1124,8 @@ public class SysYIRListener implements SysYListener {
                 if(ctx.eqExp().trueList==null){
                     List<InterRepresent> pair = createIfGotoPair(ctx.eqExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
                                                                  ctx.eqExp().address, new AddressOrData(true, 0),3);
-                    _currentCollection.addCode(pair.get(0));
-                    _currentCollection.addCode(pair.get(1));
+                    _currentCollection.addCode(pair.get(0),ctx.eqExp().start);
+                    _currentCollection.addCode(pair.get(1),null);
                     if (ctx.eqExp().startStmt==null) {
                         ctx.eqExp().startStmt= new InterRepresentHolder(pair.get(0));
                     }
@@ -1148,7 +1137,7 @@ public class SysYIRListener implements SysYListener {
                     if(ctx.lAndExp().address.item==0) //零，恒为false, 直接添加到tfalseList
                     {
                         GotoRepresent gotoIR = new GotoRepresent(null); //无条件跳转了
-                        _currentFunction.addCode(gotoIR);
+                        _currentFunction.addCode(gotoIR,ctx.lAndExp().start);
                         ctx.startStmt = new InterRepresentHolder(gotoIR);
                         _currentFunction.insertBefore(gotoIR,
                                                       ctx.eqExp().startStmt.getInterRepresent());
@@ -1176,15 +1165,15 @@ public class SysYIRListener implements SysYListener {
                         _currentCollection.insertBefore(pair.get(0), lEqStart);
                         _currentCollection.insertBefore(pair.get(1), lEqStart);
                     }else{
-                        _currentCollection.addCode(pair.get(0));
-                        _currentCollection.addCode(pair.get(1));
+                        _currentCollection.addCode(pair.get(0),ctx.lAndExp().start);
+                        _currentCollection.addCode(pair.get(1),null);
                     }
                 }
                 if(ctx.eqExp().trueList==null){
                     List<InterRepresent> pair = createIfGotoPair(ctx.eqExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
                                                                  ctx.eqExp().address, new AddressOrData(true, 0),5);
-                    _currentCollection.addCode(pair.get(0));
-                    _currentCollection.addCode(pair.get(1));
+                    _currentCollection.addCode(pair.get(0),ctx.eqExp().start);
+                    _currentCollection.addCode(pair.get(1),null);
                 }
 
                 ctx.startStmt = ctx.lAndExp().startStmt;
@@ -1221,7 +1210,7 @@ public class SysYIRListener implements SysYListener {
                 if(ctx.lOrExp().address.isData && ctx.lAndExp().address.isData)
                 {
                     GotoRepresent gotoIR = new GotoRepresent(null); //无条件跳转了
-                    _currentFunction.addCode(gotoIR);
+                    _currentFunction.addCode(gotoIR,ctx.lAndExp().start);
                     ctx.startStmt = new InterRepresentHolder(gotoIR);
                     if(ctx.lOrExp().address.item!=0 || ctx.lAndExp().address.item!=0) //恒为true
                     {
@@ -1255,8 +1244,8 @@ public class SysYIRListener implements SysYListener {
                             _currentCollection.insertBefore(pair.get(0), lAndStart);
                             _currentCollection.insertBefore(pair.get(1), lAndStart);
                         }else{
-                            _currentCollection.addCode(pair.get(0));
-                            _currentCollection.addCode(pair.get(1));
+                            _currentCollection.addCode(pair.get(0),ctx.start);
+                            _currentCollection.addCode(pair.get(1),null);
                         }
 
                     }
@@ -1281,8 +1270,8 @@ public class SysYIRListener implements SysYListener {
                         List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
                                                                      ctx.lAndExp().address, new AddressOrData(true,
                                                                                                               0),7);
-                        _currentCollection.addCode(pair.get(0));
-                        _currentCollection.addCode(pair.get(1));
+                        _currentCollection.addCode(pair.get(0),ctx.start);
+                        _currentCollection.addCode(pair.get(1),null);
                     }
 
                     ctx.trueList = ctx.lAndExp().trueList;
@@ -1290,7 +1279,7 @@ public class SysYIRListener implements SysYListener {
                     if(ctx.lOrExp().address.item!=0) //非零，恒为true, 直接添加到trueList
                     {
                         GotoRepresent gotoIR = new GotoRepresent(null); //无条件跳转了
-                        _currentFunction.addCode(gotoIR);
+                        _currentFunction.addCode(gotoIR,ctx.start);
                         ctx.startStmt = new InterRepresentHolder(gotoIR);
                         _currentFunction.insertBefore(gotoIR,
                                                       ctx.lAndExp().startStmt.getInterRepresent());
@@ -1315,16 +1304,16 @@ public class SysYIRListener implements SysYListener {
                         _currentCollection.insertBefore(pair.get(0), lAndStart);
                         _currentCollection.insertBefore(pair.get(1), lAndStart);
                     }else{
-                        _currentCollection.addCode(pair.get(0));
-                        _currentCollection.addCode(pair.get(1));
+                        _currentCollection.addCode(pair.get(0),ctx.start);
+                        _currentCollection.addCode(pair.get(1),null);
                     }
 
                 }
                 if(ctx.lAndExp().trueList==null){
                     List<InterRepresent> pair = createIfGotoPair(ctx.lAndExp(), IfGotoRepresent.RelOp.NOT_EQUAL,
                                                                  ctx.lAndExp().address, new AddressOrData(true, 0),9);
-                    _currentCollection.addCode(pair.get(0));
-                    _currentCollection.addCode(pair.get(1));
+                    _currentCollection.addCode(pair.get(0),ctx.start);
+                    _currentCollection.addCode(pair.get(1),null);
                 }
 
                 ctx.startStmt = ctx.lOrExp().startStmt;
@@ -1377,7 +1366,7 @@ public class SysYIRListener implements SysYListener {
             if(ctx.trueBodyOfIf)
             {
                 GotoRepresent gotoRepresent = new GotoRepresent(null);
-                _currentCollection.addCode(gotoRepresent,"true body done");
+                _currentCollection.addCode(gotoRepresent,ctx.stop,"true body done");
                 ctx.doneList = new LinkedList<>();
                 ctx.doneList.add(gotoRepresent);
             }

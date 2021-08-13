@@ -1,8 +1,9 @@
 package compiler.symboltable;
 
 import antlr.SysYParser;
+import compiler.Location;
 import compiler.genir.code.AddressOrData;
-import compiler.genir.code.ListenerUtil;
+import compiler.genir.ListenerUtil;
 import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.initvalue.ArrayInitValue;
 import compiler.symboltable.initvalue.SingleInitValue;
@@ -12,7 +13,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.Stack;
 
-import static compiler.genir.code.ListenerUtil.getDimsFromConstExp;
+import static compiler.genir.ListenerUtil.getDimsFromConstExp;
 
 public class SysFuncConstSymbolListener extends SysExpCalListener {
     private final Stack<SymbolDomain> blockStack = new Stack<>();
@@ -123,7 +124,8 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
         }
         Token funcName = ctx.Identifier().getSymbol();
 
-        currentFunc = funcSymbolTable.addFunc(funcName, paramNum, returnType);
+        currentFunc = funcSymbolTable.addFunc(funcName, paramNum, returnType,
+                                              new Location(ctx.RightParen().getSymbol()));
 
         pushNewScope();
     }
@@ -215,11 +217,11 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
 
 
             if(symbolAndOffset.symbol instanceof ConstSymbol
-                    && symbolAndOffset.offsetResult.isData)
+                    && symbolAndOffset.isOffsetImm())
             {
                 ctx.result =
                         new AddressOrData (true,
-                                           (symbolAndOffset.symbol).initValues.get(symbolAndOffset.offsetResult.item));
+                                           (symbolAndOffset.symbol).initValues.get(symbolAndOffset.getOffsetImm()));
             }
         }else if(ctx.exp()!=null) {
             ctx.result = ctx.exp().result;
