@@ -47,7 +47,7 @@ public class Compiler {
                         i++;
                         break;
                     default:
-                        inputFileStr = arg;
+                        //inputFileStr = arg;
                         break;
                 }
             }
