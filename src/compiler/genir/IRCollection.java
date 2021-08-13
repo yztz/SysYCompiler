@@ -111,6 +111,21 @@ public class IRCollection {
         }
     }
 
+    public void remove(InterRepresent ir)
+    {
+        int index = irs.indexOf(ir);
+        if(index>=0)
+        irs.remove(index);
+        int i = 0;
+        for (InterRepresent item : irs) {
+            if(i>=index)
+            {
+                item.lineNum--;
+            }
+            i++;
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
