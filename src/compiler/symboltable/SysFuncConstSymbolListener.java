@@ -55,13 +55,17 @@ public class SysFuncConstSymbolListener extends SysExpCalListener {
     public void exitConstDecl(SysYParser.ConstDeclContext ctx) {
         for (SysYParser.ConstDefContext defCtx : ctx.constDef()) {
             TerminalNode identifier = defCtx.Identifier();
+            ConstSymbol symbol;
             if(defCtx.constExp()==null || defCtx.constExp().size()==0) //不是数组
             {
-                currentSymbolTable.addConst(identifier.getSymbol(),defCtx.constInitVal().initValues);
+                symbol = currentSymbolTable.addConst(identifier.getSymbol(),defCtx.constInitVal().initValues);
             }
             else{ //是数组
-                currentSymbolTable.addConstArray(identifier.getSymbol(),defCtx.constInitVal().dimensions,
+                symbol = currentSymbolTable.addConstArray(identifier.getSymbol(),defCtx.constInitVal().dimensions,
                                             defCtx.constInitVal().initValues);
+            }
+            if (currentSymbolTable.getDomain()== SymbolDomain.globalDomain) {
+                symbol.isGlobal = true;
             }
         }
     }
