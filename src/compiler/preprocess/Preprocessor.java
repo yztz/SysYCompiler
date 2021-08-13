@@ -16,9 +16,9 @@ public class Preprocessor {
             s = s.replaceAll("starttime\\(\\)",String.format("_sysy_starttime(%d)",lineNum));
             s = s.replaceAll("stoptime\\(\\)",String.format("_sysy_stoptime(%d)",lineNum));
             s = s.replace("_SYSY_N","1024");
-            builder.append(s);
+            builder.append(s).append("\n");
         }
-            reader.close();
+        reader.close();
         }catch(Exception e){
             e.printStackTrace();
         }
