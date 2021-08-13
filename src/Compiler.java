@@ -42,12 +42,21 @@ public class Compiler {
                     case "-O1":
                         optimization = true;
                         break;
+                    case "-O2":
+                        optimization = true;
+                        break;
+                    case "-O3":
+                        optimization = true;
+                        break;
+                    case "-O4":
+                        optimization = true;
+                        break;
                     case "-o":
                         outputFileStr = args[i+1];
                         i++;
                         break;
                     default:
-                        //inputFileStr = arg;
+                        inputFileStr = arg;
                         break;
                 }
             }
