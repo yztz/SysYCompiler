@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -240,6 +241,12 @@ public class AsmBuilder {
         return addInstruction(op.getText(), rd.getText(), rn.getText(), rm.getText());
     }
 
+    public AsmBuilder delayGen(Consumer<AsmBuilder> builder)
+    {
+        building.add(new AsmCodeSupplier(builder));
+        return this;
+    }
+
     /**
      * 检查操作数是否合法，比如是否符合imm8m，如果不合法，会自动进行一些处理，可能会插入一些语句
      * @return 修复后的操作数
@@ -320,35 +327,8 @@ public class AsmBuilder {
 
     public AsmBuilder bl(String label) {
         lrModified = true;
-        /*if(_hookBLProtectReg)
-        {
-            List<Reg> usingRegister =
-                    regGetter.getUsingRegNext().stream().filter(r->{
-                        int id = r.getId();
-                        return id>3;
-                    }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
 
-            if(usingRegister.size()>0)
-            {
-                Reg tmp = regGetter.getTmpRegister();
-                //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
-                add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
-                stm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
-                regGetter.releaseReg(tmp);
-            }
-            addInstruction("bl", label);
-            if(usingRegister.size()>0)
-            {
-                Reg tmp = regGetter.getTmpRegister();
-                //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
-                add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
-                ldm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
-                regGetter.releaseReg(tmp);
-            }
-            return this;
-        }else{*/
             return addInstruction("bl", label);
-        /*}*/
     }
 
     public AsmBuilder bx(Reg reg) {
@@ -459,30 +439,6 @@ public class AsmBuilder {
         return mem(Mem.STR, null, rd, rn, offset, false, false);
     }
 
-    /**
-     * 从内存读取一个暂时不确定偏移量的位置上的值到rd，需保证offsetGetter获取到的偏移量在[-4095,4095]范围内
-     */
-    public AsmBuilder ldr(Reg rd,Reg rn, Supplier<Integer> offsetGetter)
-    {
-        ldstr("ldr",rd,rn,offsetGetter);
-        return this;
-    }
-    /**
-     * 将rd写入到一个暂时不确定偏移量的位置上，需保证offsetGetter获取到的偏移量在[-4095,4095]范围内
-     */
-    public AsmBuilder str(Reg rd,Reg rn, Supplier<Integer> offsetGetter)
-    {
-        ldstr("str",rd,rn,offsetGetter);
-        return this;
-    }
-
-    private void ldstr(String op,Reg rd,Reg rn, Supplier<Integer> offsetGetter)
-    {
-        building.add(new AsmCode("\t%s\t%s, [%s, #%s]",()->op, rd::getText, rn::getText, ()->{
-            Integer offset = offsetGetter.get();
-            return String.valueOf(offset);
-        }));
-    }
 
     public AsmBuilder push(Reg[] regs, boolean lr) {
 
@@ -589,30 +545,6 @@ public class AsmBuilder {
             }
         }
         return addInstruction(RegRegOperandOP.ADD.getText(), rd.getText(), rn.getText(), toImm(imm8m));
-    }
-
-    /**
-     * 加法，还不确定操作数，需保证立即数符合imm8m
-     */
-    public AsmBuilder add(Reg rd, Reg rn, Supplier<Integer> imm8mGetter) {
-
-        building.add(new AsmCode("\tadd\t%s, %s, #%s",rd::getText,rn::getText,()->
-                String.valueOf(imm8mGetter.get())));
-
-        return this;
-        //return addInstruction(RegRegOperandOP.ADD.getText(), rd.getText(), rn.getText(), toImm(imm8m));
-    }
-
-    /**
-     * 加法，还不确定操作数，需保证立即数符合imm8m
-     */
-    public AsmBuilder sub(Reg rd, Reg rn, Supplier<Integer> imm8mGetter) {
-
-        building.add(new AsmCode("\tsub\t%s, %s, #%s",rd::getText,rn::getText,()->
-                String.valueOf(imm8mGetter.get())));
-
-        return this;
-        //return addInstruction(RegRegOperandOP.ADD.getText(), rd.getText(), rn.getText(), toImm(imm8m));
     }
 
     public AsmBuilder sub(Reg rd, Reg rn, Operand operand) {

@@ -156,7 +156,7 @@ public class AsmConvertOrganizer {
     //现场保护等
     public static void genFunctionGenericStart(AsmBuilder asmBuilder, FuncSymbol funcSymbol, RegGetter regGetter) {
 
-        asmBuilder.sub(Regs.SP, Regs.SP,()->AsmUtil.getFrameSize(funcSymbol)+4);
+        asmBuilder.delayGen(b->b.sub(Regs.SP, Regs.SP,AsmUtil.getFrameSize(funcSymbol)+4));
         for (int i = 0; i < Math.min(4,funcSymbol.getParamNum()); i++) {
             asmBuilder.str(Regs.REGS[i], Regs.FP, AsmUtil.getSymbolOffsetFp(funcSymbol.paramSymbols.get(i)));
         }

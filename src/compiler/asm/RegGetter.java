@@ -152,7 +152,8 @@ public class RegGetter {
         int offset = regOrMem.memOffset;//getAvailableStagingOffset();
 
         //偏移量一定是负的，为保证符合imm8m所以转为正数使用sub指令
-        builder.sub(tmp,Regs.FP,()-> -(AsmUtil.getRegStageOffsetFP(funcSymbol) + offset * ConstDef.WORD_SIZE));
+        builder.delayGen(b->b.sub(tmp,Regs.FP,
+                                  -(AsmUtil.getRegStageOffsetFP(funcSymbol) + offset * ConstDef.WORD_SIZE)));
         builder.ldr(tmp,tmp,0);
         usedRegStagingMem.set(offset, false);
         RegOrMem newRegOrMem = new RegOrMem(tmp);
@@ -182,7 +183,8 @@ public class RegGetter {
             /*dataHolder.addAndLoadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),
                                               Regs.R12);*/
             int offsetWord = getAvailableStagingOffsetWord();
-            builder.sub(Regs.R12,Regs.FP,()-> - (AsmUtil.getRegStageOffsetFP(funcSymbol)+offsetWord * ConstDef.WORD_SIZE));
+            builder.delayGen(b->b.sub(Regs.R12,Regs.FP,
+                                      - (AsmUtil.getRegStageOffsetFP(funcSymbol)+offsetWord * ConstDef.WORD_SIZE)));
             builder.str(reg,Regs.R12,0);
             RegOrMem regOrMem = new RegOrMem(offsetWord);
 

@@ -224,7 +224,7 @@ public class AsmUtil {
             Reg tmp = regGetter.getTmpRegister();
             //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
             //为符合imm8m,转为整数改用sub指令
-            builder.sub(tmp,Regs.FP,() -> - AsmUtil.getRegProtectOffsetFP(funcSymbol));
+            builder.delayGen(b->b.sub(tmp,Regs.FP,- AsmUtil.getRegProtectOffsetFP(funcSymbol)));
             builder.stm(AsmBuilder.LSAddressMode.NONE,tmp,regs);
             regGetter.releaseReg(tmp);
 
@@ -238,8 +238,7 @@ public class AsmUtil {
         {
             Reg tmp = regGetter.getTmpRegister();
             //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
-
-            builder.sub(tmp,Regs.FP,()-> - AsmUtil.getRegProtectOffsetFP(funcSymbol));
+            builder.delayGen(b->b.sub(tmp,Regs.FP, - AsmUtil.getRegProtectOffsetFP(funcSymbol)));
             builder.ldm(AsmBuilder.LSAddressMode.NONE,tmp,regs);
             regGetter.releaseReg(tmp);
 

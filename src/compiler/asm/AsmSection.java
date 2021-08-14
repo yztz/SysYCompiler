@@ -13,7 +13,7 @@ public class AsmSection {
 
     public void add(String line)
     {
-        statements.add(new AsmCode(line));
+        statements.add(new AsmCodeString(line));
     }
 
     public void add(AsmCode code)
@@ -27,8 +27,9 @@ public class AsmSection {
 
     public void getText(StringBuilder builder)
     {
-        for (AsmCode stmt : statements) {
-            builder.append(stmt.toString()).append("\r\n");
+        for (int i = 0, statementsSize = statements.size(); i < statementsSize; i++) {
+            AsmCode stmt = statements.get(i);
+            builder.append(stmt.getAsmText());
         }
     }
 }
