@@ -442,16 +442,6 @@ public class AsmBuilder {
     }
 
     public AsmBuilder ldr(Reg rd, Reg rn, int offset) {
-        /*if(_hookIfNotImmXX)
-        {
-            if(offset>4095 || offset< -4095)
-            {
-                Reg offsetReg = regGetter.getTmpRegister(0);
-                ldrEq(offsetReg,Math.abs(offset));//把下面这句改成这句，可以让kmp从WA变成segment fault
-                //dataHolder.addAndLoadFromFuncData(this,offset,offsetReg);
-                return mem(Mem.LDR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
-            }
-        }*/
         return mem(Mem.LDR, null, rd, rn, offset, false, false);
     }
 
@@ -469,12 +459,33 @@ public class AsmBuilder {
         return mem(Mem.STR, null, rd, rn, offset, false, false);
     }
 
+    /**
+     * 从内存读取一个暂时不确定偏移量的位置上的值到rd，需保证offsetGetter获取到的偏移量在[-4095,4095]范围内
+     */
+    public AsmBuilder ldr(Reg rd,Reg rn, Supplier<Integer> offsetGetter)
+    {
+        ldstr("ldr",rd,rn,offsetGetter);
+        return this;
+    }
+    /**
+     * 将rd写入到一个暂时不确定偏移量的位置上，需保证offsetGetter获取到的偏移量在[-4095,4095]范围内
+     */
+    public AsmBuilder str(Reg rd,Reg rn, Supplier<Integer> offsetGetter)
+    {
+        ldstr("str",rd,rn,offsetGetter);
+        return this;
+    }
+
+    private void ldstr(String op,Reg rd,Reg rn, Supplier<Integer> offsetGetter)
+    {
+        building.add(new AsmCode("\t%s\t%s, [%s, #%s]",()->op, rd::getText, rn::getText, ()->{
+            Integer offset = offsetGetter.get();
+            return String.valueOf(offset);
+        }));
+    }
+
     public AsmBuilder push(Reg[] regs, boolean lr) {
-        /*String regList = Arrays.stream(regs).map(Reg::getText).collect(Collectors.joining(","));
-        if (lr) {
-            return addInstruction("push", String.format("{%s,lr}", regList));
-        }
-        return addInstruction("push", String.format("{%s}", regList));*/
+
         return push(Arrays.asList(regs), lr);
     }
 

@@ -9,6 +9,11 @@ public class AsmCode {
         this.template = template;
     }
 
+    public AsmCode(String template,Supplier<String>... args)
+    {
+        this.template = template;
+        this.args=args;
+    }
 
     public String template;
     public Supplier<String>[] args;

@@ -805,7 +805,10 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitSignExpr(SysYParser.SignExprContext ctx) {
-
+        if(ctx.result!=null && ctx.result.isData)
+        {
+            return;
+        }
         UnaryRepre.UnaryOp opcode = null;
         if(ctx.Plus()!=null)
         {
@@ -845,6 +848,10 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitMulExp(SysYParser.MulExpContext ctx) {
+        if(ctx.result!=null && ctx.result.isData)
+        {
+            return;
+        }
         if (ctx.op==null) {
             ctx.result=ctx.unaryExp().result;
             ctx.startStmt = ctx.unaryExp().startStmt;
@@ -882,6 +889,10 @@ public class SysYIRListener implements SysYListener {
 
     @Override
     public void exitAddExp(SysYParser.AddExpContext ctx) {
+        if(ctx.result!=null && ctx.result.isData)
+        {
+            return;
+        }
         if (ctx.op==null) {
             ctx.result=ctx.mulExp().result;
             ctx.startStmt = ctx.mulExp().startStmt;
