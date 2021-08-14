@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("UnusedReturnValue")
@@ -203,7 +204,7 @@ public class AsmBuilder {
 
     public AsmBuilder file(int index , String fileName)
     {
-        return addDirective(String.format("file\t%d \"%s\"",fileName));
+        return addDirective(String.format("file\t%d \"%s\"",index,fileName));
     }
 
     //========================汇编指令部分===================================
@@ -362,7 +363,11 @@ public class AsmBuilder {
         {
             if(offset>4095 || offset< -4095)
             {
-                Reg tmp = regGetter.getTmpRegister();
+                Reg tmp;
+                if(op==Mem.LDR)
+                    tmp = rd;
+                else
+                    tmp = regGetter.getTmpRegister();
                 //ldrEq(tmp, offset);
                 dataHolder.addAndLoadFromFuncData(this,offset,tmp);
                 return mem(op,size,rd,rn,tmp,false,ShiftOp.LSL,0,saveOffset,postOffset);
@@ -407,8 +412,8 @@ public class AsmBuilder {
         {
             if(offset>4095 || offset< -4095)
             {
-                Reg baseReg = regGetter.getTmpRegister();
-                Reg offsetReg = regGetter.getTmpRegister(1);
+                Reg baseReg = rd;
+                Reg offsetReg = regGetter.getTmpRegister(0);
                 ldr(baseReg,label,0);
                 //ldrEq(offsetReg,Math.abs(offset));
                 dataHolder.addAndLoadFromFuncData(this,offset,offsetReg);
@@ -437,7 +442,7 @@ public class AsmBuilder {
     }
 
     public AsmBuilder ldr(Reg rd, Reg rn, int offset) {
-        if(_hookIfNotImmXX)
+        /*if(_hookIfNotImmXX)
         {
             if(offset>4095 || offset< -4095)
             {
@@ -446,7 +451,7 @@ public class AsmBuilder {
                 //dataHolder.addAndLoadFromFuncData(this,offset,offsetReg);
                 return mem(Mem.LDR,null,rd,rn,offsetReg,offset<0,ShiftOp.LSL,0,false,false);
             }
-        }
+        }*/
         return mem(Mem.LDR, null, rd, rn, offset, false, false);
     }
 

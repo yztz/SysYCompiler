@@ -9,11 +9,16 @@ public class AsmSection {
     }
 
     //public String label;
-    public List<String>  statements = new ArrayList<>();
+    public List<AsmCode>  statements = new ArrayList<>();
 
     public void add(String line)
     {
-        statements.add(line);
+        statements.add(new AsmCode(line));
+    }
+
+    public void add(AsmCode code)
+    {
+        statements.add(code);
     }
 
     public void add(AsmSection section){
@@ -22,8 +27,8 @@ public class AsmSection {
 
     public void getText(StringBuilder builder)
     {
-        for (String stmt : statements) {
-            builder.append(stmt).append("\r\n");
+        for (AsmCode stmt : statements) {
+            builder.append(stmt.toString()).append("\r\n");
         }
     }
 }

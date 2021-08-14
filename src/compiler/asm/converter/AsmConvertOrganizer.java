@@ -43,7 +43,7 @@ public class AsmConvertOrganizer {
         int dataId = 0;
         FunctionDataHolder holder = new FunctionDataHolder(funcSymbol,dataId++);
 
-        // 如果mov的立即数不是imm12，则替换成ldr,改为从内存中加载
+        // 如果mov的立即数不是imm8m，则替换成ldr,改为从内存中加载
         builder.hookIfNotImmXX(holder, regGetter);
 
         regGetter.hookIfNotEnough(builder);
