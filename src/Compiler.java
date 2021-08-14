@@ -33,6 +33,7 @@ public class Compiler {
         String outputFileStr = null;
         boolean optimization = false;
         String operation = null;
+        boolean genDebugInfo = false;
         try {
             for (int i = 0, argsLength = args.length; i < argsLength; i++) {
                 String arg = args[i];
@@ -56,6 +57,9 @@ public class Compiler {
                     case "-o":
                         outputFileStr = args[i+1];
                         i++;
+                        break;
+                    case "-g":
+                        genDebugInfo= true;
                         break;
                     default:
                         inputFileStr = arg;
@@ -93,7 +97,7 @@ public class Compiler {
             System.out.println(irListener.irUnion.toString());
 
 
-            AsmGen asmGen = new AsmGen(symbolTableHost);
+            AsmGen asmGen = new AsmGen(symbolTableHost,genDebugInfo);
             String result = asmGen.generate(irListener.irUnion);
 
             FileWriter writer;

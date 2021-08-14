@@ -18,9 +18,10 @@ import java.util.*;
 public class AsmGen {
     SymbolTableHost symbolTableHost;
     public boolean genDebugInfo = false;
-    public AsmGen(SymbolTableHost symbolTableHost) {
+    public AsmGen(SymbolTableHost symbolTableHost,boolean genDebugInfo) {
         //throw new IOException("试一试");
         this.symbolTableHost = symbolTableHost;
+        this.genDebugInfo=genDebugInfo;
     }
 
     public String generate(IRUnion irUnion) {

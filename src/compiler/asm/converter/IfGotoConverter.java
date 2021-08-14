@@ -40,10 +40,16 @@ public class IfGotoConverter extends AsmConverter{
             builder.cmp(rd,imm8m);
             relOp = relOp.swapLeftRight(); //左右颠倒
         }else{ //todo 都是立即数
-            Reg rd = regGetter.getTmpRegister(0);
-            Reg rn = regGetter.getTmpRegister(1);
-            builder.mov(rd,ifIr.left.item);
-            builder.mov(rn,ifIr.right.item);
+            //Reg rd = regGetter.getTmpRegister(0);
+            //Reg rn = regGetter.getTmpRegister(1);
+            //builder.mov(rd,ifIr.left.item);
+            //builder.mov(rn,ifIr.right.item);
+            //builder.cmp(rd,rn);
+            builder.commit(String.format("%d %s %d",ifIr.left.item,relOp,ifIr.right.item));
+            if (relOp.compute(ifIr.left.item, ifIr.right.item)) {
+                builder.b(ifIr.getTargetIR().getLabel());
+            }
+            return 1;
         }
 
         switch (relOp)
