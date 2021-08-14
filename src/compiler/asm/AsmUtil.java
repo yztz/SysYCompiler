@@ -64,6 +64,12 @@ public class AsmUtil {
         return (varSymbol instanceof VarSymbol && ((VarSymbol) varSymbol).hasConstInitValue) && varSymbol.initValues instanceof ArrayInitValue;
     }
 
+    public static boolean isNeedInitInFuncData(HasInitSymbol varSymbol)
+    {
+        return (varSymbol instanceof VarSymbol && ((VarSymbol) varSymbol).hasConstInitValue) &&
+                !AsmUtil.imm8m(varSymbol.initValues.get(0)) && !AsmUtil.negImm8m(varSymbol.initValues.get(0));
+    }
+
 
     public static int getSymbolArrayIndexOffset(int arrayIndex)
     {
@@ -137,13 +143,25 @@ public class AsmUtil {
     /*
      * Checks if immediate value can be converted to imm12(12 bits) value.
      */
-    public static boolean imm8m(long x)
+    public static boolean imm8m(int x)
     {
         int rot;
 
+            for (rot = 0; rot < 16; rot++)
+                if ((x & ~ror32(0xff, 2 * rot)) == 0)
+                    return true;
+
+        return false;
+    }
+
+    public static boolean negImm8m(int x)
+    {
+        int rot;
+        x = -x;
         for (rot = 0; rot < 16; rot++)
             if ((x & ~ror32(0xff, 2 * rot)) == 0)
                 return true;
+
         return false;
     }
 

@@ -7,6 +7,9 @@ import compiler.genir.code.InitVarRepresent;
 import compiler.genir.code.InterRepresent;
 import compiler.genir.code.LAddrRepresent;
 import compiler.genir.code.LSRepresent;
+import compiler.symboltable.HasInitSymbol;
+import compiler.symboltable.ValueSymbol;
+import compiler.symboltable.VarSymbol;
 import compiler.symboltable.function.FuncSymbol;
 
 import java.util.ArrayList;
@@ -55,16 +58,26 @@ public class AsmConvertOrganizer {
             List<InterRepresent> flatIRList = irBlock.getAllIR();
             for (int j = 0; j < flatIRList.size(); j++) {
                 InterRepresent ir = flatIRList.get(j);
+
+
                 if(ir instanceof InitVarRepresent)
                 {
-                    holder.addData(((InitVarRepresent) ir).varSymbol);
+                    VarSymbol varSymbol = ((InitVarRepresent) ir).varSymbol;
+                    if(AsmUtil.isNeedInitInFuncData(varSymbol)
+                        || AsmUtil.isNeedInitInDataSection(varSymbol))
+                            holder.addData(varSymbol);
                 }
                 if(ir instanceof LSRepresent)
                 {
-                    holder.addData(((LSRepresent) ir).valueSymbol);
+                    ValueSymbol valueSymbol = ((LSRepresent) ir).valueSymbol;
+                    if(valueSymbol instanceof HasInitSymbol && ((HasInitSymbol) valueSymbol).isGlobalSymbol())
+                        holder.addData(valueSymbol);
                 }else if(ir instanceof LAddrRepresent)
                 {
-                    holder.addData(((LAddrRepresent) ir).valueSymbol);
+                    ValueSymbol valueSymbol = ((LAddrRepresent) ir).valueSymbol;
+
+                    if(valueSymbol instanceof HasInitSymbol && ((HasInitSymbol) valueSymbol).isGlobalSymbol())
+                        holder.addData(((LAddrRepresent) ir).valueSymbol);
                 }
 
                 for (AsmConverter converter : allConverter) {

@@ -295,7 +295,7 @@ public class AsmBuilder {
         return regOperand(RegOperandOP.CMP, rd, new RegOperand(rn));
     }
 
-    public AsmBuilder cmp(Reg rd, long imm8m) {
+    public AsmBuilder cmp(Reg rd, int imm8m) {
         if(_hookIfNotImmXX)
         {
             if(!AsmUtil.imm8m(imm8m))
@@ -516,16 +516,26 @@ public class AsmBuilder {
     }
 
     public AsmBuilder mov(Reg rd, int imm8m) {
+        RegOperandOP op;
+        int actNum;
+        if(imm8m>=0){
+            op = RegOperandOP.MOV;
+            actNum=imm8m;
+        }
+        else{
+            op = RegOperandOP.MVN;
+            actNum = -imm8m-1;
+        }
+
         if(_hookIfNotImmXX)
         {
-            if(!AsmUtil.imm8m(imm8m))
+            if(!AsmUtil.imm8m(actNum))
             {
-                //ldrEq(rd, imm8m);
                 dataHolder.addAndLoadFromFuncData(this,imm8m,rd);
                 return this;
             }
         }
-        return addInstruction(RegOperandOP.MOV.getText(), rd.getText(), String.format("#%d", imm8m));
+        return addInstruction(op.getText(), rd.getText(), String.format("#%d", actNum));
     }
 
     public AsmBuilder mov(Cond cond,Reg rd,int imm8m)
