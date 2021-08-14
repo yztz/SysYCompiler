@@ -49,7 +49,7 @@ public class AsmConvertOrganizer {
         // 如果mov的立即数不是imm8m，则替换成ldr,改为从内存中加载
         builder.hookIfNotImmXX(holder, regGetter);
 
-        regGetter.hookIfNotEnough(builder);
+        regGetter.hookIfNotEnough(builder,funcSymbol);
 
         genFunctionGenericStart(builder,funcSymbol,regGetter);
         asmSections.add(builder.getSectionAndStartNew());
@@ -105,7 +105,7 @@ public class AsmConvertOrganizer {
                     }
                     // 如果mov的立即数不是imm8m，则替换成ldr,改为从内存中加载
                     builder.hookIfNotImmXX(holder, regGetter);
-                    regGetter.hookIfNotEnough(builder);
+                    regGetter.hookIfNotEnough(builder,funcSymbol);
                 }
             }
         }

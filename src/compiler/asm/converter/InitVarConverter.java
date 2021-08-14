@@ -43,11 +43,11 @@ public class InitVarConverter extends AsmConverter{
                     return id > 2;
                 }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
 
-                AsmUtil.protectRegs(builder, regGetter, usingRegister);
+                AsmUtil.protectRegs(builder, regGetter, usingRegister,funcSymbol);
 
                 builder.bl("memcpy");
 
-                AsmUtil.recoverRegs(builder, regGetter, usingRegister);
+                AsmUtil.recoverRegs(builder, regGetter, usingRegister,funcSymbol);
             } else { //小于4个，用str加载
 
                 Reg addr = regGetter.getTmpRegister(0);

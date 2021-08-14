@@ -76,6 +76,9 @@ public class AsmUtil {
         return arrayIndex*ConstDef.WORD_SIZE;
     }
 
+    /**
+     * 获取变量在局部变量区的偏移量
+     */
     public static int getSymbolOffset(ValueSymbol symbol)
     {
         return -symbol.getOffsetByte() - symbol.getByteSize();
@@ -87,34 +90,40 @@ public class AsmUtil {
     }
 
     //这些区域用来保存寄存器数据
-    public static final int REG_DATA_LEN = 32;
+    //public static final int REG_DATA_LEN = 32;
 
-    public static final int REG_STAGE_LEN = 128;//32个值
+    //public static final int REG_STAGE_LEN = 128;//32个值
 
-    public static int getFrameSize(int localSize,int maxParamCount)
+    public static int getFrameSize(FuncSymbol funcSymbol)
     {
-        int frameSize = ((int) Math.ceil(((double)localSize)/4.0 + maxParamCount))*4 + 8;
-        return frameSize+REG_STAGE_LEN+REG_DATA_LEN;
+        int frameSize = ((int) Math.ceil(((double)funcSymbol.localByteSize)/4.0 + funcSymbol.maxCallParamCount))*4 + 8;
+        return frameSize+(funcSymbol.regStageLen+funcSymbol.regProtectLen)*ConstDef.WORD_SIZE;
     }
 
     public static int getSymbolOffsetFp(ValueSymbol symbol)
     {
-        return getSymbolOffset(symbol)-2* ConstDef.WORD_SIZE- REG_DATA_LEN - REG_STAGE_LEN;
+        return getSymbolOffset(symbol)-2* ConstDef.WORD_SIZE;
     }
     public static int getSymbolOffsetFp(ValueSymbol symbol, int arrayIndex)
     {
-        return getSymbolOffset(symbol,arrayIndex) -2* ConstDef.WORD_SIZE - REG_DATA_LEN - REG_STAGE_LEN;
+        return getSymbolOffset(symbol,arrayIndex) -2* ConstDef.WORD_SIZE;
     }
-
+    public static int getLocalStackByteSize(FuncSymbol funcSymbol)
+    {
+        return funcSymbol.localByteSize;
+    }
     //需要保存fp,lr,所以往低地址偏移两个字
-    public static int getRegOffsetFP()
+    public static int getRegProtectOffsetFP(FuncSymbol funcSymbol)
     {
-        return -REG_DATA_LEN -2* ConstDef.WORD_SIZE;
+        return -2* ConstDef.WORD_SIZE
+                - getLocalStackByteSize(funcSymbol)
+                - funcSymbol.regProtectLen*ConstDef.WORD_SIZE ;
     }
 
-    public static int getRegStageOffsetFP()
+    public static int getRegStageOffsetFP(FuncSymbol funcSymbol)
     {
-        return getRegOffsetFP() - REG_STAGE_LEN;
+        return getRegProtectOffsetFP(funcSymbol)
+                - funcSymbol.regStageLen*ConstDef.WORD_SIZE;
     }
 
     public static int getParamOffsetCalledFp(int index)
@@ -208,26 +217,27 @@ public class AsmUtil {
         return result;
     }
 
-    public static void protectRegs(AsmBuilder builder,RegGetter regGetter,List<Reg> regs)
+    public static void protectRegs(AsmBuilder builder,RegGetter regGetter,List<Reg> regs,FuncSymbol funcSymbol)
     {
         if(regs.size()>0)
         {
             Reg tmp = regGetter.getTmpRegister();
             //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
-            builder.add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
+            //为符合imm8m,转为整数改用sub指令
+            builder.sub(tmp,Regs.FP,() -> - AsmUtil.getRegProtectOffsetFP(funcSymbol));
             builder.stm(AsmBuilder.LSAddressMode.NONE,tmp,regs);
             regGetter.releaseReg(tmp);
         }
     }
 
-    public static void recoverRegs(AsmBuilder builder,RegGetter regGetter,List<Reg> regs)
+    public static void recoverRegs(AsmBuilder builder,RegGetter regGetter,List<Reg> regs,FuncSymbol funcSymbol)
     {
         if(regs.size()>0)
         {
             Reg tmp = regGetter.getTmpRegister();
             //dataHolder.loadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),tmp);
 
-            builder.add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
+            builder.sub(tmp,Regs.FP,()-> - AsmUtil.getRegProtectOffsetFP(funcSymbol));
             builder.ldm(AsmBuilder.LSAddressMode.NONE,tmp,regs);
             regGetter.releaseReg(tmp);
         }

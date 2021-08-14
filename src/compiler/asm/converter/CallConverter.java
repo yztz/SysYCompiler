@@ -79,7 +79,7 @@ public class CallConverter extends AsmConverter{
             builder.add(tmp,Regs.FP,AsmUtil.getRegOffsetFP());
             builder.stm(AsmBuilder.LSAddressMode.NONE,tmp,usingRegister);
         }*/
-        AsmUtil.protectRegs(builder,regGetter,usingRegister);
+        AsmUtil.protectRegs(builder,regGetter,usingRegister,funcSymbol);
 
         builder.bl(targetFun instanceof FuncSymbol ?((FuncSymbol)targetFun).getAsmLabel():
                            targetFun.getFuncName());
@@ -90,7 +90,7 @@ public class CallConverter extends AsmConverter{
             //regGetter.setReg(callIr,callIr.returnResult,Regs.R0);
         }
 
-        AsmUtil.recoverRegs(builder,regGetter,usingRegister);
+        AsmUtil.recoverRegs(builder,regGetter,usingRegister,funcSymbol);
         /*if(usingRegister.size()>0)
         {
             Reg tmp = regGetter.getTmpRegister();

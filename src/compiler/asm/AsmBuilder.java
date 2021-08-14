@@ -591,6 +591,30 @@ public class AsmBuilder {
         return addInstruction(RegRegOperandOP.ADD.getText(), rd.getText(), rn.getText(), toImm(imm8m));
     }
 
+    /**
+     * 加法，还不确定操作数，需保证立即数符合imm8m
+     */
+    public AsmBuilder add(Reg rd, Reg rn, Supplier<Integer> imm8mGetter) {
+
+        building.add(new AsmCode("\tadd\t%s, %s, #%s",rd::getText,rn::getText,()->
+                String.valueOf(imm8mGetter.get())));
+
+        return this;
+        //return addInstruction(RegRegOperandOP.ADD.getText(), rd.getText(), rn.getText(), toImm(imm8m));
+    }
+
+    /**
+     * 加法，还不确定操作数，需保证立即数符合imm8m
+     */
+    public AsmBuilder sub(Reg rd, Reg rn, Supplier<Integer> imm8mGetter) {
+
+        building.add(new AsmCode("\tsub\t%s, %s, #%s",rd::getText,rn::getText,()->
+                String.valueOf(imm8mGetter.get())));
+
+        return this;
+        //return addInstruction(RegRegOperandOP.ADD.getText(), rd.getText(), rn.getText(), toImm(imm8m));
+    }
+
     public AsmBuilder sub(Reg rd, Reg rn, Operand operand) {
 
         return regRegOperand(RegRegOperandOP.SUB, rd, rn, operand);

@@ -121,62 +121,10 @@ public class AsmGen {
                     maxCallParamNum = Math.max(maxCallParamNum,((CallRepresent) ir).params.length);
             }
         }
-        funcSymbol.setStackFrameSize(AsmUtil.getFrameSize(totalByteSize,maxCallParamNum));
-        /*int frameSize = ((int) Math.ceil(((double)totalByteSize)/4.0 + maxCallParamNum))*4 + 8;//4字节对齐,直接乘2
-        funcSymbol.setStackFrameSize(frameSize+AsmUtil.REG_DATA_LEN + AsmUtil.REG_STAGE_LEN);*/
+        funcSymbol.localByteSize = totalByteSize;
+        funcSymbol.maxCallParamCount = maxCallParamNum;
+        funcSymbol.setStackFrameSize(AsmUtil.getFrameSize(funcSymbol));
     }
-
-    /*public void prepareFunctionData(FuncSymbol funcSymbol,IRFunction irFunction,FunctionDataHolder holder)
-    {
-        HashSet<ValueSymbol> usedSymbol = new HashSet<>();
-        for (InterRepresent ir : irFunction.flatIR()) {
-            if(ir instanceof LSRepresent)
-            {
-                usedSymbol.add(((LSRepresent) ir).valueSymbol);
-            }else if(ir instanceof LAddrRepresent)
-            {
-                usedSymbol.add(((LAddrRepresent) ir).valueSymbol);
-            }
-        }
-
-        for (ValueSymbol symbol : symbolTableHost.getGlobalSymbolTable().getAllSymbol()) {
-            if(!usedSymbol.contains(symbol))
-                continue;
-
-            if(symbol instanceof HasInitSymbol)
-            {
-                HasInitSymbol init = (HasInitSymbol) symbol;
-                holder.addData(init);
-            }
-        }
-
-        for (SymbolTable table : symbolTableHost.symbolTableMap.values()) {
-            SymbolDomain domain = table.getDomain();
-
-            if(funcSymbol!=domain.getFunc())
-                continue;
-
-            for (ValueSymbol symbol : table.getAllSymbol()) {
-                if(symbol instanceof HasInitSymbol)
-                {
-                    holder.addData(symbol);
-                }
-            }
-        }
-        //holder.addData(FunctionDataHolder.RegFuncData.getInstance());
-    }*/
-
-   /* public AsmSection genFunctionData(FuncSymbol funcSymbol,IRFunction irFunction,FunctionDataHolder holder)
-    {
-        AsmBuilder builder = new AsmBuilder(AsmUtil.getFuncDataLabel(funcSymbol));
-        builder.align(2);
-        builder.label();
-        for (FunctionDataHolder.FuncData data : holder.getAllFuncData()) {
-            data.genData(builder);
-        }
-
-        return builder.getSection();
-    }*/
 
 
     public List<AsmSection> genStaticData() {

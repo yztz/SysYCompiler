@@ -3,6 +3,7 @@ package compiler.asm;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class AsmCode {
     public AsmCode(String template) {
@@ -28,6 +29,7 @@ public class AsmCode {
         if(args==null)
             return template;
         else
-            return String.format(template, Arrays.stream(args).map(Supplier::get));
+            return String.format(template,
+                                 Arrays.stream(args).map(Supplier::get).toArray());
     }
 }

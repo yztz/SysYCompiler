@@ -122,7 +122,7 @@ public class BinocularConverter extends AsmConverter{
                         return id>1 && target!=r;
                     }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
 
-            AsmUtil.protectRegs(builder,regGetter,usingRegister);
+            AsmUtil.protectRegs(builder,regGetter,usingRegister,funcSymbol);
 
             if(bIR.OP== BinocularRepre.Opcodes.DIV)
             {
@@ -134,7 +134,7 @@ public class BinocularConverter extends AsmConverter{
                 builder.mov(target,Regs.R1);
             }
 
-            AsmUtil.recoverRegs(builder,regGetter,usingRegister);
+            AsmUtil.recoverRegs(builder,regGetter,usingRegister,funcSymbol);
             //regGetter.setReg(ir, bIR.target, Regs.R0);
         }/*else if(bIR.OP== BinocularRepre.Opcodes.MOD)
         {

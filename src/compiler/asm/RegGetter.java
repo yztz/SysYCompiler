@@ -4,6 +4,7 @@ import compiler.ConstDef;
 import compiler.genir.IRBlock;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.InterRepresent;
+import compiler.symboltable.function.FuncSymbol;
 
 import java.util.*;
 import java.util.function.Function;
@@ -15,10 +16,12 @@ public class RegGetter {
 
     private boolean hookIfNotEnough;
     private AsmBuilder builder;
+    private FuncSymbol funcSymbol;
     //private FunctionDataHolder dataHolder;
-    public void hookIfNotEnough(AsmBuilder builder/*,FunctionDataHolder holder*/) {
+    public void hookIfNotEnough(AsmBuilder builder, FuncSymbol funcSymbol) {
         this.hookIfNotEnough = true;
         this.builder= builder;
+        this.funcSymbol = funcSymbol;
         //this.dataHolder = holder;
     }
 
@@ -35,18 +38,22 @@ public class RegGetter {
     }
     private Map<AddressOrData,Integer> refTimes=new HashMap<>();
 
-    private static final int regStagingMemLen = AsmUtil.REG_STAGE_LEN;
-    private boolean[] usedRegStagingMem = new boolean[regStagingMemLen /ConstDef.WORD_SIZE];
+    private List<Boolean> usedRegStagingMem = new ArrayList<>();
     private int getAvailableStagingOffsetWord()
     {
-        for (int i = 0; i < usedRegStagingMem.length; i++) {
-            if(!usedRegStagingMem[i])
+        int i = 0;
+        for (; i < usedRegStagingMem.size(); i++) {
+            if(!usedRegStagingMem.get(i))
                 return i;
         }
 
-        System.err.println("寄存器暂存区容量不足");
-        System.exit(3);
-        return 0;
+        usedRegStagingMem.add(true);
+        funcSymbol.regStageLen++;
+        return i;
+
+        //System.err.println("寄存器暂存区容量不足");
+        //System.exit(3);
+        //return 0;
     }
 
     /**
@@ -142,15 +149,12 @@ public class RegGetter {
         //因为我们获取的是临时寄存器，所以会被标记为准备释放。从readyToReleaseReg中移除，不然结束后它将被释放
         readyToReleaseReg.remove(tmp);
 
-        /*dataHolder.addAndLoadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),
-                                          tmp);*/
-
-
         int offset = regOrMem.memOffset;//getAvailableStagingOffset();
 
-        builder.add(tmp,Regs.FP,AsmUtil.getRegStageOffsetFP()+offset * ConstDef.WORD_SIZE);
+        //偏移量一定是负的，为保证符合imm8m所以转为正数使用sub指令
+        builder.sub(tmp,Regs.FP,()-> -(AsmUtil.getRegStageOffsetFP(funcSymbol) + offset * ConstDef.WORD_SIZE));
         builder.ldr(tmp,tmp,0);
-        usedRegStagingMem[offset] = false;
+        usedRegStagingMem.set(offset, false);
         RegOrMem newRegOrMem = new RegOrMem(tmp);
         varDesc.put(key, newRegOrMem );
         builder.commit("load stage data of "+ key.address +" to "+tmp);
@@ -178,14 +182,14 @@ public class RegGetter {
             /*dataHolder.addAndLoadFromFuncData(builder, FunctionDataHolder.RegFuncData.getInstance(),
                                               Regs.R12);*/
             int offsetWord = getAvailableStagingOffsetWord();
-            builder.add(Regs.R12,Regs.FP,AsmUtil.getRegStageOffsetFP()+offsetWord * ConstDef.WORD_SIZE);
+            builder.sub(Regs.R12,Regs.FP,()-> - (AsmUtil.getRegStageOffsetFP(funcSymbol)+offsetWord * ConstDef.WORD_SIZE));
             builder.str(reg,Regs.R12,0);
             RegOrMem regOrMem = new RegOrMem(offsetWord);
 
             AddressRWInfo addressRWInfo = regDesc.get(reg);
             varDesc.put(addressRWInfo,regOrMem); //修改原来的映射信息
 
-            usedRegStagingMem[offsetWord] = true;
+            usedRegStagingMem.set(offsetWord,true);
             builder.commit("stage "+addressRWInfo.address+ " in " +reg);
         }
 

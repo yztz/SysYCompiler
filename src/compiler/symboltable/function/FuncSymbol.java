@@ -56,6 +56,11 @@ public class FuncSymbol extends AbstractFuncSymbol{
         return returnType!=BType.VOID;
     }
 
+    public int regProtectLen = 0;
+    public int regStageLen = 0;
+    public int localByteSize;
+    public int maxCallParamCount;
+
     private int stackFrameSize;
     public void setStackFrameSize(int val)
     {
