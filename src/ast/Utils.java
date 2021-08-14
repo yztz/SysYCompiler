@@ -208,7 +208,7 @@ public class Utils {
             if (null == offset) {
                 offset = idx;
             } else {
-                offset = AstNode.makeBinaryNode(OP.ADD, offset, idx);
+                offset = AstNode.makeBinaryNode(OP.ADD, offset, idx).compute();
             }
 
         }

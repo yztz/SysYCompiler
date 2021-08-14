@@ -24,6 +24,7 @@ public class Variable implements IName {
     public int paramIndex = -1;
     public int pos = 0; //用于数组初始化赋值
 
+
     public Variable(String name, Domain domain, boolean isConst, boolean isArray, int size) {
         this.name = name;
         this.domain = domain;
