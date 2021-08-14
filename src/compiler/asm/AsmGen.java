@@ -123,7 +123,7 @@ public class AsmGen {
         }
         funcSymbol.localByteSize = totalByteSize;
         funcSymbol.maxCallParamCount = maxCallParamNum;
-        funcSymbol.setStackFrameSize(AsmUtil.getFrameSize(funcSymbol));
+        //funcSymbol.setStackFrameSize(AsmUtil.getFrameSize(funcSymbol));
     }
 
 

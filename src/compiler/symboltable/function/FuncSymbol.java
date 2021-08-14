@@ -61,7 +61,7 @@ public class FuncSymbol extends AbstractFuncSymbol{
     public int localByteSize;
     public int maxCallParamCount;
 
-    private int stackFrameSize;
+    /*private int stackFrameSize;
     public void setStackFrameSize(int val)
     {
         stackFrameSize =val;
@@ -69,7 +69,7 @@ public class FuncSymbol extends AbstractFuncSymbol{
     public int getStackFrameSize()
     {
         return stackFrameSize;
-    }
+    }*/
 
     private boolean funcCallInside = false;
 

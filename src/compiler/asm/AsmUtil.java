@@ -227,6 +227,8 @@ public class AsmUtil {
             builder.sub(tmp,Regs.FP,() -> - AsmUtil.getRegProtectOffsetFP(funcSymbol));
             builder.stm(AsmBuilder.LSAddressMode.NONE,tmp,regs);
             regGetter.releaseReg(tmp);
+
+            funcSymbol.regProtectLen=Math.max(funcSymbol.regProtectLen,regs.size());
         }
     }
 
@@ -240,6 +242,8 @@ public class AsmUtil {
             builder.sub(tmp,Regs.FP,()-> - AsmUtil.getRegProtectOffsetFP(funcSymbol));
             builder.ldm(AsmBuilder.LSAddressMode.NONE,tmp,regs);
             regGetter.releaseReg(tmp);
+
+            funcSymbol.regProtectLen=Math.max(funcSymbol.regProtectLen,regs.size());
         }
     }
 }
