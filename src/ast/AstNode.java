@@ -277,7 +277,8 @@ public class AstNode implements Tree {
             }
             if (null == this.result)
                 this.result = this;
-
+            else
+                this.result.result = this.result;
             return result;
         }
 
@@ -401,6 +402,7 @@ public class AstNode implements Tree {
                 this.result = this;
                 break;
         }
+        this.result.result = this.result;
         return result;
     }
 }

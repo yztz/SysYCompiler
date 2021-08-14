@@ -18,7 +18,7 @@ public class FunctionContext {
     public Function function;
     public List<Code> codes = new LinkedList<>();
     public List<IR> irs;
-    private List<Register> savedRegs = new LinkedList<>();
+    private Set<Register> savedRegs = new HashSet<>();
     //    public int baseOffset = 4;  // (r - 1) * 4
     public int frameSize;
     public int localSize;
@@ -26,6 +26,9 @@ public class FunctionContext {
     public ILabel returnLabel;
     private int paramCount = 0;
     private List<Variable> initVars = new ArrayList<>();
+
+    private int pushHook;
+    private int popHook;
 
 
     public FunctionContext(Function function) {
@@ -42,10 +45,23 @@ public class FunctionContext {
         initVariable();
         genBody();
         genTail();
+        genHook();
+    }
+
+    private void genHook() {
+        List<Register> regs = new ArrayList<>(savedRegs);
+        // 排序
+        regs.sort(Register.comparator);
+        // push hook
+        codes.set(pushHook, AsmFactory.push(regs));
+        // pop hook
+        int lrIdx = regs.indexOf(Register.lr);
+        if (lrIdx != -1) regs.set(lrIdx, Register.pc);
+        codes.set(popHook, AsmFactory.pop(regs));
     }
 
     private void enableLR() {
-        if (!this.savedRegs.contains(Register.lr)) this.savedRegs.add(Register.lr);
+        this.savedRegs.add(Register.lr);
     }
 
     public void analyze() {
@@ -61,21 +77,24 @@ public class FunctionContext {
                 Function callee = (Function) ir.op2;
                 maxParamBytes = Math.max(maxParamBytes, callee.getParamBytes() - 16);
             }
-            /* 分析全局变量的使用情况 */
-//            ir.getNames().forEach(name -> {
-//                if (name instanceof Variable) {
-//                    Variable var = (Variable) name;
-//                    if (var.isGlobal()) {   // 引用了全局变量
-//                        globalVarMap.put(var, Label.newLabel(String.format("%s.L%d", function.name, nextLabelID++)));
-//                    }
-//                } else if (name instanceof OffsetVar) {
-//                    Variable var = ((OffsetVar) name).variable;
-//                    if (var.isGlobal()) {   // 引用了全局变量
-//                        globalVarMap.put(var, Label.newLabel(String.format("%s.L%d", function.name, nextLabelID++)));
-//                    }
-//                }
-//            });
         }
+        /* 分析寄存器使用 */
+        for (BasicBlock block : function.blocks) {
+            RegisterAllocator allocator = new RegisterAllocator(this, block);
+            IR lastIR = null;
+            for (IR ir : block.getIRs()) {
+                lastIR = ir;
+                allocator.getReg(ir);
+                // 如果当前语句是跳转语句，则在该语句之前生成保存语句
+                if (ir.isJump() || ir.isReturn()) allocator.saveAll();
+                // 在每天语句末尾删除不相关的名字
+                allocator.killName();
+            }
+            // 基本块的最后一条不是跳转语句，主动生成保存语句
+            if (!lastIR.isJump() && !lastIR.isReturn()) allocator.saveAll();
+            savedRegs.addAll(allocator.usedRegs);
+        }
+        codes.clear();
 
         /* 分析数组定义 */
         function.getVariables().forEach(variable -> {
@@ -137,7 +156,8 @@ public class FunctionContext {
         codes.add(AsmFactory.type(function.name, "function"));
 
         codes.add(AsmFactory.label(function.name));
-        codes.add(AsmFactory.push(savedRegs));
+        pushHook = codes.size();
+        codes.add(AsmFactory.code(null));
         codes.add(AsmFactory.add(Register.fp, Register.sp, 4 * (savedRegs.size() - 1)));
         if (Utils.imm8m(localSize)){
             codes.add(AsmFactory.sub(Register.sp, Register.sp, localSize));
@@ -146,6 +166,7 @@ public class FunctionContext {
             codes.add(AsmFactory.sub(Register.sp, Register.sp, Register.r4));
         }
     }
+
 
     @SuppressWarnings("SuspiciousMethodCalls")
     public void genBody() {
@@ -456,6 +477,7 @@ public class FunctionContext {
             }
             // 基本块的最后一条不是跳转语句，主动生成保存语句
             if (!lastIR.isJump() && !lastIR.isReturn()) allocator.saveAll();
+//            savedRegs.addAll(allocator.usedRegs);
         }
     }
 
@@ -465,13 +487,21 @@ public class FunctionContext {
         codes.add(AsmFactory.label(returnLabel.getLabelName()));
         /* 恢复 */
         codes.add(AsmFactory.sub(Register.sp, Register.fp, 4 * (savedRegs.size() - 1)));
+//        if (savedRegs.contains(Register.lr)) {
+//            savedRegs.set(savedRegs.indexOf(Register.lr), Register.pc);
+//            codes.add(AsmFactory.pop(savedRegs));
+//        } else {
+//            codes.add(AsmFactory.pop(popHook));
+//            codes.add(AsmFactory.bx(Register.lr));
+//        }
+        popHook = codes.size();
         if (savedRegs.contains(Register.lr)) {
-            savedRegs.set(savedRegs.indexOf(Register.lr), Register.pc);
-            codes.add(AsmFactory.pop(savedRegs));
+            codes.add(AsmFactory.code(null));
         } else {
-            codes.add(AsmFactory.pop(savedRegs));
+            codes.add(AsmFactory.code(null));
             codes.add(AsmFactory.bx(Register.lr));
         }
+
         /* 长度 */
         codes.add(AsmFactory.size(function.name, ".-" + function.name));
     }

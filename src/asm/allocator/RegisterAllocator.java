@@ -9,8 +9,9 @@ import ast.Immediate;
 import common.OffsetVar;
 import common.Register;
 import common.Utils;
+import common.symbol.Function;
 import common.symbol.Variable;
-import ir.Temp;
+import common.Temp;
 import ir.code.IR;
 
 import java.util.*;
@@ -71,7 +72,8 @@ public class RegisterAllocator {
                     }
                 }
             }
-        } else if (name instanceof OffsetVar) {
+        }
+        else if (name instanceof OffsetVar) {
             OffsetVar offsetVar = ((OffsetVar) name);
             IAstValue offset = offsetVar.getOffset();
             Variable variable = offsetVar.variable;
@@ -103,6 +105,13 @@ public class RegisterAllocator {
                     Register offsetReg = allocReg4rVal((IName) offset);
                     codes.add(AsmFactory.ldrWithOffset(register, addr, offsetReg, true));
                 }
+            }
+        }
+        else if (name instanceof Temp) {
+            Temp tmp = ((Temp) name);
+            if (tmp.paramIdx > Function.PARAM_LIMIT - 1) {
+                int offset = (tmp.paramIdx - Function.PARAM_LIMIT) * 4;
+                codes.add(AsmFactory.ldrWithOffset(register, Register.sp, offset));
             }
         }
     }
@@ -152,7 +161,8 @@ public class RegisterAllocator {
                     }
                 }
             }
-        } else if (name instanceof OffsetVar) {
+        }
+        else if (name instanceof OffsetVar) {
             OffsetVar offsetVar = ((OffsetVar) name);
             Variable variable = offsetVar.variable;
             IAstValue offset = offsetVar.getOffset();
@@ -203,26 +213,32 @@ public class RegisterAllocator {
                 }
             }
         }
-
+        else if (name instanceof Temp) {
+            Temp tmp = ((Temp) name);
+            if (tmp.paramIdx > Function.PARAM_LIMIT - 1) {
+                int offset = (tmp.paramIdx - Function.PARAM_LIMIT) * 4;
+                codes.add(AsmFactory.strWithOffset(register, Register.sp, offset));
+            }
+        }
         describer.freeName(name);
     }
 
-    private void saveState() {
-        IName savedName = null;
-        for (Register register : Describer.availableReg) {
-            Set<IName> names = describer.getNames(register);
-            for (IName name : names) {
-                // 当前名字是tmp
-                if (name instanceof Temp && isReferredAfter(name, currentIR)) {
-                    codes.add(AsmFactory.mov(Register.r4, register));
-                    savedName = name;
-                }
-            }
-        }
-        saveAll();
-        if (savedName != null)
-            describer.updateName(Register.r4, savedName);
-    }
+//    private void saveState() {
+//        IName savedName = null;
+//        for (Register register : Describer.availableReg) {
+//            Set<IName> names = describer.getNames(register);
+//            for (IName name : names) {
+//                // 当前名字是tmp
+//                if (name instanceof Temp && isReferredAfter(name, currentIR)) {
+//                    codes.add(AsmFactory.mov(Register.r4, register));
+//                    savedName = name;
+//                }
+//            }
+//        }
+//        saveAll();
+//        if (savedName != null)
+//            describer.updateName(Register.r4, savedName);
+//    }
 
 
     private Register spill() {
@@ -364,7 +380,7 @@ public class RegisterAllocator {
                 ret.put(((IName) ir.op2), allocReg4rVal(((IName) ir.op2)));
                 break;
             case CALL:
-                saveState();
+//                saveState();
                 if (null != ir.op1) {
                     Register register = allocReg4lVal(ir);
                     ret.put(((IName) ir.op1), register);

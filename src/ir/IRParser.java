@@ -3,6 +3,7 @@ package ir;
 import ast.*;
 import common.ILabel;
 import common.OffsetVar;
+import common.Temp;
 import common.symbol.Function;
 import ir.code.*;
 import common.OP;
@@ -11,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ir.Temp.newTmp;
+import static common.Temp.newTmp;
 
 public class IRParser {
     public void flatAst(AstNode root) {
@@ -116,8 +117,13 @@ public class IRParser {
             case PARAM:
                 List<AstNode> children = root.getSubTrees();
                 Map<AstNode, IAstValue> results = new HashMap<>();
-                for (AstNode child : children) {
-                    if (child.op == OP.CALL) results.put(child, parseAst(child));
+                for (int i = 0; i < children.size(); i++) {
+                    AstNode child = children.get(i);
+                    if (child.op == OP.CALL) {
+                        tmp = (Temp) parseAst(child);
+                        tmp.paramIdx = i;
+                        results.put(child, tmp);
+                    }
                 }
                 for (AstNode child : root.getSubTrees()) {
                     IAstValue res;

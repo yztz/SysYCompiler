@@ -1,10 +1,13 @@
-package ir;
+package common;
 
 import asm.IName;
+import common.symbol.Function;
 
 public class Temp implements IName {
     private static int next_id = 0;
 
+    public int paramIdx = -1;
+    public Function function;
 
     public final int id;
     private Temp(int id) {

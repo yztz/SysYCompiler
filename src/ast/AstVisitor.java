@@ -370,7 +370,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
                     return AstNode.makeBinaryNode(OP.SUB, left, right).compute();
             }
         }
-        return right;
+        return right.compute();
     }
 
     @Override
@@ -390,7 +390,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             }
         }
 
-        return right;
+        return right.compute();
     }
 
     @Override

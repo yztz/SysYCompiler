@@ -3,13 +3,9 @@ package asm.allocator;
 import asm.IName;
 import common.ILabel;
 import common.OP;
-import common.OffsetVar;
-import common.symbol.Variable;
 import ir.IRs;
-import ir.Temp;
-import ir.code.BinaryIR;
+import common.Temp;
 import ir.code.CondGoToIR;
-import ir.code.GoToIR;
 import ir.code.IR;
 
 import java.util.*;
