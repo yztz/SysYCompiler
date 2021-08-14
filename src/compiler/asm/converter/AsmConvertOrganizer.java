@@ -145,9 +145,12 @@ public class AsmConvertOrganizer {
             builder.b(holder.getLabel()+".end");
 
         builder.label();
-        for (FunctionDataHolder.FuncData data : holder.getAllFuncData()) {
-            data.genData(builder);
-        }
+        builder.delayGen(b->{
+            for (FunctionDataHolder.FuncData data : holder.getAllFuncData()) {
+                data.genData(b);
+            }
+        });
+
         if(!laseOne)
             builder.label(holder.getLabel()+".end");
         return builder.getSection();

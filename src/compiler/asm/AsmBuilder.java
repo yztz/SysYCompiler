@@ -243,7 +243,10 @@ public class AsmBuilder {
 
     public AsmBuilder delayGen(Consumer<AsmBuilder> builder)
     {
-        building.add(new AsmCodeSupplier(builder));
+        if(_hookIfNotImmXX)
+            building.add(new AsmCodeSupplier(builder,dataHolder,regGetter));
+        else
+            building.add(new AsmCodeSupplier(builder));
         return this;
     }
 
