@@ -1,5 +1,6 @@
 package compiler.asm.converter;
 
+import compiler.ConstDef;
 import compiler.Location;
 import compiler.asm.*;
 import compiler.genir.IRBlock;
@@ -108,13 +109,15 @@ public class AsmConvertOrganizer {
                     regGetter.hookIfNotEnough(builder,funcSymbol);
                 }
             }
+
+            regGetter.clearLoadSaveInfo();
         }
 
         asmSections.add(builder.getSectionAndStartNew());
 
         //生成函数的开头和保存LR寄存器和移动FP的代码
         //在这里生成，是因为我们需要知道代码中是否修改了lr寄存器
-        builder.text().align(2).global().arch("armv7-a").fpu("vfp").type(AsmBuilder.Type.Function).label();
+        builder.text().align(2).global().arch(ConstDef.getArchName()).fpu("vfp").type(AsmBuilder.Type.Function).label();
 
         if(genDebugInfo)
             builder.lfb(funcSymbol.defineOrder).loc(1,funcSymbol.defineLocation);
@@ -169,7 +172,6 @@ public class AsmConvertOrganizer {
             asmBuilder.ldr(tmp, Regs.FP, AsmUtil.getParamOffsetCalledFp(i));
             asmBuilder.str(tmp, Regs.FP, AsmUtil.getSymbolOffsetFp(funcSymbol.paramSymbols.get(i)));
             regGetter.releaseReg(tmp);
-            //todo 之前没加也可以，为什么呢
         }
     }
 

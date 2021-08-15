@@ -5,11 +5,9 @@ import compiler.asm.operand.*;
 import compiler.genir.code.IfGotoRepresent;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("UnusedReturnValue")
@@ -207,12 +205,22 @@ public class AsmBuilder {
     {
         return addDirective(String.format("file\t%d \"%s\"",index,fileName));
     }
-
-    //========================汇编指令部分===================================
-
     public AsmBuilder size(String targetLabel, long size) {
         return addDirective("size", targetLabel, String.valueOf(size));
     }
+    //========================汇编指令部分===================================
+
+
+
+    public AsmBuilder delayGen(Consumer<AsmBuilder> builder)
+    {
+        if(_hookIfNotImmXX)
+            building.add(new AsmCodeSupplier(builder,dataHolder,regGetter));
+        else
+            building.add(new AsmCodeSupplier(builder));
+        return this;
+    }
+
     public AsmBuilder addInstruction(String op, String r1, String r2, String r3, String r4) {
         building.add(String.format("\t%s\t%s, %s, %s, %s", op, r1, r2, r3,r4));
         return this;
@@ -241,14 +249,31 @@ public class AsmBuilder {
         return addInstruction(op.getText(), rd.getText(), rn.getText(), rm.getText());
     }
 
-    public AsmBuilder delayGen(Consumer<AsmBuilder> builder)
+    public AsmBuilder regRegImmOrReg(RegRegImmOrRegOP op, Reg rd, Reg rn, int imm8m)
     {
         if(_hookIfNotImmXX)
-            building.add(new AsmCodeSupplier(builder,dataHolder,regGetter));
-        else
-            building.add(new AsmCodeSupplier(builder));
-        return this;
+        {
+            if(!AsmUtil.imm8m(imm8m))
+            {
+                Reg tmp;
+                if(rd!=rn)
+                {
+                    tmp = rd;
+                }else{
+                    tmp = regGetter.getTmpRegister();
+                }
+                mov(tmp,imm8m);
+                regRegImmOrReg(op,rd,rn,tmp);
+                regGetter.releaseReg(tmp);
+            }
+        }
+        return addInstruction(op.getText(), rd.getText(), rn.getText(), String.format("#%d",imm8m));
     }
+    public AsmBuilder regRegImmOrReg(RegRegImmOrRegOP op, Reg rd, Reg rn, Reg rs)
+    {
+        return addInstruction(op.getText(), rd.getText(), rn.getText(), rs.getText());
+    }
+
 
     /**
      * 检查操作数是否合法，比如是否符合imm8m，如果不合法，会自动进行一些处理，可能会插入一些语句
@@ -577,6 +602,16 @@ public class AsmBuilder {
         return addInstruction(RegRegOperandOP.SUB.getText(), rd.getText(), rn.getText(), toImm(imm8m));
     }
 
+    public AsmBuilder mul(Reg rd,Reg rn,Reg rm)
+    {
+        return tripleReg(TripleRegOP.MUL,rd,rn,rm);
+    }
+
+    public AsmBuilder sdiv(Reg rd,Reg rn,Reg rm)
+    {
+        return tripleReg(TripleRegOP.SDIV,rd,rn,rm);
+    }
+
     public AsmBuilder commit(String commit)
     {
         building.add(String.format("@%s",commit));
@@ -635,12 +670,27 @@ public class AsmBuilder {
         }
     }
 
-    public enum TripleRegOP {
+    public enum TripleRegOP{
         ADD, SUB, MUL, //乘
         MLA, //乘并加
         MLS, //乘并减
         UMLL, UMLAL, UMAAL, SDIV,//有符号除
-        UDIV;//无符号除
+        UDIV,//无符号除
+        ASR,//算数右移
+        LSL,//逻辑左移
+        LSR,//逻辑右移
+        ROR;//循环右移
+
+        public String getText() {
+            return name().toLowerCase(Locale.ROOT);
+        }
+    }
+
+    public enum RegRegImmOrRegOP {
+        ASR,//算数右移
+        LSL,//逻辑左移
+        LSR,//逻辑右移
+        ROR;//循环右移
 
         public String getText() {
             return name().toLowerCase(Locale.ROOT);

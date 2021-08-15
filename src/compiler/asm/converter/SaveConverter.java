@@ -21,8 +21,8 @@ public class SaveConverter extends LSConverter {
     public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         SaveRepresent saveIR = (SaveRepresent)ir;
 
-        LoadSaveInfo loadSaveInfo = getLoadSaveInfo(funcSymbol);
-        loadSaveInfo.canLastLoadUse.put(saveIR.valueSymbol,false);
+        RegGetter.LoadSaveInfo loadSaveInfo = regGetter.getLoadSaveInfo(funcSymbol);
+        loadSaveInfo.putCanLastLoadedUse(saveIR.valueSymbol,saveIR.offset,false);
 
 
         LazyGetter<Reg> rdGetter;
@@ -38,9 +38,9 @@ public class SaveConverter extends LSConverter {
         int num =  super.process(AsmBuilder.Mem.STR, builder, regGetter, (LSRepresent) ir,funcSymbol,dataHolder,
                                 rdGetter);
 
-        loadSaveInfo.canLastSaveUse.put(saveIR.valueSymbol,true);
-        loadSaveInfo.lastSaveAddress.put(saveIR.valueSymbol,saveIR.target);
-        loadSaveInfo.lastSaveReg.put(saveIR.valueSymbol,rdGetter.get());
+        loadSaveInfo.putCanLastSaveUse(saveIR.valueSymbol,saveIR.offset,true);
+        loadSaveInfo.putLastSaveAddress(saveIR.valueSymbol,saveIR.offset,saveIR.target);
+        loadSaveInfo.putLastSaveReg(saveIR.valueSymbol,saveIR.offset,rdGetter.get());
 
         return num;
     }

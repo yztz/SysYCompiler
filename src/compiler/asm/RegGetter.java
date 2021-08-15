@@ -4,6 +4,7 @@ import compiler.ConstDef;
 import compiler.genir.IRBlock;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.InterRepresent;
+import compiler.symboltable.ValueSymbol;
 import compiler.symboltable.function.FuncSymbol;
 
 import java.util.*;
@@ -406,5 +407,95 @@ public class RegGetter {
             inMem=true;
             this.memOffset = memOffset;
         }
+    }
+
+    public static class SymbolAndOffset{
+        public ValueSymbol symbol;
+        public AddressOrData offset;
+
+        public SymbolAndOffset(ValueSymbol symbol, AddressOrData offset) {
+            this.symbol = symbol;
+            this.offset = offset;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SymbolAndOffset that = (SymbolAndOffset) o;
+            return symbol.equals(that.symbol) && offset.equals(that.offset);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(symbol, offset);
+        }
+    }
+    public static class LoadSaveInfo{
+        public boolean getCanLastLoadedUse(ValueSymbol symbol,AddressOrData offset)
+        {
+            return canLastLoadUse.getOrDefault(new SymbolAndOffset(symbol,offset),false);
+        }
+        public AddressOrData getLastLoadAddress(ValueSymbol symbol,AddressOrData offset)
+        {
+            return lastLoadAddress.get(new SymbolAndOffset(symbol,offset));
+        }
+        public boolean getCanLastSaveUse(ValueSymbol symbol,AddressOrData offset)
+        {
+            return canLastSaveUse.getOrDefault(new SymbolAndOffset(symbol,offset),false);
+        }
+        public AddressOrData getLastSaveAddress(ValueSymbol symbol,AddressOrData offset)
+        {
+            return lastSaveAddress.get(new SymbolAndOffset(symbol,offset));
+        }
+
+        public Reg getLastSaveReg(ValueSymbol symbol,AddressOrData offset)
+        {
+            return lastSaveReg.get(new SymbolAndOffset(symbol,offset));
+        }
+
+        public void putCanLastLoadedUse(ValueSymbol symbol,AddressOrData offset,boolean can)
+        {
+            canLastLoadUse.put(new SymbolAndOffset(symbol,offset),can);
+        }
+        public void putLastLoadAddress(ValueSymbol symbol,AddressOrData offset,AddressOrData address)
+        {
+            lastLoadAddress.put(new SymbolAndOffset(symbol,offset),address);
+        }
+        public void putCanLastSaveUse(ValueSymbol symbol,AddressOrData offset,boolean can)
+        {
+            canLastSaveUse.put(new SymbolAndOffset(symbol,offset),can);
+        }
+        public void putLastSaveAddress(ValueSymbol symbol,AddressOrData offset,AddressOrData target)
+        {
+            lastSaveAddress.put(new SymbolAndOffset(symbol,offset),target);
+        }
+
+        public void putLastSaveReg(ValueSymbol symbol,AddressOrData offset,Reg reg)
+        {
+            lastSaveReg.put(new SymbolAndOffset(symbol,offset),reg);
+        }
+
+        private Map<SymbolAndOffset,Boolean> canLastLoadUse = new HashMap<>();
+        private Map<SymbolAndOffset, AddressOrData> lastLoadAddress = new HashMap<>();
+
+        private Map<SymbolAndOffset,Boolean> canLastSaveUse = new HashMap<>();
+        private Map<SymbolAndOffset, AddressOrData> lastSaveAddress = new HashMap<>();
+        private Map<SymbolAndOffset, Reg> lastSaveReg = new HashMap<>();
+    }
+
+    public static Map<FuncSymbol,LoadSaveInfo> loadSaveInfoMap=new HashMap<>();
+
+    public LoadSaveInfo getLoadSaveInfo(FuncSymbol funcSymbol)
+    {
+        if(!loadSaveInfoMap.containsKey(funcSymbol))
+            loadSaveInfoMap.put(funcSymbol,new LoadSaveInfo());
+
+        return loadSaveInfoMap.get(funcSymbol);
+    }
+
+    public void clearLoadSaveInfo()
+    {
+        loadSaveInfoMap.clear();
     }
 }

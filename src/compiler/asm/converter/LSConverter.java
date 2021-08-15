@@ -13,29 +13,10 @@ import compiler.symboltable.ValueSymbol;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public abstract class LSConverter extends AsmConverter {
-    public static class LoadSaveInfo{
-        protected Map<ValueSymbol,Boolean> canLastLoadUse = new HashMap<>();
-        protected Map<ValueSymbol, AddressOrData> lastLoadAddress = new HashMap<>();
-
-        protected Map<ValueSymbol,Boolean> canLastSaveUse = new HashMap<>();
-        protected Map<ValueSymbol, AddressOrData> lastSaveAddress = new HashMap<>();
-        protected Map<ValueSymbol, Reg> lastSaveReg = new HashMap<>();
-    }
-
-    public static Map<FuncSymbol,LoadSaveInfo> loadSaveInfoMap=new HashMap<>();
-
-    protected LoadSaveInfo getLoadSaveInfo(FuncSymbol funcSymbol)
-    {
-        if(!loadSaveInfoMap.containsKey(funcSymbol))
-            loadSaveInfoMap.put(funcSymbol,new LoadSaveInfo());
-
-        return loadSaveInfoMap.get(funcSymbol);
-    }
-
-
     public int process(AsmBuilder.Mem op, AsmBuilder builder, RegGetter regGetter, LSRepresent ir,
                        FuncSymbol funcSymbol, FunctionDataHolder data, LazyGetter<Reg> rdGetter) {
         ValueSymbol valueSymbol = ir.valueSymbol;

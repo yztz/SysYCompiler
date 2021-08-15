@@ -23,17 +23,16 @@ public class LoadConverter extends LSConverter {
         LoadRepresent loadIr = (LoadRepresent) ir;
         ValueSymbol valueSymbol = loadIr.valueSymbol;
 
-        LoadSaveInfo loadSaveInfo = getLoadSaveInfo(funcSymbol);
-        /*if(loadSaveInfo.canLastLoadUse.containsKey(valueSymbol) &&
-                loadSaveInfo.canLastLoadUse.get(valueSymbol)) //之前已读取，且没有被修改(由SaveConverter设置)
+        RegGetter.LoadSaveInfo loadSaveInfo = regGetter.getLoadSaveInfo(funcSymbol);
+        if(loadSaveInfo.getCanLastLoadedUse(valueSymbol,loadIr.offset)) //之前已读取，且没有被修改(由SaveConverter设置)
         {
-            AddressOrData addressOrData = loadSaveInfo.lastLoadAddress.get(valueSymbol);
+            AddressOrData addressOrData = loadSaveInfo.getLastLoadAddress(valueSymbol,loadIr.offset);
             RegGetter.RegOrMem regOrMem = regGetter.getReg(addressOrData);
             if(regOrMem.inMem)
             {
                 Reg targetReg = regGetter.distributeReg(loadIr,loadIr.target);
                 regGetter.loadStagedFromMem(regOrMem, targetReg);
-                loadSaveInfo.lastLoadAddress.put(valueSymbol,loadIr.target);
+                loadSaveInfo.putLastLoadAddress(valueSymbol,loadIr.offset,loadIr.target);
                 return 1;
             }else {
                 AddressRWInfo addressInReg = regGetter.getAddressInReg(regOrMem.reg);
@@ -42,14 +41,15 @@ public class LoadConverter extends LSConverter {
                     //regGetter.setReg(loadIr,loadIr.target,regOrMem.reg);
                     Reg reg = regGetter.distributeReg(ir, loadIr.target, r -> r != regOrMem.reg);
                     builder.mov(reg,regOrMem.reg);
-                    loadSaveInfo.lastLoadAddress.put(valueSymbol,loadIr.target);
+                    loadSaveInfo.putCanLastLoadedUse(valueSymbol,loadIr.offset,true);
+                    loadSaveInfo.putLastLoadAddress(valueSymbol,loadIr.offset,loadIr.target);
                     return 1;
                 }
             }
-        }*/
+        }
 
-        loadSaveInfo.canLastLoadUse.put(valueSymbol,true);
-        loadSaveInfo.lastLoadAddress.put(valueSymbol,loadIr.target);
+        loadSaveInfo.putCanLastLoadedUse(valueSymbol,loadIr.offset,true);
+        loadSaveInfo.putLastLoadAddress(valueSymbol,loadIr.offset,loadIr.target);
 
         boolean flag = false;
         if (valueSymbol instanceof ConstSymbol) {

@@ -1,5 +1,7 @@
 package compiler.asm.converter;
 
+import compiler.ConstDef;
+import compiler.Util;
 import compiler.asm.*;
 import compiler.asm.operand.ImmOperand;
 import compiler.asm.operand.RegOperand;
@@ -51,6 +53,82 @@ public class BinocularConverter extends AsmConverter{
             return 1;
         }
 
+        if(bIR.OP == BinocularRepre.Opcodes.MUL)
+        {
+            if(bIR.sourceFirst.isData && !bIR.sourceSecond.isData)
+            {
+
+                int num = bIR.sourceFirst.item;
+                if(Util.isPow2(num))
+                {
+                    Reg reg = regGetter.distributeReg(bIR,bIR.target);
+                    Reg rd = regGetter.distributeReg(bIR, bIR.sourceSecond);
+                    int pow2 = Util.getPow2(num);
+                    builder.regRegImmOrReg(AsmBuilder.RegRegImmOrRegOP.LSL,reg,rd,pow2);
+                    return 1;
+                }
+            }else if(!bIR.sourceFirst.isData && bIR.sourceSecond.isData)
+            {
+                int num = bIR.sourceSecond.item;
+                if(Util.isPow2(num))
+                {
+                    Reg reg = regGetter.distributeReg(bIR,bIR.target);
+                    Reg rd = regGetter.distributeReg(bIR, bIR.sourceFirst);
+                    int pow2 = Util.getPow2(num);
+                    builder.regRegImmOrReg(AsmBuilder.RegRegImmOrRegOP.LSL,reg,rd,pow2);
+                    return 1;
+                }
+            }
+        }else if(bIR.OP == BinocularRepre.Opcodes.DIV)
+        {
+            if(!bIR.sourceFirst.isData && bIR.sourceSecond.isData)
+            {
+                int num = bIR.sourceSecond.item;
+                if(Util.isPow2(num))
+                {
+                    Reg reg = regGetter.distributeReg(bIR,bIR.target);
+                    Reg rd = regGetter.distributeReg(bIR, bIR.sourceFirst);
+                    int pow2 = Util.getPow2(num);
+                    builder.regRegImmOrReg(AsmBuilder.RegRegImmOrRegOP.ASR,reg,rd,pow2);
+                    return 1;
+                }
+            }
+        }else if(bIR.OP == BinocularRepre.Opcodes.MOD && ConstDef.modPow2Optimize)
+        {
+            if(!bIR.sourceFirst.isData && bIR.sourceSecond.isData)
+            {
+                int num = bIR.sourceSecond.item;
+                if(Util.isPow2(num))
+                {
+                    Reg reg = regGetter.distributeReg(bIR,bIR.target);
+                    Reg rd = regGetter.distributeReg(bIR, bIR.sourceFirst); //左操作数
+                    int pow2 = Util.getPow2(num);
+                    builder.regRegOperand(AsmBuilder.RegRegOperandOP.AND,reg,rd,new ImmOperand(pow2));
+                }
+                /*if(Util.isPow2(num))
+                {
+                    Reg reg = regGetter.distributeReg(bIR,bIR.target);
+                    Reg rd = regGetter.distributeReg(bIR, bIR.sourceFirst); //左操作数
+                    int pow2 = Util.getPow2(num);
+
+                    if(reg!=rd)
+                    {
+                        builder.regRegImmOrReg(AsmBuilder.RegRegImmOrRegOP.ASR,reg,rd,pow2);
+                        builder.regRegImmOrReg(AsmBuilder.RegRegImmOrRegOP.LSL,reg,reg,pow2);
+                        builder.sub(reg,rd,reg);
+                    }else{
+                        //如果reg和rd是同一个
+                        Reg tmp = regGetter.getTmpRegister();
+                        builder.regRegImmOrReg(AsmBuilder.RegRegImmOrRegOP.ASR,tmp,rd,pow2);
+                        builder.regRegImmOrReg(AsmBuilder.RegRegImmOrRegOP.LSL,tmp,tmp,pow2);
+                        builder.sub(reg,rd,tmp);
+                        regGetter.releaseReg(tmp);
+                    }
+                    return 1;
+                }*/
+            }
+        }
+
 
         Reg reg = regGetter.distributeReg(ir, bIR.target);
 
@@ -97,82 +175,88 @@ public class BinocularConverter extends AsmConverter{
             }
         }else if(bIR.OP== BinocularRepre.Opcodes.DIV || bIR.OP== BinocularRepre.Opcodes.MOD)
         {
-            //除法用__aeabi_idiv
-            if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData ) //都不是立即数
+
+
+            if(ConstDef.armv7ve)
             {
-                Reg rd = regGetter.distributeReg(bIR, bIR.sourceFirst);
-                Reg rn = regGetter.distributeReg(bIR, bIR.sourceSecond);
-                builder.mov(Regs.R0,rd);
-                builder.mov(Regs.R1,rn);
-            }else if(!bIR.sourceFirst.isData) { //右边的是立即数
-                Reg rd = regGetter.distributeReg(bIR, bIR.sourceFirst);
-                builder.mov(Regs.R0,rd);
-                builder.mov(Regs.R1,bIR.sourceSecond.item);
+                Reg rl;
+                Reg rr;
+                if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData ) //都不是立即数
+                {
+                    rl = regGetter.distributeReg(bIR, bIR.sourceFirst);
+                    rr = regGetter.distributeReg(bIR, bIR.sourceSecond);
+                }else if(!bIR.sourceFirst.isData) { //右边的是立即数
+                    rl = regGetter.distributeReg(bIR, bIR.sourceFirst);
+                    rr = regGetter.getTmpRegister();
+                    builder.mov(rr,bIR.sourceSecond.item);
+                }else{
+
+                    rr = regGetter.distributeReg(bIR, bIR.sourceSecond);
+                    rl = regGetter.getTmpRegister();
+                    builder.mov(rl,bIR.sourceFirst.item);
+                }
+
+                Reg target = regGetter.distributeReg(ir, bIR.target);
+                if(bIR.OP== BinocularRepre.Opcodes.DIV)
+                {
+                    builder.sdiv(target,rl,rr);
+                }
+                else{
+                    if(rl!=target)
+                    {
+                        builder.sdiv(target,rl,rr);
+                        builder.mul(target,target,rr);
+                        builder.sub(target,rl,target);
+                    }else{
+                        Reg tmp = regGetter.getTmpRegister();
+                        builder.sdiv(tmp,rl,rr);
+                        builder.mul(tmp,tmp,rr);
+                        builder.sub(target,rl,tmp);
+                        regGetter.releaseReg(tmp);
+                    }
+                }
             }else{
+                //除法用__aeabi_idiv
+                if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData ) //都不是立即数
+                {
+                    Reg rd = regGetter.distributeReg(bIR, bIR.sourceFirst);
+                    Reg rn = regGetter.distributeReg(bIR, bIR.sourceSecond);
+                    builder.mov(Regs.R0,rd);
+                    builder.mov(Regs.R1,rn);
+                }else if(!bIR.sourceFirst.isData) { //右边的是立即数
+                    Reg rd = regGetter.distributeReg(bIR, bIR.sourceFirst);
+                    builder.mov(Regs.R0,rd);
+                    builder.mov(Regs.R1,bIR.sourceSecond.item);
+                }else{
 
-                Reg rn = regGetter.distributeReg(bIR, bIR.sourceSecond);
-                builder.mov(Regs.R0,bIR.sourceFirst.item);
-                builder.mov(Regs.R1,rn);
+                    Reg rn = regGetter.distributeReg(bIR, bIR.sourceSecond);
+                    builder.mov(Regs.R0,bIR.sourceFirst.item);
+                    builder.mov(Regs.R1,rn);
+                }
+
+                Reg target = regGetter.distributeReg(ir, bIR.target);
+
+                List<Reg> usingRegister =
+                        regGetter.getUsingRegNext().stream().filter(r->{
+                            int id = r.getId();
+                            return id>1 && target!=r;
+                        }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
+
+                AsmUtil.protectRegs(builder,regGetter,usingRegister,funcSymbol);
+
+                if(bIR.OP== BinocularRepre.Opcodes.DIV)
+                {
+                    builder.bl("__aeabi_idiv");
+                    builder.mov(target,Regs.R0);
+                }
+                else{
+                    builder.bl("__aeabi_idivmod");
+                    builder.mov(target,Regs.R1);
+                }
+
+                AsmUtil.recoverRegs(builder,regGetter,usingRegister,funcSymbol);
             }
-
-            Reg target = regGetter.distributeReg(ir, bIR.target);
-            List<Reg> usingRegister =
-                    regGetter.getUsingRegNext().stream().filter(r->{
-                        int id = r.getId();
-                        return id>1 && target!=r;
-                    }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
-
-            AsmUtil.protectRegs(builder,regGetter,usingRegister,funcSymbol);
-
-            if(bIR.OP== BinocularRepre.Opcodes.DIV)
-            {
-                builder.bl("__aeabi_idiv");
-                builder.mov(target,Regs.R0);
-            }
-            else{
-                builder.bl("__aeabi_idivmod");
-                builder.mov(target,Regs.R1);
-            }
-
-            AsmUtil.recoverRegs(builder,regGetter,usingRegister,funcSymbol);
-            //regGetter.setReg(ir, bIR.target, Regs.R0);
-        }/*else if(bIR.OP== BinocularRepre.Opcodes.MOD)
-        {
-            //除法用__aeabi_idivmod
-            if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData) //都不是立即数
-            {
-                Reg rd = regGetter.getReg(bIR, bIR.sourceFirst);
-                Reg rn = regGetter.getReg(bIR, bIR.sourceSecond);
-                builder.mov(Regs.R0,rd);
-                builder.mov(Regs.R1,rn);
-            }else if(!bIR.sourceFirst.isData) { //右边的是立即数
-                Reg rd = regGetter.getReg(bIR, bIR.sourceFirst);
-                builder.mov(Regs.R0,rd);
-                builder.mov(Regs.R1,bIR.sourceSecond.item);
-            }else{
-
-                Reg rn = regGetter.getReg(bIR, bIR.sourceSecond);
-                builder.mov(Regs.R0,bIR.sourceFirst.item);
-                builder.mov(Regs.R1,rn);
-            }
-
-            Reg target = regGetter.getReg(ir, bIR.target);
-
-            List<Reg> usingRegister =
-                    regGetter.getUsingRegNext().stream().filter(r->{
-                        int id = r.getId();
-                        return id>1 && target!=r; //排除掉target，不然恢复的时候会把几所结果覆盖掉
-                    }).sorted(Comparator.comparingInt(Reg::getId)).collect(Collectors.toList());
-
-            AsmUtil.protectRegs(builder,regGetter,usingRegister);
-
-            builder.bl("__aeabi_idivmod");
-            //regGetter.setReg(ir, bIR.target, Regs.R1);
-
-            builder.mov(target,Regs.R1);
-
-            AsmUtil.recoverRegs(builder,regGetter,usingRegister);
-        }*/
+        }
         else{
 
 
@@ -186,6 +270,7 @@ public class BinocularConverter extends AsmConverter{
                 rd = regGetter.distributeReg(bIR, bIR.sourceFirst);
                 builder.mov(rn, bIR.sourceSecond.item);
             }else{
+
                 rd = regGetter.getTmpRegister();
                 rn = regGetter.distributeReg(bIR, bIR.sourceSecond);
                 builder.mov(rd,bIR.sourceFirst.item);
