@@ -34,6 +34,10 @@ public class Compiler {
                     Utils.openStream(args[i + 1]);
                     i = i + 1;
                     break;
+                case "-O2":
+                    break;
+                case "-O1":
+                    break;
                 default:
                     file = arg;
             }
