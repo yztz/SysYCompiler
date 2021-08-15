@@ -122,7 +122,6 @@ public class FunctionContext {
 
     public void initVariable() {
         for (Variable variable : initVars) {
-//            System.out.println(variable.offset);
             codes.add(AsmFactory.note(String.format("init %s, size: %d", variable, variable.getBytes())));
             codes.add(AsmFactory.mov(Register.r2, variable.getBytes()));
             codes.add(AsmFactory.mov(Register.r1, 0));
@@ -234,9 +233,8 @@ public class FunctionContext {
                         rd = regMap.get(ir.op1);
                         rn = regMap.get(ir.op2);
                         if (ir.op3 instanceof Immediate) {
-                            Register tmp = allocator.allocFreeReg();
-                            codes.add(AsmFactory.mov(tmp, ((Immediate) ir.op3).value));
-                            codes.add(AsmFactory.mul(rd, rn, tmp));
+                            codes.add(AsmFactory.mov(Register.ip, ((Immediate) ir.op3).value));
+                            codes.add(AsmFactory.mul(rd, rn, Register.ip));
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.mul(rd, rn, rm));
@@ -247,15 +245,13 @@ public class FunctionContext {
                         //rn = regMap.get(ir.op2);
                         if (ir.op2 instanceof Immediate) {
                             rm = regMap.get(ir.op3);
-                            Register tmp = allocator.allocFreeReg();
-                            codes.add(AsmFactory.mov(tmp, ((Immediate) ir.op2).value));
-                            codes.add(AsmFactory.div(rd, tmp, rm));
+                            codes.add(AsmFactory.mov(Register.ip, ((Immediate) ir.op2).value));
+                            codes.add(AsmFactory.div(rd, Register.ip, rm));
                         } else {
                             rn = regMap.get(ir.op2);
                             if (ir.op3 instanceof Immediate) {
-                                Register tmp = allocator.allocFreeReg();
-                                codes.add(AsmFactory.mov(tmp, ((Immediate) ir.op3).value));
-                                codes.add(AsmFactory.div(rd, rn, tmp));
+                                codes.add(AsmFactory.mov(Register.ip, ((Immediate) ir.op3).value));
+                                codes.add(AsmFactory.div(rd, rn, Register.ip));
                             } else {
                                 rm = regMap.get(ir.op3);
                                 codes.add(AsmFactory.div(rd, rn, rm));
@@ -265,7 +261,7 @@ public class FunctionContext {
                     case MOD:
                         rd = regMap.get(ir.op1);
                         if (ir.op2 instanceof Immediate) {
-                            rn = allocator.allocFreeReg();
+                            rn = Register.ip;
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.mov(rn, ((Immediate) ir.op2).value));
                             codes.add(AsmFactory.div(rd, rn, rm));
@@ -273,7 +269,7 @@ public class FunctionContext {
                         } else {
                             rn = regMap.get(ir.op2);
                             if (ir.op3 instanceof Immediate) {
-                                rm = allocator.allocFreeReg();
+                                rm = Register.ip;
                                 codes.add(AsmFactory.mov(rm, ((Immediate) ir.op3).value));
                                 codes.add(AsmFactory.div(rd, rn, rm));
                                 codes.add(AsmFactory.mls(rd, rm, rd, rn));
@@ -317,7 +313,7 @@ public class FunctionContext {
                         if (paramCount > Function.PARAM_LIMIT - 1) {
                             int offset = 4 * (paramCount - Function.PARAM_LIMIT);
                             if (ir.op1 instanceof Immediate) {  // 参数为立即数
-                                rd = allocator.allocFreeReg();
+                                rd = Register.ip;
                                 codes.add(AsmFactory.mov(rd, ((Immediate) ir.op1).value));
                                 codes.add(AsmFactory.strWithOffset(rd, Register.sp, offset));
                             } else {

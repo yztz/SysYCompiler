@@ -128,7 +128,14 @@ public class AsmFactory {
 //    }
 
     public static Code add(Register rd, Register rn, Register rm) {
-        return Code.code(String.format("add %s, %s, %s", rd, rn, rm));
+        return add(rd, rn, rm, false);
+    }
+
+    public static Code add(Register rd, Register rn, Register rm, boolean align) {
+        if (align)
+            return Code.code(String.format("add %s, %s, %s, lsl #2", rd, rn, rm));
+        else
+            return Code.code(String.format("add %s, %s, %s", rd, rn, rm));
     }
 
     public static Code add(Register rd, Register rn, int imm) {

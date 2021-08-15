@@ -347,7 +347,7 @@ public class AstNode implements Tree {
                 break;
             case AND:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
-                    this.result = AstNode.makeLeaf(left.getInteger() == 1 && right.getInteger() == 1 ? 1 : 0);
+                    this.result = AstNode.makeLeaf(left.getInteger() != 0 && right.getInteger() != 0 ? 1 : 0);
                 } else if (lVal instanceof Immediate) {
                     if (left.getInteger() == 0)
                         this.result = AstNode.makeLeaf(0);
@@ -359,7 +359,7 @@ public class AstNode implements Tree {
                 break;
             case OR:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
-                    this.result = AstNode.makeLeaf(left.getInteger() == 1 || right.getInteger() == 1 ? 1 : 0);
+                    this.result = AstNode.makeLeaf(left.getInteger() != 0 || right.getInteger() != 0 ? 1 : 0);
                 } else if (lVal instanceof Immediate) {
                     if (left.getInteger() != 0)
                         this.result = AstNode.makeLeaf(1);

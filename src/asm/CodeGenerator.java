@@ -34,6 +34,7 @@ public class CodeGenerator {
         if (!globalSymTab.normalVariable.isEmpty())
             write(AsmFactory.section(".data"));
         for (Variable variable : globalSymTab.normalVariable) {
+//            variable.printInitVals();
             write(AsmFactory.var(variable));
         }
         if (!globalSymTab.constVariable.isEmpty())

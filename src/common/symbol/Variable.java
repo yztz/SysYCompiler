@@ -24,6 +24,21 @@ public class Variable implements IName {
     public int paramIndex = -1;
     public int pos = 0; //用于数组初始化赋值
 
+    public void printInitVals() {
+        System.out.println("====================" + name + "=====================");
+        int zeroCount = 0;
+        for (int i = 0; i < size; i++) {
+            int val = constVal.getOrDefault(i, 0);
+            if (0 == val) zeroCount++;
+            else {
+                if (zeroCount != 0)
+                    System.out.printf("\"0[x%d]\": %d%n", zeroCount, val);
+
+                zeroCount = 0;
+                System.out.printf("\"%d\": %d%n", i, val);
+            }
+        }
+    }
 
     public Variable(String name, Domain domain, boolean isConst, boolean isArray, int size) {
         this.name = name;

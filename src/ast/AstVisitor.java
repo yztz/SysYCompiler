@@ -155,8 +155,8 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             AstNode left = visit(ctx.lAndExp());
             AstNode right = visit(ctx.eqExp());
 
-            if (left.isLeaf()) left = AstNode.makeBinaryNode(OP.EQ, left, AstNode.makeLeaf(1));
-            if (right.isLeaf()) right = AstNode.makeBinaryNode(OP.EQ, right, AstNode.makeLeaf(1));
+//            if (left.isLeaf()) left = AstNode.makeBinaryNode(OP.EQ, left, AstNode.makeLeaf(1));
+//            if (right.isLeaf()) right = AstNode.makeBinaryNode(OP.EQ, right, AstNode.makeLeaf(1));
 
             return AstNode.makeBinaryNode(OP.AND, left, right);
         }
