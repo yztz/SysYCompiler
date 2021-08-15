@@ -17,7 +17,10 @@ import org.antlr.v4.runtime.tree.Tree;
 
 
 import javax.swing.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 
 
@@ -80,11 +83,12 @@ public class Compiler {
     public static SysYParser getParser(String fileName) {
         CharStream input = null;
         try {
-            input = CharStreams.fromFileName(fileName);
+            BufferedReader bf = new BufferedReader(new FileReader(fileName));
+            String preprocessed = Utils.preprocess(bf);
+            input = CharStreams.fromString(preprocessed);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        assert input != null;
 
         SysYLexer lexer = new SysYLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);

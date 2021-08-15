@@ -15,8 +15,8 @@ public class Domain {
         functions.put("putint", new Function("putint", "void"));
         functions.put("putch", new Function("putch", "void"));
         functions.put("putarray", new Function("putarray", "void"));
-        functions.put("starttime", new Function("starttime", "void"));
-        functions.put("stoptime", new Function("stoptime", "void"));
+        functions.put("_sysy_starttime", new Function("_sysy_starttime", "void"));
+        functions.put("_sysy_stoptime", new Function("_sysy_stoptime", "void"));
     }
 
     public static Function currentFunc = null;
