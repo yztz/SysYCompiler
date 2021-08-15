@@ -64,7 +64,7 @@ public class RegisterAllocator {
                     codes.add(AsmFactory.ldrWithoutOffset(register, register));
                 } else {    // 局部变量
                     int offset = context.getVariableOffset(variable);
-                    Register offsetReg = loadImm(offset);
+                    Register offsetReg = loadOffset(offset);
                     if (null == offsetReg) {
                         codes.add(AsmFactory.ldrWithOffset(register, Register.fp, offset));
                     } else {
@@ -95,7 +95,7 @@ public class RegisterAllocator {
             } else {    //
                 if (offset instanceof Immediate) {
                     int imm = 4 * ((Immediate) offset).value;
-                    Register offsetReg = loadImm(imm);
+                    Register offsetReg = loadOffset(imm);
                     if (null == offsetReg) {
                         codes.add(AsmFactory.ldrWithOffset(register, addr, imm));
                     } else {
@@ -122,6 +122,15 @@ public class RegisterAllocator {
             return null;
         } else {
             codes.add(AsmFactory.mov(Register.ip, imm));
+            return Register.ip;
+        }
+    }
+
+    public Register loadOffset(int offset) {
+        if (Utils.isLegalOffset(offset)) {
+            return null;
+        } else {
+            codes.add(AsmFactory.mov(Register.ip, offset));
             return Register.ip;
         }
     }
@@ -162,7 +171,7 @@ public class RegisterAllocator {
                 } else {    // 局部变量
                     codes.add(AsmFactory.code(String.format("@ save %s:local", variable.name)));
                     int offset = context.getVariableOffset(variable);
-                    Register offsetReg = loadImm(offset);
+                    Register offsetReg = loadOffset(offset);
                     if (null == offsetReg) {
                         codes.add(AsmFactory.strWithOffset(register, Register.fp, offset));
                     } else {
@@ -182,7 +191,7 @@ public class RegisterAllocator {
                     if (offset instanceof Immediate) {
                         int imm = 4 * ((Immediate) offset).value;
                         // 传送数据
-                        Register offsetReg = loadImm(imm);
+                        Register offsetReg = loadOffset(imm);
                         if (null == offsetReg) {
                             codes.add(AsmFactory.strWithOffset(register, addr, imm));
                         } else {
@@ -197,7 +206,7 @@ public class RegisterAllocator {
                     int arrayAddress = context.getVariableOffset(variable);
                     if (offset instanceof Immediate) {
                         int imm = arrayAddress + ((Immediate) offset).value * 4;
-                        Register offsetReg = loadImm(imm);
+                        Register offsetReg = loadOffset(imm);
                         if (null == offsetReg) {
                             codes.add(AsmFactory.strWithOffset(register, Register.fp, imm));
                         } else {

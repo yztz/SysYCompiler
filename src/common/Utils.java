@@ -66,6 +66,10 @@ public class Utils {
         return false;
     }
 
+    public static boolean isLegalOffset(int offset) {
+        return offset >= -4095 && offset <= 4095;
+    }
+
 }
 
 
