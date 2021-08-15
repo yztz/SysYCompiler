@@ -234,7 +234,28 @@ public class AsmFactory {
         return Code.code(".arm");
     }
 
+    public static Code ltorg() {
+        return Code.code(".ltorg");
+    }
+
     //===============================集成==============================//
+
+    public static final int POOL_SIZE = 1024;
+
+    public static List<Code> pool() {
+        List<Code> codes = new ArrayList<>();
+        codes.add(ltorg());
+        codes.add(space(POOL_SIZE));
+        return codes;
+    }
+
+    public static List<Code> pool(String label) {
+        List<Code> codes = new ArrayList<>();
+        codes.add(b(label));
+        codes.add(ltorg());
+        codes.add(space(POOL_SIZE));
+        return codes;
+    }
 
     public static List<Code> var(Variable variable) {
         List<Code> codes = new ArrayList<>();

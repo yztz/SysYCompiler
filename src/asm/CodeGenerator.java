@@ -13,6 +13,7 @@ import ir.IRs;
 import java.util.*;
 
 public class CodeGenerator {
+    private List<Code> codes = new LinkedList<>();
 
     public void genCode() {
         // 生成头部信息
@@ -20,38 +21,46 @@ public class CodeGenerator {
         // 初始化全局变量
         genGlobalVar();
         // 生成函数
-        write(AsmFactory.code(".text"));
+        addCode(AsmFactory.code(".text"));
         for (Function function : IRs.getFunctions())
-            write(new FunctionContext(function).codes);
+            addCode(new FunctionContext(function).codes);
+        output();
     }
 
     public void genInfo() {
-        write(AsmFactory.arch("armv7ve"));
+        addCode(AsmFactory.arch("armv7ve"));
     }
 
     public void genGlobalVar() {
         SymbolTable globalSymTab = Domain.globalDomain.symbolTable;
         if (!globalSymTab.normalVariable.isEmpty())
-            write(AsmFactory.section(".data"));
+            addCode(AsmFactory.section(".data"));
         for (Variable variable : globalSymTab.normalVariable) {
 //            variable.printInitVals();
-            write(AsmFactory.var(variable));
+            addCode(AsmFactory.var(variable));
         }
         if (!globalSymTab.constVariable.isEmpty())
-            write(AsmFactory.section(".rodata"));
+            addCode(AsmFactory.section(".rodata"));
         for (Variable variable : globalSymTab.constVariable) {
-            write(AsmFactory.var(variable));
+            addCode(AsmFactory.var(variable));
         }
     }
 
 
-    private void write(Code code) {
-        Utils.write(code);
+
+    private void addCode(Code code) {
+        codes.add(code);
+//        Utils.write(code);
     }
-    private void write(List<Code> codes) {
-        for (Code code : codes) {
-            Utils.write(code);
-        }
+    private void addCode(List<Code> codes) {
+//        for (Code code : codes) {
+//            Utils.write(code);
+//        }
+        this.codes.addAll(codes);
+    }
+
+    private void output(){
+        for (Code code : codes) Utils.write(code);
     }
 
 }

@@ -13,6 +13,7 @@ import ir.code.IR;
 import java.util.*;
 
 public class FunctionContext {
+
     private static int nextLabelID = 0;
 
     public Function function;
@@ -46,6 +47,32 @@ public class FunctionContext {
         genBody();
         genTail();
         genHook();
+        insertPools();
+    }
+
+    private void insertPools() {
+        final int partSize = 1024 - AsmFactory.POOL_SIZE / 4;
+        int n = codes.size();
+        // 函数内插入
+        int part = n / partSize;
+        int offset = 0;
+        for (int i = 1; i <= part; i++) {
+            int loc = i * partSize + offset;
+            Code code = codes.get(loc);
+            if (code.isLabel) {
+                List<Code> pool = AsmFactory.pool(code.content);
+                codes.addAll(loc, pool);
+                offset += pool.size();
+            } else {
+                String labelName = String.format(".%s.pool.%d", function.name, i);
+                codes.add(loc, AsmFactory.label(labelName));
+                List<Code> pool = AsmFactory.pool(labelName);
+                codes.addAll(loc, pool);
+                offset += pool.size();
+            }
+        }
+        // 函数末尾添加
+        codes.addAll(AsmFactory.pool());
     }
 
     private void genHook() {
@@ -158,7 +185,7 @@ public class FunctionContext {
         pushHook = codes.size();
         codes.add(AsmFactory.code(null));
         codes.add(AsmFactory.add(Register.fp, Register.sp, 4 * (savedRegs.size() - 1)));
-        if (Utils.imm8m(localSize)){
+        if (Utils.imm8m(localSize)) {
             codes.add(AsmFactory.sub(Register.sp, Register.sp, localSize));
         } else {
             codes.add(AsmFactory.mov(Register.r4, localSize));
@@ -358,7 +385,7 @@ public class FunctionContext {
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
-                            if (Utils.imm8m(imm)){
+                            if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
                                 codes.add(AsmFactory.mov(rd, imm));
@@ -377,7 +404,7 @@ public class FunctionContext {
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
-                            if (Utils.imm8m(imm)){
+                            if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
                                 codes.add(AsmFactory.mov(rd, imm));
@@ -396,7 +423,7 @@ public class FunctionContext {
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
-                            if (Utils.imm8m(imm)){
+                            if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
                                 codes.add(AsmFactory.mov(rd, imm));
@@ -415,7 +442,7 @@ public class FunctionContext {
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
-                            if (Utils.imm8m(imm)){
+                            if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
                                 codes.add(AsmFactory.mov(rd, imm));
@@ -434,7 +461,7 @@ public class FunctionContext {
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
-                            if (Utils.imm8m(imm)){
+                            if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
                                 codes.add(AsmFactory.mov(rd, imm));
@@ -453,7 +480,7 @@ public class FunctionContext {
                         rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
-                            if (Utils.imm8m(imm)){
+                            if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
                                 codes.add(AsmFactory.mov(rd, imm));
