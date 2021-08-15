@@ -1,5 +1,6 @@
 package compiler.asm.converter;
 
+import compiler.ConstDef;
 import compiler.LazyGetter;
 import compiler.asm.*;
 import compiler.genir.code.AddressOrData;
@@ -24,7 +25,8 @@ public class LoadConverter extends LSConverter {
         ValueSymbol valueSymbol = loadIr.valueSymbol;
 
         RegGetter.LoadSaveInfo loadSaveInfo = regGetter.getLoadSaveInfo(funcSymbol);
-        if(loadSaveInfo.getCanLastLoadedUse(valueSymbol,loadIr.offset)) //之前已读取，且没有被修改(由SaveConverter设置)
+        if(ConstDef.avoidUselessLoad && loadSaveInfo.getCanLastLoadedUse(valueSymbol, loadIr.offset)) //之前已读取，且没有被修改
+            // (由SaveConverter设置)
         {
             AddressOrData addressOrData = loadSaveInfo.getLastLoadAddress(valueSymbol,loadIr.offset);
             RegGetter.RegOrMem regOrMem = regGetter.getReg(addressOrData);

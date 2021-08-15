@@ -1,5 +1,6 @@
 package compiler.optim;
 
+import compiler.ConstDef;
 import compiler.Util;
 import compiler.asm.AddressRWInfo;
 import compiler.genir.IRBlock;
@@ -26,7 +27,8 @@ public class OptimizeProcessor {
     {
         jumpOptimize(irFunction);
 
-        mulDivOptimize(irFunction);
+        if(ConstDef.removeUselessMulDiv)
+            mulDivOptimize(irFunction);
 
 
         List<IRBlock> irBlocks = null;
