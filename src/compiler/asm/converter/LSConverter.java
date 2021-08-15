@@ -1,6 +1,7 @@
 package compiler.asm.converter;
 
 import compiler.ConstDef;
+import compiler.LazyGetter;
 import compiler.asm.*;
 import compiler.asm.operand.ShiftOp;
 import compiler.genir.code.AddressOrData;
@@ -15,12 +16,28 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public abstract class LSConverter extends AsmConverter {
+    public static class LoadSaveInfo{
+        protected Map<ValueSymbol,Boolean> canLastLoadUse = new HashMap<>();
+        protected Map<ValueSymbol, AddressOrData> lastLoadAddress = new HashMap<>();
 
-    protected static Map<ValueSymbol,Boolean> canLastLoadUse = new HashMap<>();
-    protected static Map<ValueSymbol, AddressOrData> lastLoadAddress = new HashMap<>();
+        protected Map<ValueSymbol,Boolean> canLastSaveUse = new HashMap<>();
+        protected Map<ValueSymbol, AddressOrData> lastSaveAddress = new HashMap<>();
+        protected Map<ValueSymbol, Reg> lastSaveReg = new HashMap<>();
+    }
+
+    public static Map<FuncSymbol,LoadSaveInfo> loadSaveInfoMap=new HashMap<>();
+
+    protected LoadSaveInfo getLoadSaveInfo(FuncSymbol funcSymbol)
+    {
+        if(!loadSaveInfoMap.containsKey(funcSymbol))
+            loadSaveInfoMap.put(funcSymbol,new LoadSaveInfo());
+
+        return loadSaveInfoMap.get(funcSymbol);
+    }
+
 
     public int process(AsmBuilder.Mem op, AsmBuilder builder, RegGetter regGetter, LSRepresent ir,
-                       FuncSymbol funcSymbol, FunctionDataHolder data, Supplier<Reg> rdGetter) {
+                       FuncSymbol funcSymbol, FunctionDataHolder data, LazyGetter<Reg> rdGetter) {
         ValueSymbol valueSymbol = ir.valueSymbol;
 
         if(!(valueSymbol instanceof ParamSymbol) || !valueSymbol.isArray())

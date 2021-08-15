@@ -1,5 +1,6 @@
 package compiler.asm.converter;
 
+import compiler.LazyGetter;
 import compiler.asm.*;
 import compiler.genir.code.AddressOrData;
 import compiler.genir.code.InterRepresent;
@@ -21,30 +22,32 @@ public class LoadConverter extends LSConverter {
     public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         LoadRepresent loadIr = (LoadRepresent) ir;
         ValueSymbol valueSymbol = loadIr.valueSymbol;
-        if(canLastLoadUse.containsKey(valueSymbol) &&
-                canLastLoadUse.get(valueSymbol)) //之前已读取，且没有被修改(由SaveConverter设置)
+
+        LoadSaveInfo loadSaveInfo = getLoadSaveInfo(funcSymbol);
+        if(loadSaveInfo.canLastLoadUse.containsKey(valueSymbol) &&
+                loadSaveInfo.canLastLoadUse.get(valueSymbol)) //之前已读取，且没有被修改(由SaveConverter设置)
         {
-            AddressOrData addressOrData = lastLoadAddress.get(valueSymbol);
+            AddressOrData addressOrData = loadSaveInfo.lastLoadAddress.get(valueSymbol);
             RegGetter.RegOrMem regOrMem = regGetter.getReg(addressOrData);
             if(regOrMem.inMem)
             {
                 Reg targetReg = regGetter.distributeReg(loadIr,loadIr.target);
                 regGetter.loadStagedFromMem(regOrMem, targetReg);
-                lastLoadAddress.put(valueSymbol,loadIr.target);
+                loadSaveInfo.lastLoadAddress.put(valueSymbol,loadIr.target);
                 return 1;
             }else {
                 AddressRWInfo addressInReg = regGetter.getAddressInReg(regOrMem.reg);
                 if(addressInReg!=null && addressInReg.address.equals(addressOrData)) // 寄存器里依然保存着上次读取的值
                 {
                     regGetter.setReg(loadIr,loadIr.target,regOrMem.reg);
-                    lastLoadAddress.put(valueSymbol,loadIr.target);
+                    loadSaveInfo.lastLoadAddress.put(valueSymbol,loadIr.target);
                     return 1;
                 }
             }
         }
 
-        canLastLoadUse.put(valueSymbol,true);
-        lastLoadAddress.put(valueSymbol,loadIr.target);
+        loadSaveInfo.canLastLoadUse.put(valueSymbol,true);
+        loadSaveInfo.lastLoadAddress.put(valueSymbol,loadIr.target);
 
         boolean flag = false;
         if (valueSymbol instanceof ConstSymbol) {
@@ -60,7 +63,7 @@ public class LoadConverter extends LSConverter {
         }
         if(!flag)
             return super.process(AsmBuilder.Mem.LDR, builder, regGetter, (LSRepresent) ir,funcSymbol, dataHolder,
-                                 ()->regGetter.distributeReg(ir, ((LSRepresent) ir).target));
+                                 new LazyGetter<>(()->regGetter.distributeReg(ir, ((LSRepresent) ir).target)));
         else
             return 1;
     }
