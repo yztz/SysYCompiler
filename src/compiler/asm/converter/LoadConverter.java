@@ -24,7 +24,7 @@ public class LoadConverter extends LSConverter {
         ValueSymbol valueSymbol = loadIr.valueSymbol;
 
         LoadSaveInfo loadSaveInfo = getLoadSaveInfo(funcSymbol);
-        if(loadSaveInfo.canLastLoadUse.containsKey(valueSymbol) &&
+        /*if(loadSaveInfo.canLastLoadUse.containsKey(valueSymbol) &&
                 loadSaveInfo.canLastLoadUse.get(valueSymbol)) //之前已读取，且没有被修改(由SaveConverter设置)
         {
             AddressOrData addressOrData = loadSaveInfo.lastLoadAddress.get(valueSymbol);
@@ -39,12 +39,14 @@ public class LoadConverter extends LSConverter {
                 AddressRWInfo addressInReg = regGetter.getAddressInReg(regOrMem.reg);
                 if(addressInReg!=null && addressInReg.address.equals(addressOrData)) // 寄存器里依然保存着上次读取的值
                 {
-                    regGetter.setReg(loadIr,loadIr.target,regOrMem.reg);
+                    //regGetter.setReg(loadIr,loadIr.target,regOrMem.reg);
+                    Reg reg = regGetter.distributeReg(ir, loadIr.target, r -> r != regOrMem.reg);
+                    builder.mov(reg,regOrMem.reg);
                     loadSaveInfo.lastLoadAddress.put(valueSymbol,loadIr.target);
                     return 1;
                 }
             }
-        }
+        }*/
 
         loadSaveInfo.canLastLoadUse.put(valueSymbol,true);
         loadSaveInfo.lastLoadAddress.put(valueSymbol,loadIr.target);

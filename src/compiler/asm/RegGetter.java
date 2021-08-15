@@ -8,6 +8,7 @@ import compiler.symboltable.function.FuncSymbol;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class RegGetter {
 
@@ -37,7 +38,7 @@ public class RegGetter {
     /**
      * 当前IR使用的
      */
-    HashSet<Reg> usingRegThisIR = new HashSet<>();
+    public HashSet<Reg> usingRegThisIR = new HashSet<>();
     public RegGetter(List<IRBlock> irBlocks) {
         calNextRef(irBlocks);
     }
@@ -140,8 +141,10 @@ public class RegGetter {
             usingRegThisIR.add(reg);
         }
     }
-
-    public Reg distributeReg(InterRepresent ir, AddressOrData address) {
+    public Reg distributeReg(InterRepresent ir, AddressOrData address){
+        return distributeReg(ir,address,t->true);
+    }
+    public Reg distributeReg(InterRepresent ir, AddressOrData address, Predicate<Reg> filter) {
         Map<AddressRWInfo, Reference> refMap = ir.refMap;
         for (AddressRWInfo key : refMap.keySet()) {
             if (key.address != address) continue;
@@ -150,7 +153,7 @@ public class RegGetter {
 
             if (!varDesc.containsKey(key)) {    // 临时变量还未映射
                 // 获取空寄存器
-                register = getFreeReg();
+                register = getFreeReg(filter);
                 if (register == null) {
                     System.out.println("寄存器分配失败");
                     register = stageOneRegAndUseIt(); //把一个寄存器的内容暂存到内存里，然后使用这个寄存器
@@ -226,6 +229,8 @@ public class RegGetter {
             reg = minRefOpt.get();
         }else{
             reg = usableRegs[0];
+            System.err.println("实在找不到能用的寄存器了");
+            System.exit(-3);
         }
 
 
@@ -339,15 +344,11 @@ public class RegGetter {
 
     /**
      * 获取空闲的寄存器
-     *
-     * @param index 第几个空闲的寄存器
      */
-    private Reg getFreeReg(int index) {
-        int i = 0;
+    private Reg getFreeReg(Predicate<Reg> filter) {
         for (Reg register : usableRegs) {
-            if (isFreeRegIgnoreCurrentIR(register)) {
-                if (i == index) return register;
-                i++;
+            if (filter.test(register) && isFreeRegIgnoreCurrentIR(register)) {
+                return register;
             }
         }
         return null;
@@ -380,7 +381,7 @@ public class RegGetter {
      * @return 寄存器
      */
     public Reg getFreeReg() {
-        return getFreeReg(0);
+        return getFreeReg(r->true);
     }
 
     public boolean isFreeReg(Reg register) { //todo 上下两个函数，名字反了

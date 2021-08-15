@@ -168,6 +168,8 @@ public class AsmConvertOrganizer {
             Reg tmp = regGetter.getTmpRegister();
             asmBuilder.ldr(tmp, Regs.FP, AsmUtil.getParamOffsetCalledFp(i));
             asmBuilder.str(tmp, Regs.FP, AsmUtil.getSymbolOffsetFp(funcSymbol.paramSymbols.get(i)));
+            regGetter.releaseReg(tmp);
+            //todo 之前没加也可以，为什么呢
         }
     }
 

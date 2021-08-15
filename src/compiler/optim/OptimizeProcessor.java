@@ -26,7 +26,7 @@ public class OptimizeProcessor {
     {
         jumpOptimize(irFunction);
 
-        mulDivOptimize(irFunction);
+        //mulDivOptimize(irFunction);
 
 
         List<IRBlock> irBlocks = null;
