@@ -138,8 +138,31 @@ public class IRParser {
                 AstNode cond = root.getNode(0);
                 AstNode then = root.getNode(1);
                 AstNode el = root.getNode(2);
-                tmp = (Temp) parseAst(cond);
-                IRs.addIR(new CondGoToIR((ILabel) cond.value, tmp));
+                left = parseAst(cond.getLeft());
+                right = parseAst(cond.getRight());
+                switch (cond.op) {
+                    case GE:
+                        op = OP.GE_GOTO;
+                        break;
+                    case GT:
+                        op = OP.GT_GOTO;
+                        break;
+                    case LE:
+                        op = OP.LE_GOTO;
+                        break;
+                    case LT:
+                        op = OP.LT_GOTO;
+                        break;
+                    case EQ:
+                        op = OP.EQ_GOTO;
+                        break;
+                    case NOT_EQ:
+                        op = OP.NOT_EQ_GOTO;
+                        break;
+                    default:
+                        System.err.println("unknown relOP" + op);
+                }
+                IRs.addIR(new CondGoToIR(op, (ILabel) cond.value, left, right));
                 parseAst(el);   // 先parse el方便ir跳转
                 parseAst(then);
                 break;

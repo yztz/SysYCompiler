@@ -18,8 +18,14 @@ public enum OP {
 
     CALL,
     PARAM,
-    COND_GOTO,
+//    COND_GOTO,
     GOTO,
+    GT_GOTO,
+    GE_GOTO,
+    LT_GOTO,
+    LE_GOTO,
+    EQ_GOTO,
+    NOT_EQ_GOTO,
 
     IF_ELSE,
     WHILE,
@@ -65,6 +71,16 @@ public enum OP {
             OR,
     };
 
+    public static final OP[] JUMP_OP = {
+            GOTO,
+            GT_GOTO,
+            GE_GOTO,
+            LT_GOTO,
+            LE_GOTO,
+            EQ_GOTO,
+            NOT_EQ_GOTO,
+    };
+
     public static boolean include(OP op, OP[] ops) {
         for (OP tmp : ops) {
             if (op == tmp) return true;
@@ -76,6 +92,9 @@ public enum OP {
         return include(op, COMMUTATIVE_OP);
     }
 
+    public static boolean isJump(OP op) {
+        return include(op, JUMP_OP);
+    }
 
     /**
      * 判断是否是关系运算
@@ -83,6 +102,8 @@ public enum OP {
     public static boolean isRelOP(OP op) {
         return include(op, REL_OP);
     }
+
+
 
 
 

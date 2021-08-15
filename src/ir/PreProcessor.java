@@ -43,6 +43,7 @@ public class PreProcessor {
         将指定分支下的语句替换if语句
      */
     private static void reduceIf(AstNode ifStat, boolean branch) {
+        System.out.println("reduced...");
         AstNode parent = ifStat.parent;
         AstNode prev = ifStat;
         for (AstNode node : ifStat.getNode(branch ? 1 : 2).getSubTrees()) {

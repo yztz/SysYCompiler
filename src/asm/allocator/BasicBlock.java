@@ -85,7 +85,7 @@ public class BasicBlock {
         System.out.println("========" + id + "========");
         for (IR ir : irs) {
             System.out.print(ir);
-            System.out.println(ir.ref2String());
+//            System.out.println(ir.ref2String());
         }
         System.out.printf("Target Blocks: %s\n", nodes.toString());
     }

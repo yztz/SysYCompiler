@@ -9,6 +9,7 @@ import common.*;
 import common.symbol.Function;
 import common.symbol.Variable;
 import ir.code.IR;
+import ir.code.TernaryIR;
 
 import java.util.*;
 
@@ -374,125 +375,170 @@ public class FunctionContext {
                         }
                         codes.add(AsmFactory.b(returnLabel.getLabelName()));
                         break;
-                    case COND_GOTO:
-                        target = ((ILabel) ir.op1);
-                        rn = regMap.get(ir.op2);
-                        codes.add(AsmFactory.cmp(rn, 0));
-                        codes.add(AsmFactory.bWhen(target.getLabelName(), "ne"));
-                        break;
+//                    case COND_GOTO:
+//                        target = ((ILabel) ir.op1);
+//                        rn = regMap.get(ir.op2);
+//                        codes.add(AsmFactory.cmp(rn, 0));
+//                        codes.add(AsmFactory.bWhen(target.getLabelName(), "ne"));
+//                        break;
+                    case GE_GOTO:
                     case GE:
                         rn = regMap.get(ir.op2);
-                        rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
                             if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
-                                codes.add(AsmFactory.mov(rd, imm));
-                                codes.add(AsmFactory.cmp(rn, rd));
+                                codes.add(AsmFactory.mov(Register.ip, imm));
+                                codes.add(AsmFactory.cmp(rn, Register.ip));
                             }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
                         }
-                        codes.add(AsmFactory.movWhen(rd, 1, "ge"));
-                        codes.add(AsmFactory.movWhen(rd, 0, "lt"));
-                        codes.add(AsmFactory.uxtb(rd));
+                        if (ir instanceof TernaryIR) {
+                            rd = regMap.get(ir.op1);
+                            codes.add(AsmFactory.movWhen(rd, 1, "ge"));
+                            codes.add(AsmFactory.movWhen(rd, 0, "lt"));
+//                            codes.add(AsmFactory.uxtb(rd));
+                        } else {
+                            target = ((ILabel) ir.op1);
+                            codes.add(AsmFactory.bWhen(target.getLabelName(), "ge"));
+                        }
+
+
                         break;
+                    case GT_GOTO:
                     case GT:
                         rn = regMap.get(ir.op2);
-                        rd = regMap.get(ir.op1);
+
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
                             if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
-                                codes.add(AsmFactory.mov(rd, imm));
-                                codes.add(AsmFactory.cmp(rn, rd));
+                                codes.add(AsmFactory.mov(Register.ip, imm));
+                                codes.add(AsmFactory.cmp(rn, Register.ip));
                             }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
                         }
-                        codes.add(AsmFactory.movWhen(rd, 1, "gt"));
-                        codes.add(AsmFactory.movWhen(rd, 0, "le"));
-                        codes.add(AsmFactory.uxtb(rd));
+                        if (ir instanceof TernaryIR) {
+                            rd = regMap.get(ir.op1);
+                            codes.add(AsmFactory.movWhen(rd, 1, "gt"));
+                            codes.add(AsmFactory.movWhen(rd, 0, "le"));
+//                        codes.add(AsmFactory.uxtb(rd));
+                        } else {
+                            target = ((ILabel) ir.op1);
+                            codes.add(AsmFactory.bWhen(target.getLabelName(), "gt"));
+                        }
+
                         break;
+                    case LE_GOTO:
                     case LE:
                         rn = regMap.get(ir.op2);
-                        rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
                             if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
-                                codes.add(AsmFactory.mov(rd, imm));
-                                codes.add(AsmFactory.cmp(rn, rd));
+                                codes.add(AsmFactory.mov(Register.ip, imm));
+                                codes.add(AsmFactory.cmp(rn, Register.ip));
                             }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
                         }
-                        codes.add(AsmFactory.movWhen(rd, 1, "le"));
-                        codes.add(AsmFactory.movWhen(rd, 0, "gt"));
-                        codes.add(AsmFactory.uxtb(rd));
+                        if (ir instanceof TernaryIR) {
+                            rd = regMap.get(ir.op1);
+                            codes.add(AsmFactory.movWhen(rd, 1, "le"));
+                            codes.add(AsmFactory.movWhen(rd, 0, "gt"));
+//                        codes.add(AsmFactory.uxtb(rd));
+                        } else {
+                            target = (ILabel) ir.op1;
+                            codes.add(AsmFactory.bWhen(target.getLabelName(), "le"));
+                        }
+
                         break;
+                    case LT_GOTO:
                     case LT:
                         rn = regMap.get(ir.op2);
-                        rd = regMap.get(ir.op1);
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
                             if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
-                                codes.add(AsmFactory.mov(rd, imm));
-                                codes.add(AsmFactory.cmp(rn, rd));
+                                codes.add(AsmFactory.mov(Register.ip, imm));
+                                codes.add(AsmFactory.cmp(rn, Register.ip));
                             }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
                         }
-                        codes.add(AsmFactory.movWhen(rd, 1, "lt"));
-                        codes.add(AsmFactory.movWhen(rd, 0, "ge"));
-                        codes.add(AsmFactory.uxtb(rd));
+                        if (ir instanceof TernaryIR) {
+                            rd = regMap.get(ir.op1);
+                            codes.add(AsmFactory.movWhen(rd, 1, "lt"));
+                            codes.add(AsmFactory.movWhen(rd, 0, "ge"));
+                        } else {
+                            target = ((ILabel) ir.op1);
+                            codes.add(AsmFactory.bWhen(target.getLabelName(), "lt"));
+                        }
+
+//                        codes.add(AsmFactory.uxtb(rd));
                         break;
+                    case EQ_GOTO:
                     case EQ:
                         rn = regMap.get(ir.op2);
-                        rd = regMap.get(ir.op1);
+
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
                             if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
-                                codes.add(AsmFactory.mov(rd, imm));
-                                codes.add(AsmFactory.cmp(rn, rd));
+                                codes.add(AsmFactory.mov(Register.ip, imm));
+                                codes.add(AsmFactory.cmp(rn, Register.ip));
                             }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
                         }
-                        codes.add(AsmFactory.movWhen(rd, 1, "eq"));
-                        codes.add(AsmFactory.movWhen(rd, 0, "ne"));
-                        codes.add(AsmFactory.uxtb(rd));
+                        if (ir instanceof TernaryIR) {
+                            rd = regMap.get(ir.op1);
+                            codes.add(AsmFactory.movWhen(rd, 1, "eq"));
+                            codes.add(AsmFactory.movWhen(rd, 0, "ne"));
+//                        codes.add(AsmFactory.uxtb(rd));
+                        } else {
+                            target = (ILabel) ir.op1;
+                            codes.add(AsmFactory.bWhen(target.getLabelName(), "eq"));
+                        }
+
                         break;
+                    case NOT_EQ_GOTO:
                     case NOT_EQ:
                         rn = regMap.get(ir.op2);
-                        rd = regMap.get(ir.op1);
+
                         if (ir.op3 instanceof Immediate) {
                             imm = ((Immediate) ir.op3).value;
                             if (Utils.imm8m(imm)) {
                                 codes.add(AsmFactory.cmp(rn, imm));
                             } else {
-                                codes.add(AsmFactory.mov(rd, imm));
-                                codes.add(AsmFactory.cmp(rn, rd));
+                                codes.add(AsmFactory.mov(Register.ip, imm));
+                                codes.add(AsmFactory.cmp(rn, Register.ip));
                             }
                         } else {
                             rm = regMap.get(ir.op3);
                             codes.add(AsmFactory.cmp(rn, rm));
                         }
-                        codes.add(AsmFactory.movWhen(rd, 1, "ne"));
-                        codes.add(AsmFactory.movWhen(rd, 0, "eq"));
-                        codes.add(AsmFactory.uxtb(rd));
+                        if (ir instanceof TernaryIR) {
+                            rd = regMap.get(ir.op1);
+                            codes.add(AsmFactory.movWhen(rd, 1, "ne"));
+                            codes.add(AsmFactory.movWhen(rd, 0, "eq"));
+//                        codes.add(AsmFactory.uxtb(rd));
+                        } else {
+                            target = (ILabel) ir.op1;
+                            codes.add(AsmFactory.bWhen(target.getLabelName(), "ne"));
+                        }
                         break;
                 }
                 // 在每天语句末尾删除不相关的名字

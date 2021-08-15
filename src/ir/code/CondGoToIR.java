@@ -12,10 +12,20 @@ import java.util.function.Consumer;
 
 public class CondGoToIR extends IR{
 
-    public CondGoToIR(ILabel target, IAstValue ident) {
-        super(OP.COND_GOTO);
+    public CondGoToIR(OP cond, ILabel target, IAstValue left, IAstValue right) {
+        super(cond);
         this.op1 = target;
-        this.op2 = ident;
+        if (this.op2 instanceof Immediate) {
+            this.op2 = right;
+            this.op3 = left;
+            if (op == OP.LE_GOTO) this.op = OP.GT_GOTO;
+            if (op == OP.LT_GOTO) this.op = OP.GE_GOTO;
+            if (op == OP.GE_GOTO) this.op = OP.LT_GOTO;
+            if (op == OP.GT_GOTO) this.op = OP.LE_GOTO;
+        } else {
+            this.op2 = left;
+            this.op3 = right;
+        }
     }
 
 
@@ -26,6 +36,6 @@ public class CondGoToIR extends IR{
 
     @Override
     public String toString() {
-        return String.format("%-4s\tif %s != 0 goto %-5s", getLabelName(), op2, op1);
+        return String.format("%-4s\tif %s %s %s goto %-5s", getLabelName(), op2, op, op3,op1);
     }
 }

@@ -385,8 +385,14 @@ public class RegisterAllocator {
                 }
                 break;
             // cond goto
-            case COND_GOTO:
+            case GE_GOTO:
+            case GT_GOTO:
+            case LE_GOTO:
+            case LT_GOTO:
+            case EQ_GOTO:
+            case NOT_EQ_GOTO:
                 ret.put(((IName) ir.op2), allocReg4rVal(((IName) ir.op2)));
+                if (ir.op3 instanceof IName) ret.put(((IName) ir.op3), allocReg4rVal(((IName) ir.op3)));
                 break;
             case CALL:
 //                saveState();
