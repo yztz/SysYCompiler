@@ -23,7 +23,7 @@ public class IRBlock extends IRCollection {
         irs.add(ir);
     }
 
-    public List<InterRepresent> irs = new ArrayList<>();
+    //public List<InterRepresent> irs = new ArrayList<>();
 
     public void moveDown(int originIndex, int targetIndex)
     {

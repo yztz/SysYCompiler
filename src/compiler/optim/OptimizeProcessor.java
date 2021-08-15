@@ -3,11 +3,9 @@ package compiler.optim;
 import compiler.Util;
 import compiler.asm.AddressRWInfo;
 import compiler.genir.IRBlock;
+import compiler.genir.IRCollection;
 import compiler.genir.IRFunction;
-import compiler.genir.code.GotoRepresent;
-import compiler.genir.code.IfGotoRepresent;
-import compiler.genir.code.InterRepresent;
-import compiler.genir.code.LoadRepresent;
+import compiler.genir.code.*;
 import compiler.symboltable.function.FuncSymbol;
 
 import java.util.*;
@@ -27,6 +25,10 @@ public class OptimizeProcessor {
     public static List<IRBlock> optimize(IRFunction irFunction)
     {
         jumpOptimize(irFunction);
+
+        mulDivOptimize(irFunction);
+
+
         List<IRBlock> irBlocks = null;
         try {
             irBlocks = divideIntoBlock(irFunction);
@@ -81,7 +83,7 @@ public class OptimizeProcessor {
     public static void optimizeIrOrder(List<IRBlock> irBlocks)
     {
         for (IRBlock irBlock : irBlocks) {
-            List<InterRepresent> irs = irBlock.irs;
+            List<InterRepresent> irs = irBlock.getAllIR();
             HashSet<InterRepresent> irHasMoved=new HashSet<>();
             for (int i = 1; i < irs.size(); i++) {
                 InterRepresent ir = irs.get(i);
@@ -221,5 +223,42 @@ public class OptimizeProcessor {
             Util.printStackAndExit(158,e);
         }
         return result;
+    }
+
+    private static void mulDivOptimize(IRCollection irCollection)
+    {
+        List<InterRepresent> irs = new ArrayList<>(irCollection.getAllIR());
+        for (InterRepresent ir : irs) {
+            if(ir instanceof BinocularRepre)
+            {
+                BinocularRepre bIR = ((BinocularRepre) ir);
+                if(bIR.OP== BinocularRepre.Opcodes.MUL || bIR.OP== BinocularRepre.Opcodes.DIV)
+                {
+                    if(bIR.OP== BinocularRepre.Opcodes.MUL && bIR.sourceFirst.isData && bIR.sourceFirst.item==1)
+                    {
+                        irCollection.getAllIR().stream().map(InterRepresent::getAllAddressRWInfo).forEach(
+                                ads-> ads.forEach(adInfo->{
+                                    if (adInfo.address.equals(bIR.target))
+                                    {
+                                        adInfo.address.item = bIR.sourceSecond.item;
+                                    }
+                                })
+                        );
+                        irCollection.remove(bIR);
+                    }else if(bIR.sourceSecond.isData && bIR.sourceSecond.item==1)
+                    {
+                        irCollection.getAllIR().stream().map(InterRepresent::getAllAddressRWInfo).forEach(
+                                ads-> ads.forEach(adInfo->{
+                                    if (adInfo.address.equals(bIR.target))
+                                    {
+                                        adInfo.address.item = bIR.sourceFirst.item;
+                                    }
+                                })
+                        );
+                        irCollection.remove(bIR);
+                    }
+                }
+            }
+        }
     }
 }

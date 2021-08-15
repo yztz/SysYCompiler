@@ -33,7 +33,7 @@ public class CallConverter extends AsmConverter{
                     builder.mov(rd,param.item);
                     regGetter.releaseReg(rd);
                 }else{
-                    rd = regGetter.getReg(ir,param);
+                    rd = regGetter.distributeReg(ir, param);
                 }
                 builder.str(rd,Regs.SP,(paramStackLen - stackOffset - 1) *4);
                 regGetter.releaseRegIfNoRef(rd);
@@ -58,7 +58,7 @@ public class CallConverter extends AsmConverter{
                     }*/
                     builder.mov(Regs.REGS[i],param.item);
                 }else{
-                    Reg reg = regGetter.getReg(ir, param);
+                    Reg reg = regGetter.distributeReg(ir, param);
                     builder.mov(Regs.REGS[i], reg);
                     regGetter.releaseRegIfNoRef(reg);
                 }
@@ -85,7 +85,7 @@ public class CallConverter extends AsmConverter{
                            targetFun.getFuncName());
 
         if (callIr.returnResult != null) {
-            Reg result = regGetter.getReg(callIr,callIr.returnResult);
+            Reg result = regGetter.distributeReg(callIr, callIr.returnResult);
             builder.mov(result,Regs.R0);
             //regGetter.setReg(callIr,callIr.returnResult,Regs.R0);
         }

@@ -1,19 +1,23 @@
 package compiler.asm.converter;
 
 import compiler.ConstDef;
-import compiler.Util;
 import compiler.asm.*;
 import compiler.asm.operand.ShiftOp;
+import compiler.genir.code.AddressOrData;
 import compiler.genir.code.LSRepresent;
 import compiler.symboltable.HasInitSymbol;
 import compiler.symboltable.function.FuncSymbol;
 import compiler.symboltable.ParamSymbol;
 import compiler.symboltable.ValueSymbol;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public abstract class LSConverter extends AsmConverter {
 
+    protected static Map<ValueSymbol,Boolean> canLastLoadUse = new HashMap<>();
+    protected static Map<ValueSymbol, AddressOrData> lastLoadAddress = new HashMap<>();
 
     public int process(AsmBuilder.Mem op, AsmBuilder builder, RegGetter regGetter, LSRepresent ir,
                        FuncSymbol funcSymbol, FunctionDataHolder data, Supplier<Reg> rdGetter) {
@@ -42,7 +46,7 @@ public abstract class LSConverter extends AsmConverter {
                 }else{
 
                     //int offsetFPWord = AsmUtil.getSymbolOffset(valueSymbol)/ ConstDef.WORD_SIZE;
-                    Reg rm = regGetter.getReg(ir,ir.offset);
+                    Reg rm = regGetter.distributeReg(ir, ir.offset);
                     //builder.add(rm,rm,offsetFPWord);
                     builder.mem(op, null, rdGetter.get(), baseAddrReg,
                                 rm, false, ShiftOp.LSL, 2, false, false);
@@ -62,7 +66,7 @@ public abstract class LSConverter extends AsmConverter {
                 }else{
 
                     int offsetFPWord = AsmUtil.getSymbolOffsetFp(valueSymbol)/ ConstDef.WORD_SIZE;
-                    Reg rm = regGetter.getReg(ir,ir.offset);
+                    Reg rm = regGetter.distributeReg(ir, ir.offset);
                     builder.add(rm,rm,offsetFPWord);
                     builder.mem(op, null, rdGetter.get(), baseAddrReg,
                                 rm, false, ShiftOp.LSL, 2, false, false);
@@ -89,7 +93,7 @@ public abstract class LSConverter extends AsmConverter {
                 Reg tmp = regGetter.getTmpRegister();
                 builder.ldr(tmp,Regs.FP,offsetFP); // 先读取地址
 
-                Reg rm = regGetter.getReg(ir,ir.offset);
+                Reg rm = regGetter.distributeReg(ir, ir.offset);
 
                 if(tmp==rm)
                 {

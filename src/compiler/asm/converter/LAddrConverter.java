@@ -24,7 +24,7 @@ public class LAddrConverter extends AsmConverter{
     @Override
     public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         LAddrRepresent retIr = (LAddrRepresent) ir;
-        Reg rd = regGetter.getReg(retIr, retIr.target);
+        Reg rd = regGetter.distributeReg(retIr, retIr.target);
         ValueSymbol symbol = retIr.valueSymbol;
         if(symbol instanceof HasInitSymbol && ((HasInitSymbol)symbol).isGlobalSymbol())
         {
@@ -53,7 +53,7 @@ public class LAddrConverter extends AsmConverter{
         if(!retIr.offset.isData)
         {
             builder.add(rd,rd,new RegShiftImmOperand(ShiftOp.LSL,
-                                                     regGetter.getReg(retIr,retIr.offset),2));
+                                                     regGetter.distributeReg(retIr, retIr.offset), 2));
         }
 
         return 1;

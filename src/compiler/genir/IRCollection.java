@@ -8,6 +8,8 @@ import compiler.genir.code.InterRepresentHolder;
 import org.antlr.v4.runtime.Token;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class IRCollection {
     
@@ -133,6 +135,11 @@ public class IRCollection {
             }
             i++;
         }
+    }
+
+    public Stream<InterRepresent> findAll(Predicate<InterRepresent> predicate)
+    {
+        return irs.stream().filter(predicate);
     }
 
     @Override

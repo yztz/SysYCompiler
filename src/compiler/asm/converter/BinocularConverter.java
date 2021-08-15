@@ -43,7 +43,7 @@ public class BinocularConverter extends AsmConverter{
                     result = s1%s2;
                     break;
             }
-            Reg reg = regGetter.getReg(ir, bIR.target);
+            Reg reg = regGetter.distributeReg(ir, bIR.target);
 
             //AsmUtil.dealIfNotImm12(result,reg,builder,dataHolder);
 
@@ -52,7 +52,7 @@ public class BinocularConverter extends AsmConverter{
         }
 
 
-        Reg reg = regGetter.getReg(ir, bIR.target);
+        Reg reg = regGetter.distributeReg(ir, bIR.target);
 
         if(bIR.OP== BinocularRepre.Opcodes.ADD || bIR.OP== BinocularRepre.Opcodes.MINUS)
         {
@@ -60,10 +60,10 @@ public class BinocularConverter extends AsmConverter{
             {
                 AsmBuilder.RegRegOperandOP op = bIR.OP == BinocularRepre.Opcodes.ADD ? AsmBuilder.RegRegOperandOP.ADD : AsmBuilder.RegRegOperandOP.SUB;
 
-                builder.regRegOperand(op, reg, regGetter.getReg(ir,bIR.sourceFirst),
-                                      new RegOperand(regGetter.getReg(ir,bIR.sourceSecond)));
+                builder.regRegOperand(op, reg, regGetter.distributeReg(ir, bIR.sourceFirst),
+                                      new RegOperand(regGetter.distributeReg(ir, bIR.sourceSecond)));
             }else if(!bIR.sourceFirst.isData){
-                Reg rn = regGetter.getReg(ir,bIR.sourceFirst);
+                Reg rn = regGetter.distributeReg(ir, bIR.sourceFirst);
                 int imm = bIR.sourceSecond.item;
                 if(imm>=0)
                 {
@@ -82,7 +82,7 @@ public class BinocularConverter extends AsmConverter{
 
 
             }else{
-                Reg rn = regGetter.getReg(ir,bIR.sourceSecond);
+                Reg rn = regGetter.distributeReg(ir, bIR.sourceSecond);
 
                 if (bIR.OP== BinocularRepre.Opcodes.ADD) {
 
@@ -100,22 +100,22 @@ public class BinocularConverter extends AsmConverter{
             //除法用__aeabi_idiv
             if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData ) //都不是立即数
             {
-                Reg rd = regGetter.getReg(bIR, bIR.sourceFirst);
-                Reg rn = regGetter.getReg(bIR, bIR.sourceSecond);
+                Reg rd = regGetter.distributeReg(bIR, bIR.sourceFirst);
+                Reg rn = regGetter.distributeReg(bIR, bIR.sourceSecond);
                 builder.mov(Regs.R0,rd);
                 builder.mov(Regs.R1,rn);
             }else if(!bIR.sourceFirst.isData) { //右边的是立即数
-                Reg rd = regGetter.getReg(bIR, bIR.sourceFirst);
+                Reg rd = regGetter.distributeReg(bIR, bIR.sourceFirst);
                 builder.mov(Regs.R0,rd);
                 builder.mov(Regs.R1,bIR.sourceSecond.item);
             }else{
 
-                Reg rn = regGetter.getReg(bIR, bIR.sourceSecond);
+                Reg rn = regGetter.distributeReg(bIR, bIR.sourceSecond);
                 builder.mov(Regs.R0,bIR.sourceFirst.item);
                 builder.mov(Regs.R1,rn);
             }
 
-            Reg target = regGetter.getReg(ir, bIR.target);
+            Reg target = regGetter.distributeReg(ir, bIR.target);
             List<Reg> usingRegister =
                     regGetter.getUsingRegNext().stream().filter(r->{
                         int id = r.getId();
@@ -179,15 +179,15 @@ public class BinocularConverter extends AsmConverter{
             Reg rd,rn;
             if(!bIR.sourceFirst.isData && !bIR.sourceSecond.isData) //都不是立即数
             {
-                rd = regGetter.getReg(bIR, bIR.sourceFirst);
-                rn = regGetter.getReg(bIR, bIR.sourceSecond);
+                rd = regGetter.distributeReg(bIR, bIR.sourceFirst);
+                rn = regGetter.distributeReg(bIR, bIR.sourceSecond);
             }else if(!bIR.sourceFirst.isData) { //右边的是立即数
                 rn = regGetter.getTmpRegister();
-                rd = regGetter.getReg(bIR, bIR.sourceFirst);
+                rd = regGetter.distributeReg(bIR, bIR.sourceFirst);
                 builder.mov(rn, bIR.sourceSecond.item);
             }else{
                 rd = regGetter.getTmpRegister();
-                rn = regGetter.getReg(bIR, bIR.sourceSecond);
+                rn = regGetter.distributeReg(bIR, bIR.sourceSecond);
                 builder.mov(rd,bIR.sourceFirst.item);
             }
 

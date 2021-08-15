@@ -10,7 +10,12 @@ import java.util.*;
 import java.util.function.Function;
 
 public class RegGetter {
+
+    // 寄存器中现在保存着谁(寄存器可能已经释放，但是值仍然保存着)
+    private final Map<Reg, AddressRWInfo> regSaving = new HashMap<>();
+    // 寄存器被分配给了谁
     private final Map<Reg, AddressRWInfo> regDesc = new HashMap<>();
+    // 变量被保存在哪个寄存器
     private final Map<AddressRWInfo, RegOrMem> varDesc = new HashMap<>();
     protected Reg[] usableRegs = {Regs.R4, Regs.R5, Regs.R6, Regs.R7, Regs.R8, Regs.R9, Regs.R10/*, Regs.R12, Regs.R0, Regs.R1, Regs.R2, Regs.R3*/};
 
@@ -62,8 +67,8 @@ public class RegGetter {
     public void calNextRef(List<IRBlock> irBlocks) {
         for (IRBlock block : irBlocks) {
             Map<AddressRWInfo, Reference> refTable = new HashMap<>();
-            for (int i = block.irs.size() - 1; i >= 0; i--) {
-                InterRepresent ir = block.irs.get(i);
+            for (int i = block.getAllIR().size() - 1; i >= 0; i--) {
+                InterRepresent ir = block.getAllIR().get(i);
 
                 ir.getAllAddressRWInfo().forEach(var -> {
                     Reference ref = refTable.getOrDefault(var, new Reference(null, true));
@@ -102,9 +107,41 @@ public class RegGetter {
 
         return regs;
     }
+    public RegOrMem getReg(AddressOrData addressOrData)
+    {
+        for (AddressRWInfo addressRWInfo : varDesc.keySet()) {
+            if(addressRWInfo.address.equals(addressOrData))
+            {
+                return varDesc.get(addressRWInfo);
+            }
+        }
+        return null;
+    }
 
+    public void setReg(InterRepresent ir,AddressOrData address,Reg reg)
+    {
+        Map<AddressRWInfo, Reference> refMap = ir.refMap;
+        for (AddressRWInfo key : refMap.keySet()) {
+            if (key.address != address) continue;
 
-    public Reg getReg(InterRepresent ir, AddressOrData address) {
+            regSaving.put(reg,key);
+            regDesc.put(reg,key);
+            varDesc.put(key,new RegOrMem(reg));
+
+            Reference ref = refMap.get(key);
+
+            if (null == ref.nextRef) {  // 不存在引用则释放reg
+                readyToReleaseReg.add(reg);
+                regDesc.put(reg, null);
+            } else {
+                readyToReleaseReg.remove(reg);
+            }
+
+            usingRegThisIR.add(reg);
+        }
+    }
+
+    public Reg distributeReg(InterRepresent ir, AddressOrData address) {
         Map<AddressRWInfo, Reference> refMap = ir.refMap;
         for (AddressRWInfo key : refMap.keySet()) {
             if (key.address != address) continue;
@@ -118,6 +155,7 @@ public class RegGetter {
                     System.out.println("寄存器分配失败");
                     register = stageOneRegAndUseIt(); //把一个寄存器的内容暂存到内存里，然后使用这个寄存器
                 }
+                regSaving.put(register,key);
                 regDesc.put(register,key);
                 varDesc.put(key, new RegOrMem(register));
             } else {
@@ -125,7 +163,7 @@ public class RegGetter {
                 if(!regOrMem.inMem) //不在内存里，直接使用这个寄存器
                     register = regOrMem.reg;
                 else{
-                    register = getStagedFromMem(key,regOrMem);
+                    register = recoverStagedFromMem(key, regOrMem);
                 }
             }
 
@@ -143,23 +181,36 @@ public class RegGetter {
         return null;
     }
 
-    private Reg getStagedFromMem(AddressRWInfo key,RegOrMem regOrMem) {
+    public AddressRWInfo getAddressInReg(Reg reg)
+    {
+        return regSaving.getOrDefault(reg,null);
+    }
+
+    private Reg recoverStagedFromMem(AddressRWInfo key, RegOrMem regOrMem) {
         Reg tmp = getTmpRegister(); //如果寄存器依然不够，会有另一个寄存器被保存到内存里，给它他让位子
 
         //因为我们获取的是临时寄存器，所以会被标记为准备释放。从readyToReleaseReg中移除，不然结束后它将被释放
         readyToReleaseReg.remove(tmp);
 
-        int offset = regOrMem.memOffset;//getAvailableStagingOffset();
+        loadStagedFromMem(regOrMem, tmp);
 
-        //偏移量一定是负的，为保证符合imm8m所以转为正数使用sub指令
-        builder.delayGen(b->b.sub(tmp,Regs.FP,
-                                  -(AsmUtil.getRegStageOffsetFP(funcSymbol) + offset * ConstDef.WORD_SIZE)));
-        builder.ldr(tmp,tmp,0);
+        int offset = regOrMem.memOffset;
         usedRegStagingMem.set(offset, false);
         RegOrMem newRegOrMem = new RegOrMem(tmp);
         varDesc.put(key, newRegOrMem );
-        builder.commit("load stage data of "+ key.address +" to "+tmp);
+        builder.commit("load stage data of "+ key.address +" to "+ tmp);
+
         return tmp;
+    }
+
+    public void loadStagedFromMem(RegOrMem regOrMem, Reg targetReg) {
+        int offset = regOrMem.memOffset;//getAvailableStagingOffset();
+
+        //偏移量一定是负的，为保证符合imm8m所以转为正数使用sub指令
+        builder.delayGen(b->b.sub(targetReg, Regs.FP,
+                                  -(AsmUtil.getRegStageOffsetFP(funcSymbol) + offset * ConstDef.WORD_SIZE)));
+        builder.ldr(targetReg, targetReg, 0);
+
     }
 
     private Reg stageOneRegAndUseIt() {
@@ -328,23 +379,23 @@ public class RegGetter {
      * 获取第一个空闲的寄存器
      * @return 寄存器
      */
-    protected Reg getFreeReg() {
+    public Reg getFreeReg() {
         return getFreeReg(0);
     }
 
-    protected boolean isFreeReg(Reg register) { //todo 上下两个函数，名字反了
+    public boolean isFreeReg(Reg register) { //todo 上下两个函数，名字反了
         return (!regDesc.containsKey(register) || regDesc.get(register) == null)
                 /*&& !usingRegThisIR.contains(register)*/;
     }
 
-    protected boolean isFreeRegIgnoreCurrentIR(Reg register) {
+    public boolean isFreeRegIgnoreCurrentIR(Reg register) {
         return (!regDesc.containsKey(register) || regDesc.get(register) == null) && !usingRegThisIR.contains(register);
     }
 
     public static class RegOrMem{
-        boolean inMem = false;
-        Reg reg;
-        int memOffset;
+        public boolean inMem = false;
+        public Reg reg;
+        public int memOffset;
 
         public RegOrMem(Reg reg) {
             this.reg = reg;

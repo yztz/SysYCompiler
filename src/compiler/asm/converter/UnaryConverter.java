@@ -34,10 +34,10 @@ public class UnaryConverter extends AsmConverter{
                     result = result==0?1:0;
                     break;
             }
-            builder.mov(regGetter.getReg(ir,uIR.target),result);
+            builder.mov(regGetter.distributeReg(ir, uIR.target), result);
         }else{
-            Reg rd = regGetter.getReg(ir,uIR.target);
-            Reg rn = regGetter.getReg(ir,uIR.source);
+            Reg rd = regGetter.distributeReg(ir, uIR.target);
+            Reg rn = regGetter.distributeReg(ir, uIR.source);
             switch (uIR.OP) {
 
                 case MINUS:

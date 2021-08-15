@@ -76,6 +76,11 @@ public class AsmGen {
 
         List<IRBlock> irBlocks = OptimizeProcessor.optimize(irFunction);
 
+        System.out.printf("%s after optimization%n", funcSymbol.getFuncName());
+        for (IRBlock irBlock : irBlocks) {
+            System.out.println(irBlock.toString());
+        }
+
         RegGetter regGetter = null;
         try {
             regGetter = new RegGetter(irBlocks);

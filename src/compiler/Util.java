@@ -1,5 +1,6 @@
 package compiler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -41,5 +42,22 @@ public class Util {
     {
         e.printStackTrace();
         System.exit(code);
+    }
+
+    static int[] pow2 = new int[]{1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,
+        32768,65536,131072,262144,524288,1048576};
+    public static boolean isPow2(int num)
+    {
+        return Arrays.stream(pow2).anyMatch(i->i==num);
+    }
+
+    public static int getPow2(int num)
+    {
+        for (int i = 0; i < pow2.length; i++) {
+            if(pow2[i]==num)
+                return i;
+        }
+
+        return -1;
     }
 }

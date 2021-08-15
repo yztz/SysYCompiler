@@ -27,15 +27,15 @@ public class IfGotoConverter extends AsmConverter{
 
         if(!ifIr.left.isData && !ifIr.right.isData)
         {
-            Reg rd = regGetter.getReg(ir,ifIr.left);
-            Reg rn = regGetter.getReg(ir,ifIr.right);
+            Reg rd = regGetter.distributeReg(ir, ifIr.left);
+            Reg rn = regGetter.distributeReg(ir, ifIr.right);
             builder.cmp(rd,rn);
         }else if(!ifIr.left.isData ){
-            Reg rd = regGetter.getReg(ir,ifIr.left);
+            Reg rd = regGetter.distributeReg(ir, ifIr.left);
             int imm8m = ifIr.right.item;
             builder.cmp(rd,imm8m);
         }else if(!ifIr.right.isData ){
-            Reg rd = regGetter.getReg(ir,ifIr.right);
+            Reg rd = regGetter.distributeReg(ir, ifIr.right);
             int imm8m = ifIr.left.item;
             builder.cmp(rd,imm8m);
             relOp = relOp.swapLeftRight(); //左右颠倒

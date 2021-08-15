@@ -20,6 +20,8 @@ public class SaveConverter extends LSConverter {
     public int process(AsmBuilder builder, RegGetter regGetter, InterRepresent ir, List<InterRepresent> allIR, int index, FuncSymbol funcSymbol, FunctionDataHolder dataHolder) {
         SaveRepresent saveIR = (SaveRepresent)ir;
 
+        canLastLoadUse.put(saveIR.valueSymbol,false);
+
         Supplier<Reg> rdGetter;
         if(saveIR.target.isData)
         {
@@ -27,7 +29,7 @@ public class SaveConverter extends LSConverter {
             builder.mov(rd,saveIR.target.item);
             rdGetter = ()->rd;
         }else{
-            rdGetter = ()->regGetter.getReg(ir, saveIR.target);
+            rdGetter = ()->regGetter.distributeReg(ir, saveIR.target);
         }
 
         return super.process(AsmBuilder.Mem.STR, builder, regGetter, (LSRepresent) ir,funcSymbol,dataHolder,rdGetter);
