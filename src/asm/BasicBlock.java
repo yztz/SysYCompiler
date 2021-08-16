@@ -1,6 +1,6 @@
-package asm.allocator;
+package asm;
 
-import asm.IName;
+import asm.allocator.Reference;
 import common.ILabel;
 import common.OP;
 import ir.IRs;

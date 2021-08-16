@@ -1,5 +1,6 @@
 package asm.allocator;
 
+import asm.BasicBlock;
 import asm.FunctionContext;
 import asm.IName;
 import asm.code.AsmFactory;
@@ -366,6 +367,7 @@ public class RegisterAllocator {
 //                codes.add(AsmFactory.uxtb(rd));
                 break;
             // 赋值语句
+            case LOAD:
             case ASSIGN:
                 if (ir.op2 instanceof IName && ir.op1 != ir.op2) {
                     rn = allocReg4rVal(((IName) ir.op2));

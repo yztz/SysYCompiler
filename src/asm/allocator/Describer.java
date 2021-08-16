@@ -1,5 +1,6 @@
 package asm.allocator;
 
+import asm.BasicBlock;
 import asm.IAddress;
 import asm.IName;
 import common.OffsetVar;
@@ -10,7 +11,6 @@ import ir.code.IR;
 import java.util.*;
 
 import static common.Register.*;
-import static common.Register.r12;
 
 public class Describer {
     private static final IAddress MEM_ADDR = new MEMAddr();

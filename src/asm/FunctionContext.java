@@ -1,6 +1,5 @@
 package asm;
 
-import asm.allocator.BasicBlock;
 import asm.allocator.RegisterAllocator;
 import asm.code.AsmFactory;
 import asm.code.Code;
@@ -19,7 +18,6 @@ public class FunctionContext {
 
     public Function function;
     public List<Code> codes = new LinkedList<>();
-    public List<IR> irs;
     private Set<Register> savedRegs = new HashSet<>();
     //    public int baseOffset = 4;  // (r - 1) * 4
     public int frameSize;
@@ -35,9 +33,8 @@ public class FunctionContext {
 
     public FunctionContext(Function function) {
         this.function = function;
-        this.irs = function.irs;
-        this.function.blocks = BasicBlock.genBlocks(irs);
-        for (BasicBlock block : function.blocks) block.printBlock();
+//        this.function.blocks = BasicBlock.genBlocks(irs);
+//        for (BasicBlock block : function.blocks) block.printBlock();
         this.savedRegs.add(Register.r4);
         this.savedRegs.add(Register.fp);
 
@@ -99,13 +96,22 @@ public class FunctionContext {
         /* 分析调用函数行为 */
         /* 分析调用函数所需的栈空间大小 */
         int maxParamBytes = 0;
-        for (IR ir : irs) {
-            if (ir.op == OP.CALL) { // 分析函数调用情况以及调用函数所需的最大参数空间
-                enableLR();
-                Function callee = (Function) ir.op2;
-                maxParamBytes = Math.max(maxParamBytes, callee.getParamBytes() - 16);
+        for (BasicBlock block : function.blocks) {
+            for (IR ir : block.getIRs()) {
+                if (ir.op == OP.CALL) { // 分析函数调用情况以及调用函数所需的最大参数空间
+                    enableLR();
+                    Function callee = (Function) ir.op2;
+                    maxParamBytes = Math.max(maxParamBytes, callee.getParamBytes() - 16);
+                }
             }
         }
+//        for (IR ir : irs) {
+//            if (ir.op == OP.CALL) { // 分析函数调用情况以及调用函数所需的最大参数空间
+//                enableLR();
+//                Function callee = (Function) ir.op2;
+//                maxParamBytes = Math.max(maxParamBytes, callee.getParamBytes() - 16);
+//            }
+//        }
         /* 分析寄存器使用 */
         for (BasicBlock block : function.blocks) {
             RegisterAllocator allocator = new RegisterAllocator(this, block);

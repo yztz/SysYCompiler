@@ -30,6 +30,18 @@ public class AstNode implements Tree {
         this.label = label;
     }
 
+    public boolean existLabel() {
+        boolean res = label != null;
+        if (res) {
+            return true;
+        } else {
+            for (AstNode child : subTree) {
+                if (child.existLabel()) return true;
+            }
+        }
+        return false;
+    }
+
     public void setNode(int idx, AstNode node) {
         if (null == node) return;
         node.parent = this;
@@ -68,6 +80,14 @@ public class AstNode implements Tree {
     public void insertAfter(AstNode refNode, AstNode newNode) {
         int idx = subTree.indexOf(refNode);
         insert(idx + 1, newNode);
+    }
+
+    public void insertAfter(AstNode refNode, List<AstNode> newNodes) {
+        int idx = subTree.indexOf(refNode) + 1;
+        for (AstNode node : newNodes) {
+            insert(idx, node);
+            idx++;
+        }
     }
 
     public void insertBefore(AstNode refNode, AstNode newNode) {
@@ -340,7 +360,7 @@ public class AstNode implements Tree {
             case GE:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     this.result = AstNode.makeLeaf(left.getInteger() >= right.getInteger() ? 1 : 0);
-                } else if (lVal == rVal) {
+                } else if (lVal != null && lVal == rVal) {
                     this.result = AstNode.makeLeaf(1);
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.GE, left, right);
@@ -349,7 +369,7 @@ public class AstNode implements Tree {
             case GT:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     this.result = AstNode.makeLeaf(left.getInteger() > right.getInteger() ? 1 : 0);
-                } else if (lVal == rVal) {
+                } else if (lVal != null && lVal == rVal) {
                     this.result = AstNode.makeLeaf(0);
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.GT, left, right);
@@ -363,7 +383,8 @@ public class AstNode implements Tree {
                         this.result = AstNode.makeLeaf(0);
                     else
                         this.result = right;
-                } else if (lVal == rVal) {
+                } else if (lVal != null && lVal == rVal) {
+                    System.out.println(lVal);
                     this.result = left;
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.AND, left, right);
@@ -377,7 +398,7 @@ public class AstNode implements Tree {
                         this.result = AstNode.makeLeaf(1);
                     else
                         this.result = right;
-                } else if (lVal == rVal) {
+                } else if (lVal != null && lVal == rVal) {
                     this.result = left;
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.OR, left, right);
@@ -386,7 +407,7 @@ public class AstNode implements Tree {
             case EQ:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     this.result = AstNode.makeLeaf(left.getInteger() == right.getInteger() ? 1 : 0);
-                } else if (lVal == rVal) {
+                } else if (lVal != null && lVal == rVal) {
                     this.result = AstNode.makeLeaf(1);
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.EQ, left, right);
@@ -402,7 +423,7 @@ public class AstNode implements Tree {
             case LE:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     this.result = AstNode.makeLeaf(left.getInteger() <= right.getInteger() ? 1 : 0);
-                } else if (lVal == rVal) {
+                } else if (lVal != null && lVal == rVal) {
                     this.result = AstNode.makeLeaf(1);
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.LE, left, right);
@@ -411,7 +432,7 @@ public class AstNode implements Tree {
             case LT:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     this.result = AstNode.makeLeaf(left.getInteger() < right.getInteger() ? 1 : 0);
-                } else if (lVal == rVal) {
+                } else if (lVal != null && lVal == rVal) {
                     this.result = AstNode.makeLeaf(0);
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.LT, left, right);

@@ -1,5 +1,6 @@
 package ir;
 
+import asm.BasicBlock;
 import common.ILabel;
 import common.symbol.Function;
 import ir.code.IR;
@@ -41,7 +42,12 @@ public class IRs {
     }
 
     public static void endSection() {
-        currentFunc = null;
+        if (currentFunc != null) {
+            // 生成基本块
+            currentFunc.blocks = BasicBlock.genBlocks(currentFunc.irs);
+//            for (BasicBlock block : currentFunc.blocks) block.printBlock();
+            currentFunc = null;
+        }
     }
 
     private static void attachLabel(IR ir) {
@@ -53,10 +59,12 @@ public class IRs {
     }
 
     public static void setNextLabel(ILabel label) {
+        if (null != nextLabel) System.err.printf("label[%s] covered by label[%s]%n", nextLabel, label);
         nextLabel = label;
     }
 
     public static void removeNextLabel() {
+//        if (nextLabel != null) System.err.printf("label[%s] removed%n", nextLabel);
         nextLabel = null;
     }
 

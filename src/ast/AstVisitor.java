@@ -143,7 +143,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             AstNode left = visit(ctx.lOrExp());
             AstNode right = visit(ctx.lAndExp());
 
-            return AstNode.makeBinaryNode(OP.OR, left, right);
+            return AstNode.makeBinaryNode(OP.OR, left, right).compute();
         }
     }
 
@@ -158,7 +158,7 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
 //            if (left.isLeaf()) left = AstNode.makeBinaryNode(OP.EQ, left, AstNode.makeLeaf(1));
 //            if (right.isLeaf()) right = AstNode.makeBinaryNode(OP.EQ, right, AstNode.makeLeaf(1));
 
-            return AstNode.makeBinaryNode(OP.AND, left, right);
+            return AstNode.makeBinaryNode(OP.AND, left, right).compute();
         }
     }
 
@@ -170,9 +170,9 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             AstNode left = visit(ctx.eqExp());
             AstNode right = visit(ctx.relExp());
             if ("==".equals(ctx.op.getText())) {
-                return AstNode.makeBinaryNode(OP.EQ, left, right);
+                return AstNode.makeBinaryNode(OP.EQ, left, right).compute();
             } else {
-                return AstNode.makeBinaryNode(OP.NOT_EQ, left, right);
+                return AstNode.makeBinaryNode(OP.NOT_EQ, left, right).compute();
             }
         }
     }
@@ -187,13 +187,13 @@ public class AstVisitor extends SysYBaseVisitor<AstNode> {
             AstNode right = visit(ctx.addExp());
             switch (ctx.op.getText()) {
                 case ">=":
-                    return AstNode.makeBinaryNode(OP.GE, left, right);
+                    return AstNode.makeBinaryNode(OP.GE, left, right).compute();
                 case "<=":
-                    return AstNode.makeBinaryNode(OP.LE, left, right);
+                    return AstNode.makeBinaryNode(OP.LE, left, right).compute();
                 case ">":
-                    return AstNode.makeBinaryNode(OP.GT, left, right);
+                    return AstNode.makeBinaryNode(OP.GT, left, right).compute();
                 case "<":
-                    return AstNode.makeBinaryNode(OP.LT, left, right);
+                    return AstNode.makeBinaryNode(OP.LT, left, right).compute();
                 default:
                     return null;
             }

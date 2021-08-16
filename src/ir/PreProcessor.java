@@ -28,15 +28,8 @@ public class PreProcessor {
      */
     public static void processIF(AstNode root) {
         List<AstNode> ifStats = Utils.searchNode(root, OP.IF_ELSE);
-        ifStats.forEach(ifStat -> {
-            // 为el增加跳转
-//            AstNode nextStat = Utils.findNextStat(ifStat);
-//            AstNode then = ifStat.getNode(1);
-//            AstNode el = ifStat.getNode(2);
-//
-            // 制造短路
-            resolveIfElse(ifStat);
-        });
+        // 制造短路
+        ifStats.forEach(PreProcessor::resolveIfElse);
     }
 
     /*
@@ -74,12 +67,12 @@ public class PreProcessor {
             ifStat.setNode(0, cond);
         }
         // 计算
-        AstNode res = cond.compute();
-        if (res.op == OP.IMMEDIATE) {   // 如何为1或0直接化简
-            int ident = res.getInteger();
-            reduceIf(ifStat, ident == 1);
-            return;
-        }
+//        AstNode res = cond.compute();
+//        if (res.op == OP.IMMEDIATE) {   // 如何为1或0直接化简
+//            int ident = res.getInteger();
+//            reduceIf(ifStat, ident == 1);
+//            return;
+//        }
 //        else if (cond.getLeft().op == OP.IMMEDIATE) {   // 处理 1 || a...
 //            reduceIf(ifStat, );
 //        }
@@ -166,8 +159,7 @@ public class PreProcessor {
 
         AstNode then = whileStat.getNode(1);
         // 往then中加入跳转GOTO
-        ILabel whileStatLabel = Label.newLabel(Label.LOOP);
-        whileStat.setLabel(whileStatLabel);
+        ILabel whileStatLabel = whileStat.putLabelIfAbsent(Label::newLabel);
         then.addNode(AstNode.makeGoTo(whileStatLabel));
         // then中可能存在continue以及break，将其替换为对应的goto, 特别注意嵌套while
 

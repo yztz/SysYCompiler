@@ -11,6 +11,7 @@ public enum OP {
     MOD,
     ASSIGN,
     ASSIGN_GROUP,
+    LOAD,
 
     STATEMENTS,
     VAL_GROUP,

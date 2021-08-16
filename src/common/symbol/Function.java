@@ -1,7 +1,6 @@
 package common.symbol;
 
-import asm.allocator.BasicBlock;
-import ast.IAstValue;
+import asm.BasicBlock;
 import common.ILabel;
 import ir.code.IR;
 
