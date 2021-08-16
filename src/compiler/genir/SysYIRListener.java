@@ -197,12 +197,8 @@ public class SysYIRListener implements SysYListener {
     @Override
     public void exitFuncDef(SysYParser.FuncDefContext ctx) {
 
-        // 其实根本不需要
-        /*if(_currentIRFunc.getLineOccupied()==0||
-            !(_currentIRFunc.getLast().getLastIR() instanceof ReturnRepresent))
-        {*/
-        _currentCollection.addCode(new ReturnRepresent(),ctx.block().stop, "default return");
-        /*}*/
+
+        _currentCollection.addCode(new ReturnRepresent(true),ctx.block().stop, "default return");
         _currentFunction = null;
     }
 

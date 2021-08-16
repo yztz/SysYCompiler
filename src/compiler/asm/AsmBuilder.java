@@ -355,8 +355,8 @@ public class AsmBuilder {
 
     public AsmBuilder bl(String label) {
         lrModified = true;
-
-            return addInstruction("bl", label);
+        regGetter.clearLoadSaveInfo();
+        return addInstruction("bl", label);
     }
 
     public AsmBuilder bx(Reg reg) {

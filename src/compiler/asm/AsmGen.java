@@ -17,11 +17,13 @@ import java.util.*;
 
 public class AsmGen {
     SymbolTableHost symbolTableHost;
+    FuncSymbolTable funcSymbolTable;
     public boolean genDebugInfo = false;
-    public AsmGen(SymbolTableHost symbolTableHost,boolean genDebugInfo) {
+    public AsmGen(SymbolTableHost symbolTableHost,FuncSymbolTable funcSymbolTable,boolean genDebugInfo) {
         //throw new IOException("试一试");
         this.symbolTableHost = symbolTableHost;
         this.genDebugInfo=genDebugInfo;
+        this.funcSymbolTable = funcSymbolTable;
     }
 
     public String generate(IRUnion irUnion) {
@@ -36,6 +38,9 @@ public class AsmGen {
         {
             Util.printStackAndExit(-12,e);
         }
+
+        OptimizeProcessor.globalOptimize(irUnion,funcSymbolTable,symbolTableHost);
+
         for (IRCollection ir : irUnion.getAll()) {
             if (ir instanceof IRFunction) {
                 IRFunction irFunction = (IRFunction)ir;

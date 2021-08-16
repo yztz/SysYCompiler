@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class ReturnRepresent extends InterRepresent{
+    public boolean defaultReturn = false;
     public AddressOrData returnData;
 
     public ReturnRepresent() {
@@ -17,6 +18,10 @@ public class ReturnRepresent extends InterRepresent{
     public ReturnRepresent(AddressOrData returnData) {
         this();
         this.returnData = returnData;
+    }
+
+    public ReturnRepresent(boolean defaultReturn) {
+        this.defaultReturn = defaultReturn;
     }
 
     @Override

@@ -6,8 +6,11 @@ import compiler.asm.AddressRWInfo;
 import compiler.genir.IRBlock;
 import compiler.genir.IRCollection;
 import compiler.genir.IRFunction;
+import compiler.genir.IRUnion;
 import compiler.genir.code.*;
-import compiler.symboltable.function.FuncSymbol;
+import compiler.optim.refgraph.GlobalRefOptimizer;
+import compiler.symboltable.FuncSymbolTable;
+import compiler.symboltable.SymbolTableHost;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,7 +25,14 @@ public class OptimizeProcessor {
     {
 
     }
-
+    public static void globalOptimize(IRUnion irUnion, FuncSymbolTable funcSymbolTable, SymbolTableHost symbolTableHost)
+    {
+        if(ConstDef.globalOptimize)
+        {
+            GlobalRefOptimizer globalRefOptimizer =new GlobalRefOptimizer(irUnion, funcSymbolTable, symbolTableHost);
+            globalRefOptimizer.optimize();
+        }
+    }
     public static List<IRBlock> optimize(IRFunction irFunction)
     {
         jumpOptimize(irFunction);
@@ -33,7 +43,8 @@ public class OptimizeProcessor {
 
         List<IRBlock> irBlocks = null;
         try {
-            irBlocks = divideIntoBlock(irFunction);
+            IRBlockDivider divider=new IRBlockDivider(irFunction);
+            irBlocks = divider.getBlocks();
         }catch (NullPointerException ne)
         {
             Util.printStackAndExit(-15,ne);
@@ -128,103 +139,6 @@ public class OptimizeProcessor {
                 }
             }
         }
-    }
-    /**
-     * 将中间代码划分为块
-     */
-    public static List<IRBlock> divideIntoBlock(IRFunction irFunction) {
-        List<IRBlock> result = new ArrayList<>();
-
-        FuncSymbol funcSymbol = irFunction.funcSymbol;
-        List<InterRepresent> codes = irFunction.getAllIR();
-        Set<InterRepresent> enterPoints = new HashSet<>();
-        int len = codes.size();
-        // 第一条语句
-        enterPoints.add(codes.get(0));
-        int labelID = 0;
-
-        try {
-            for (int i = 1; i < len; i++) {
-                InterRepresent ir = codes.get(i);
-                if (ir instanceof GotoRepresent) {
-                    // goto语句的下一条语句
-                    enterPoints.add(codes.get(i + 1));
-
-                    GotoRepresent gotoIR = (GotoRepresent) ir;
-                    // 目标语句
-                    enterPoints.add((gotoIR).getTargetIR());
-
-                    if(gotoIR instanceof IfGotoRepresent)
-                    {
-                        if(gotoIR.targetHolder==null)
-                            System.exit(161);
-                        if(gotoIR.getTargetIR()==null)
-                            System.exit(30+gotoIR.flag);
-                    }else{
-                        String description = irFunction.getDescription(i);
-                        if(gotoIR.targetHolder==null)
-                        {
-                            if(description.equals("break"))
-                                System.exit(171);
-                            if(description.equals("continue"))
-                                System.exit(173);
-                            if(description.equals("while end"))
-                                System.exit(175);
-
-                            System.exit(177);
-                        }
-
-                        if(gotoIR.getTargetIR()==null)
-                        {
-                            if(description.equals("break"))
-                                System.exit(172);
-                            if(description.equals("continue"))
-                                System.exit(174);
-                            if(description.equals("while end"))
-                                System.exit(176);
-
-                            System.exit(178);
-                        }
-                    }
-
-
-                    String label;
-                /*if (ir.hasLabel()) label = ir.getLabel();
-                else {*/
-                    label = String.format("%s.%d", funcSymbol.getFuncName(), labelID++);
-                    //}
-                    (gotoIR).getTargetIR().setLabel(label);
-                }
-            }
-        }catch (NullPointerException e)
-        {
-            Util.printStackAndExit(157, e);
-        }
-
-        try {
-            for (int i = 0; i < codes.size(); i++) {
-                InterRepresent ir = codes.get(i);
-
-                if (enterPoints.contains(ir)) {
-
-
-
-                    IRBlock block = new IRBlock(ir.getLabel());
-                    block.addIR(ir);
-                    while (++i < len && !enterPoints.contains(codes.get(i))) {
-                        // TODO 还未考虑halt
-                        block.addIR(codes.get(i));
-                    }
-                    i--;
-
-                    result.add(block);
-                }
-            }
-        }catch (NullPointerException e)
-        {
-            Util.printStackAndExit(158,e);
-        }
-        return result;
     }
 
     // 去掉乘1除1等操作

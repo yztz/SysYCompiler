@@ -1,5 +1,6 @@
 package compiler.genir;
 
+import compiler.genir.code.GotoRepresent;
 import compiler.genir.code.InterRepresent;
 
 import java.util.ArrayList;
@@ -8,11 +9,13 @@ import java.util.List;
 public class IRBlock extends IRCollection {
     public String label;
 
-    public IRBlock prevBlock;
+    /*public IRBlock prevBlock;
     public IRBlock nextBlock;
 
     public List<IRBlock> possibleGotoBlock = new ArrayList<>();
-    public List<IRBlock> mustGotoBlock = new ArrayList<>();
+    public List<IRBlock> mustGotoBlock = new ArrayList<>();*/
+
+    public List<GotoRepresent> jumpFrom=new ArrayList<>();
 
     public IRBlock(String label) {
         this.label = label;

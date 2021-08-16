@@ -318,6 +318,7 @@ public class RegGetter {
                 if (i == index) {
                     usingRegThisIR.add(register);
                     readyToReleaseReg.add(register);
+                    regSaving.put(register,null);
                     return register;
                 }
                 i++;
@@ -494,6 +495,11 @@ public class RegGetter {
         return loadSaveInfoMap.get(funcSymbol);
     }
 
+    /**
+     * 应当在函数调用时和代码块结束后调用，因为此时寄存器中存放的内容已经不确定
+     * {@link AsmBuilder#bl}
+     * {@link compiler.asm.converter.AsmConvertOrganizer#process}
+     */
     public void clearLoadSaveInfo()
     {
         loadSaveInfoMap.clear();

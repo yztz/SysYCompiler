@@ -1,5 +1,6 @@
 import antlr.SysYLexer;
 import antlr.SysYParser;
+import compiler.ConstDef;
 import compiler.Util;
 import compiler.asm.AsmGen;
 import compiler.genir.SysYIRListener;
@@ -44,15 +45,19 @@ public class Compiler {
                         break;
                     case "-O1":
                         optimization = true;
+                        ConstDef.globalOptimize = true;
                         break;
                     case "-O2":
                         optimization = true;
+                        ConstDef.globalOptimize = true;
                         break;
                     case "-O3":
                         optimization = true;
+                        ConstDef.globalOptimize = true;
                         break;
                     case "-O4":
                         optimization = true;
+                        ConstDef.globalOptimize = true;
                         break;
                     case "-o":
                         outputFileStr = args[i+1];
@@ -97,7 +102,7 @@ public class Compiler {
             System.out.println(irListener.irUnion.toString());
 
 
-            AsmGen asmGen = new AsmGen(symbolTableHost,genDebugInfo);
+            AsmGen asmGen = new AsmGen(symbolTableHost,funcSymbolTable,genDebugInfo);
             String result = asmGen.generate(irListener.irUnion);
 
             FileWriter writer;
