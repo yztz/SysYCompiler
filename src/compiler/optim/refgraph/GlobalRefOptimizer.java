@@ -104,25 +104,33 @@ public class GlobalRefOptimizer {
         for (IRCollection irs : irUnion.getAll()) {
 
             // 删除无用的代码前，调整goto目标
-            for (InterRepresent ir : irs.getAllIR()) {
-                if(ir instanceof GotoRepresent)
-                {
+            List<InterRepresent> irsAllIR = irs.getAllIR();
+
+            for (int j = 0; j < irsAllIR.size(); j++) {
+                InterRepresent ir = irsAllIR.get(j);
+                if (ir instanceof GotoRepresent) {
                     GotoRepresent gotoIr = ((GotoRepresent) ir);
-                    if(usedIr.contains(gotoIr.getTargetIR()))
-                        continue;
+                    if (usedIr.contains(gotoIr.getTargetIR())) continue;
 
                     int index = irs.getAllIR().indexOf(gotoIr.getTargetIR());
-                    boolean resetTarget=false;
-                    for(int i = index+1;i<irs.getAllIR().size();i++)
-                    {
+                    boolean resetTarget = false;
+                    for (int i = index; i < irs.getAllIR().size(); i++) {
                         InterRepresent checking = irs.getAllIR().get(i);
-                        if(usedIr.contains(checking) || checking instanceof GotoRepresent)
+                        if(checking instanceof ReturnRepresent)
                         {
+                            gotoIr.targetHolder.setInterRepresent(getDefaultReturnIR(irBelongFunc.get(checking)));
+                            resetTarget = true;
+                            break;
+                        }
+                        if (usedIr.contains(checking) || checking instanceof GotoRepresent) {
                             gotoIr.targetHolder.setInterRepresent(checking);
-                            resetTarget=true;
+                            resetTarget = true;
                             break;
                         }
                     }
+
+                    if(resetTarget)
+                        j--; //再检查一次
                 }
             }
 
@@ -217,6 +225,15 @@ public class GlobalRefOptimizer {
         }
 
         return result;
+    }
+
+    private ReturnRepresent getDefaultReturnIR(FuncSymbol funcSymbol)
+    {
+        for (ReturnRepresent ret : getAllReturnIR(funcSymbol)) {
+            if(ret.defaultReturn)
+                return ret;
+        }
+        return null;
     }
 
     private Set<RefNode> findRef(IRCollection irCollection, ValueSymbol valueSymbol)
