@@ -4,11 +4,23 @@ import asm.BasicBlock;
 import common.ILabel;
 import ir.code.IR;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Function implements ILabel {
+    public static final Map<String, Type> STD = new HashMap<>();
+
+    static {
+        STD.put("getint", Type.INT);
+        STD.put("getch", Type.INT);
+        STD.put("getarray", Type.INT);
+        STD.put("putint", Type.VOID);
+        STD.put("putch", Type.VOID);
+        STD.put("putarray", Type.VOID);
+        STD.put("_sysy_starttime", Type.VOID);
+        STD.put("_sysy_stoptime", Type.VOID);
+        Domain.loadSTD();
+    }
+
     public static final int PARAM_LIMIT = 4;
 
     public String name;
@@ -20,10 +32,22 @@ public class Function implements ILabel {
     public List<IR> irs = new ArrayList<>();
     public List<BasicBlock> blocks;
 
+    public boolean isRetUsed = false;
+
+
 
     public Function(String name, String retType) {
         this.name = name;
         this.retType = Type.valueOf(retType.toUpperCase());
+
+        if ("main".equals(name)) isRetUsed = true;
+    }
+
+    public Function(String name, Type retType) {
+        this.name = name;
+        this.retType = retType;
+
+        if ("main".equals(name)) isRetUsed = true;
     }
 
     public void addParam(Variable param) {
@@ -35,7 +59,10 @@ public class Function implements ILabel {
         } else {
             param.offset = param.width * (PARAM_LIMIT - param.paramIndex - 1);
         }
+    }
 
+    public boolean isSTD() {
+        return STD.containsKey(name);
     }
 
     public void addVariable(Variable variable) {

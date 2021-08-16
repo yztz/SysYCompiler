@@ -16,6 +16,7 @@ import static common.Temp.newTmp;
 
 public class IRParser {
     public void flatAst(AstNode root) {
+        PreProcessor.delUnUsedReturn(root);
         PreProcessor.processWhile(root);
         PreProcessor.processIF(root);
         parseAst(root);

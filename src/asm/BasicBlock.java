@@ -3,6 +3,7 @@ package asm;
 import asm.allocator.Reference;
 import common.ILabel;
 import common.OP;
+import common.symbol.Function;
 import ir.IRs;
 import common.Temp;
 import ir.code.CondGoToIR;
@@ -11,13 +12,13 @@ import ir.code.IR;
 import java.util.*;
 
 public class BasicBlock {
-    public static BasicBlock ENTRY_BLOCK = new BasicBlock(-1);
-    public static BasicBlock EXIT_BLOCK = new BasicBlock(-2);
+//    public static BasicBlock ENTRY_BLOCK = new BasicBlock(-1, null);
+//    public static BasicBlock EXIT_BLOCK = new BasicBlock(-2, null);
 
     private static final Map<ILabel, BasicBlock> labelMap = new HashMap<>();
     private static int nextID = 0;
 
-
+    public final Function function;
     private List<IR> irs = new ArrayList<>();
     public final int id;
 
@@ -25,7 +26,8 @@ public class BasicBlock {
     public List<BasicBlock> nodes = new ArrayList<>();
 
 
-    private BasicBlock(int id) {
+    private BasicBlock(int id, Function function) {
+        this.function = function;
         this.id = id;
     }
 
@@ -70,8 +72,8 @@ public class BasicBlock {
         }
     }
 
-    public static BasicBlock newBlock() {
-        BasicBlock ret = new BasicBlock(nextID++);
+    private static BasicBlock newBlock(Function function) {
+        BasicBlock ret = new BasicBlock(nextID++, function);
 
         return ret;
     }
@@ -90,7 +92,8 @@ public class BasicBlock {
         System.out.printf("Target Blocks: %s\n", nodes.toString());
     }
 
-    public static List<BasicBlock> genBlocks(List<IR> irs) {
+    public static List<BasicBlock> genBlocks(Function function) {
+        List<IR> irs = function.irs;
         List<BasicBlock> blocks = new ArrayList<>();
         int len = irs.size();
         Set<IR> enterPoints = new HashSet<>();   // 入口点
@@ -112,7 +115,7 @@ public class BasicBlock {
         for (int i = 0; i < len; ) {
             IR ir = irs.get(i);
             if (enterPoints.contains(ir)) { //是入口点
-                BasicBlock block = BasicBlock.newBlock();
+                BasicBlock block = BasicBlock.newBlock(function);
                 block.addIR(ir);
                 i++;
                 for (int j = i; j < len; j++, i++) {

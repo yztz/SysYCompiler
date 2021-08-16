@@ -1,22 +1,28 @@
 package common.symbol;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Domain {
-    public static Map<String, Function> functions = new HashMap<>();
+    private static Map<String, Function> functions = new HashMap<>();
     private static Deque<Domain> stack = new ArrayDeque<>();
     public static Domain globalDomain = new Domain(null);
 
-    static {
-        functions.put("getint", new Function("getint", "int"));
-        functions.put("getch", new Function("getch", "int"));
-        functions.put("getarray", new Function("getarray", "int"));
-        functions.put("putint", new Function("putint", "void"));
-        functions.put("putch", new Function("putch", "void"));
-        functions.put("putarray", new Function("putarray", "void"));
-        functions.put("_sysy_starttime", new Function("_sysy_starttime", "void"));
-        functions.put("_sysy_stoptime", new Function("_sysy_stoptime", "void"));
+//    static {
+//        functions.put("getint", new Function("getint", "int"));
+//        functions.put("getch", new Function("getch", "int"));
+//        functions.put("getarray", new Function("getarray", "int"));
+//        functions.put("putint", new Function("putint", "void"));
+//        functions.put("putch", new Function("putch", "void"));
+//        functions.put("putarray", new Function("putarray", "void"));
+//        functions.put("_sysy_starttime", new Function("_sysy_starttime", "void"));
+//        functions.put("_sysy_stoptime", new Function("_sysy_stoptime", "void"));
+//    }
+    public static void loadSTD() {
+        for (String name : Function.STD.keySet()) {
+            functions.put(name, new Function(name, Function.STD.get(name)));
+        }
     }
 
     public static Function currentFunc = null;
@@ -27,6 +33,8 @@ public class Domain {
     static {
         stack.push(globalDomain);
     }
+
+
 
     private Domain father;
     public SymbolTable symbolTable = new SymbolTable(this);
@@ -65,6 +73,9 @@ public class Domain {
         currentFunc = null;
     }
 
+    public static Set<Function> getFunctions() {
+        return functions.values().stream().filter(function -> !function.isSTD()).collect(Collectors.toSet());
+    }
 
     public static Variable addConstVar(String name) {
         return addVariableToTable(Variable.constVar(name, getDomain()));

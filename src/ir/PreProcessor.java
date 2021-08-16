@@ -1,13 +1,19 @@
 package ir;
 
+import asm.BasicBlock;
+import asm.IName;
+import asm.allocator.Reference;
 import ast.AstNode;
 import ast.Immediate;
 import ast.Utils;
 import common.ILabel;
 import common.Label;
 import common.OP;
+import common.symbol.Domain;
+import common.symbol.Function;
+import ir.code.IR;
 
-import java.util.List;
+import java.util.*;
 
 public class PreProcessor {
     /**
@@ -181,5 +187,59 @@ public class PreProcessor {
         return statement.putLabelIfAbsent(Label::newLabel);
     }
 
+    /*
+        删除无用的返回值
+     */
+    public static void delUnUsedReturn(AstNode root) {
+        Map<Function, Set<Function>> retDeps = new HashMap<>();
 
+        List<AstNode> calls = Utils.searchNode(root, OP.CALL);
+        for (AstNode call : calls) {
+            AstNode parent = call.parent;
+            Function function = (Function) call.getRight().value;
+            if (function.hasReturn() && !function.isRetUsed) {
+                if (parent.op == OP.RETURN) {   // 作为返回值，则要考察当前函数的返回值使用情况
+                    Function wrapFunction = getFunction(call);
+                    if (function != wrapFunction) {   // 非递归
+                        Set<Function> deps = retDeps.getOrDefault(function, new HashSet<>());
+                        deps.add(wrapFunction);
+                        retDeps.put(function, deps);
+                    } else {
+                        function.isRetUsed = true;
+                        retDeps.remove(function);
+                    }
+                } else if (parent.op != OP.STATEMENTS){
+                    function.isRetUsed = true;
+                    retDeps.remove(function);
+                }
+            }
+        }
+        for (Function function : retDeps.keySet()) {
+            Deque<Function> dependencies = new ArrayDeque<>(retDeps.get(function));
+            while (!dependencies.isEmpty()) {
+                Function top = dependencies.pop();
+                if (retDeps.containsKey(top)) { //依赖于其他函数
+                    dependencies.addAll(retDeps.get(top));
+                } else if (top.isRetUsed) {
+                    function.isRetUsed = true;
+                    retDeps.remove(function);
+                    break;
+                }
+            }
+        }
+
+        for (Function function : Domain.getFunctions()) {
+            System.out.printf("%s:%s\t\tretUsed = %s%n", function.name, function.retType, function.isRetUsed);
+        }
+    }
+
+    public static Function getFunction(AstNode node) {
+        while (node != null && !(node.label instanceof Function)) {
+            node = node.parent;
+        }
+        if (node == null)
+            return null;
+        else
+            return ((Function) node.label);
+    }
 }

@@ -13,6 +13,7 @@ public class IRs {
     private static Map<ILabel, IR> labelMap = new HashMap<>();
     private static ILabel nextLabel;
     private static List<Function> functions = new ArrayList<>();
+    public static List<BasicBlock> blocks = new ArrayList<>();
 
     private static Function currentFunc;
 
@@ -44,8 +45,9 @@ public class IRs {
     public static void endSection() {
         if (currentFunc != null) {
             // 生成基本块
-            currentFunc.blocks = BasicBlock.genBlocks(currentFunc.irs);
+            currentFunc.blocks = BasicBlock.genBlocks(currentFunc);
 //            for (BasicBlock block : currentFunc.blocks) block.printBlock();
+            blocks.addAll(currentFunc.blocks);
             currentFunc = null;
         }
     }
