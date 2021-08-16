@@ -71,10 +71,72 @@ public class IRParser {
 
         switch (op) {
             case MUL:
+                tmp = newTmp();
+                left = parseAst(root.getLeft());
+                right = parseAst(root.getRight());
+                // a * 1, 1 * a, 0 * a, a * 0
+                if (left.getVal().equals(0) || right.getVal().equals(0)) {
+                    return new Immediate(0);
+                } else if (left.getVal().equals(1)) {
+                    return right;
+                } else if (right.getVal().equals(1)) {
+                    return left;
+                } else {
+                    IRs.addIR(new TernaryIR(op, tmp, left, right));
+                    return tmp;
+                }
             case DIV:
+                tmp = newTmp();
+                left = parseAst(root.getLeft());
+                right = parseAst(root.getRight());
+                // 0 / a, a / a, a / 1
+                if (left.getVal().equals(0)) {
+                    return new Immediate(0);
+                } else if (left == right) {
+                    return new Immediate(1);
+                } else if (right.getVal().equals(1)) {
+                    return left;
+                } else {
+                    IRs.addIR(new TernaryIR(op, tmp, left, right));
+                    return tmp;
+                }
             case MOD:
+                tmp = newTmp();
+                left = parseAst(root.getLeft());
+                right = parseAst(root.getRight());
+                // a % 1 = 0, a % a = 0, 0 % a = 0
+                if (left.getVal().equals(0) || right.getVal().equals(1) || left == right) {
+                    return new Immediate(0);
+                } else {
+                    IRs.addIR(new TernaryIR(op, tmp, left, right));
+                    return tmp;
+                }
             case SUB:
+                tmp = newTmp();
+                left = parseAst(root.getLeft());
+                right = parseAst(root.getRight());
+                // a - 0 = a; a - a = 0;
+                if (right.getVal().equals(0)) {
+                    return left;
+                } else if (left == right) {
+                    return new Immediate(0);
+                } else {
+                    IRs.addIR(new TernaryIR(op, tmp, left, right));
+                    return tmp;
+                }
             case ADD:
+                tmp = newTmp();
+                left = parseAst(root.getLeft());
+                right = parseAst(root.getRight());
+                // any + 0, 0 + any
+                if (left.getVal().equals(0)) {
+                    return right;
+                } else if (right.getVal().equals(0)) {
+                    return left;
+                } else {
+                    IRs.addIR(new TernaryIR(op, tmp, left, right));
+                    return tmp;
+                }
             case LE:
             case LT:
             case GE:

@@ -1,7 +1,5 @@
 package common.symbol;
 
-import ast.IAstValue;
-import ast.Immediate;
 import asm.IName;
 
 import java.util.*;

@@ -166,7 +166,8 @@ public class PreProcessor {
 
         AstNode then = whileStat.getNode(1);
         // 往then中加入跳转GOTO
-        ILabel whileStatLabel = whileStat.putLabelIfAbsent(Label::newLabel);
+        ILabel whileStatLabel = Label.newLabel(Label.LOOP);
+        whileStat.setLabel(whileStatLabel);
         then.addNode(AstNode.makeGoTo(whileStatLabel));
         // then中可能存在continue以及break，将其替换为对应的goto, 特别注意嵌套while
 

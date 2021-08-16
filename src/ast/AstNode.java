@@ -23,6 +23,13 @@ public class AstNode implements Tree {
 
     private final List<AstNode> subTree = new LinkedList<>();
 
+    public void setLabel(ILabel label) {
+        if (this.label != null) {
+            System.err.printf("warning: the label[%s] will be covered!%n", this.label);
+        }
+        this.label = label;
+    }
+
     public void setNode(int idx, AstNode node) {
         if (null == node) return;
         node.parent = this;
@@ -287,7 +294,6 @@ public class AstNode implements Tree {
         IAstValue lVal = left.value;
         IAstValue rVal = right.value;
         switch (op) {
-            // todo 0 * any = 0; 0 + any = any; 1 * any = any;
             case ADD:
                 if (lVal instanceof Immediate && rVal instanceof Immediate)
                     this.result = AstNode.makeLeaf(left.getInteger() + right.getInteger());
@@ -334,6 +340,8 @@ public class AstNode implements Tree {
             case GE:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     this.result = AstNode.makeLeaf(left.getInteger() >= right.getInteger() ? 1 : 0);
+                } else if (lVal == rVal) {
+                    this.result = AstNode.makeLeaf(1);
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.GE, left, right);
                 }
@@ -341,6 +349,8 @@ public class AstNode implements Tree {
             case GT:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     this.result = AstNode.makeLeaf(left.getInteger() > right.getInteger() ? 1 : 0);
+                } else if (lVal == rVal) {
+                    this.result = AstNode.makeLeaf(0);
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.GT, left, right);
                 }
@@ -353,6 +363,8 @@ public class AstNode implements Tree {
                         this.result = AstNode.makeLeaf(0);
                     else
                         this.result = right;
+                } else if (lVal == rVal) {
+                    this.result = left;
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.AND, left, right);
                 }
@@ -365,6 +377,8 @@ public class AstNode implements Tree {
                         this.result = AstNode.makeLeaf(1);
                     else
                         this.result = right;
+                } else if (lVal == rVal) {
+                    this.result = left;
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.OR, left, right);
                 }
@@ -372,6 +386,8 @@ public class AstNode implements Tree {
             case EQ:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     this.result = AstNode.makeLeaf(left.getInteger() == right.getInteger() ? 1 : 0);
+                } else if (lVal == rVal) {
+                    this.result = AstNode.makeLeaf(1);
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.EQ, left, right);
                 }
@@ -386,6 +402,8 @@ public class AstNode implements Tree {
             case LE:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     this.result = AstNode.makeLeaf(left.getInteger() <= right.getInteger() ? 1 : 0);
+                } else if (lVal == rVal) {
+                    this.result = AstNode.makeLeaf(1);
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.LE, left, right);
                 }
@@ -393,10 +411,12 @@ public class AstNode implements Tree {
             case LT:
                 if (lVal instanceof Immediate && rVal instanceof Immediate) {
                     this.result = AstNode.makeLeaf(left.getInteger() < right.getInteger() ? 1 : 0);
+                } else if (lVal == rVal) {
+                    this.result = AstNode.makeLeaf(0);
                 } else {
                     this.result = AstNode.makeBinaryNode(OP.LT, left, right);
                 }
-                 break;
+                break;
 
             default:
                 this.result = this;

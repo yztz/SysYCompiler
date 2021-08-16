@@ -3,14 +3,12 @@ package common;
 import ir.code.IR;
 
 public class Label implements ILabel {
-    private static int next_id = 0;
+    public static final Scheme DEFAULT = new Scheme(".L");
+    public static final Scheme LOOP = new Scheme(".LOOP");
 
     public final String name;
     public IR bindIR;
 
-    public void bindIR(IR ir) {
-        this.bindIR = ir;
-    }
 
     public IR getIR() {
         return this.bindIR;
@@ -21,10 +19,13 @@ public class Label implements ILabel {
     }
 
     public static Label newLabel() {
-        return new Label(".L" + next_id++);
+        return newLabel(DEFAULT);
     }
     public static Label newLabel(String name) {
         return new Label(name);
+    }
+    public static Label newLabel(Scheme scheme) {
+        return new Label(scheme.name + scheme.nextID++);
     }
 
     public static Label newLabel(IR ir) {
@@ -43,5 +44,13 @@ public class Label implements ILabel {
     @Override
     public String getLabelName() {
         return name;
+    }
+
+    static class Scheme {
+        final String name;
+        int nextID = 0;
+        Scheme(String name) {
+            this.name = name;
+        }
     }
 }

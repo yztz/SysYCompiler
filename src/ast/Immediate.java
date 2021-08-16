@@ -12,6 +12,11 @@ public class Immediate implements IAstValue {
     }
 
     @Override
+    public Object getVal() {
+        return value;
+    }
+
+    @Override
     public String toString() {
         return value + "";
     }
