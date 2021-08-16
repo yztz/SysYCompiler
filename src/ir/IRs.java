@@ -29,6 +29,10 @@ public class IRs {
         return functions;
     }
 
+    public static Function getCurrentFunc() {
+        return currentFunc;
+    }
+
     public static void addIR(IR ir) {
         if (null != currentFunc) {
             currentFunc.irs.add(ir);

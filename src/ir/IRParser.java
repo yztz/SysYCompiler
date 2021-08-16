@@ -238,8 +238,13 @@ public class IRParser {
                 parseAst(then);
                 break;
             case RETURN:
-                left = parseAst(root.getLeft());
-                IRs.addIR(new UnaryIR(OP.RETURN, left));
+                Function currFunc = IRs.getCurrentFunc();
+                if (currFunc.isRetUsed) {
+                    left = parseAst(root.getLeft());
+                    IRs.addIR(new UnaryIR(OP.RETURN, left));
+                } else {
+                    IRs.addIR(new UnaryIR(OP.RETURN, null));
+                }
                 break;
         }
         return null;
