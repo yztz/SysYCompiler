@@ -114,7 +114,7 @@ public class GlobalRefOptimizer {
 
                     int index = irs.getAllIR().indexOf(gotoIr.getTargetIR());
                     boolean resetTarget = false;
-                    for (int i = index; i < irs.getAllIR().size(); i++) {
+                    for (int i = index+1; i < irs.getAllIR().size(); i++) {
                         InterRepresent checking = irs.getAllIR().get(i);
                         if(checking instanceof ReturnRepresent)
                         {
